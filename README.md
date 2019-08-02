@@ -1,3 +1,1 @@
-# mockserer
-# springboot override the default properties.
-java -jar mockserver.jar --server.port=8081 --spring.data.mongodb.host=localhost
+测试辅助平台后台代码

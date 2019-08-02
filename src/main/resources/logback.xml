@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+
+	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
+	<include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+    <jmxConfigurator/>
+	<!-- 日志文件输出目录（tomcat/logs） -->
+	<property name="LOG_HOME" value="${catalina.base}/logs" />
+	<!-- 日志文件名 -->
+	<property name="LOG_FILE" value="test-asist" />
+	<!-- 日志格式 -->
+	<property name="FILE_LOG_PATTERN1" value="%date{ISO8601}^|%level^|%t^|%c^|%M^|[%X{module}%X{traceKey}%X{input}%X{output}]=&gt;%msg%ex%n" />
+
+	<!-- CONSOLE级别 -->
+	<appender name="CONSOLE"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${FILE_LOG_PATTERN1}</pattern>
+		</encoder>
+	</appender>
+
+	<!-- INFO级别 -->
+	<appender name="INFO_FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder>
+			<pattern>${FILE_LOG_PATTERN1}</pattern>
+		</encoder>
+		<file>${LOG_HOME}/${LOG_FILE}-info.log</file>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_HOME}/${LOG_FILE}-info.log.%d{yyyy-MM-dd}</fileNamePattern>
+		</rollingPolicy>
+	</appender>
+
+	<!-- ERROR级别 -->
+	<appender name="ERROR_FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder>
+			<pattern>${FILE_LOG_PATTERN1}</pattern>
+		</encoder>
+		<file>${LOG_HOME}/${LOG_FILE}-error.log</file>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>ERROR</level>
+		</filter>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_HOME}/${LOG_FILE}-error.log.%d{yyyy-MM-dd}</fileNamePattern>
+		</rollingPolicy>
+	</appender>
+
+	<root level="INFO">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="INFO_FILE" />
+		<appender-ref ref="ERROR_FILE" />
+	</root>
+	
+	<logger name="JamonPerformanceMonitor" level="INFO" />
+    <logger name="JamonRestApiPerformanceLogger" level="INFO" />
+    
+</configuration>
