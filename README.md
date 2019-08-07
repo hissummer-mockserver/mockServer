@@ -1,8 +1,8 @@
 Hissummer Mock server 
 
 
-1. build admin ui first
-2. copy the admin ui files into the server
+1. build admin ui first  <a href="https://github.com/hissummer-mockserver/mockserverAdminUI" target="_blank">See how to build mockserver adminUi</a>
+2. copy the admin ui build files into the mockserver source code
 ```
 cp the dist/* to src/main/resource/static/
 cp the dist/index.html to src/main/webapp/templates/
