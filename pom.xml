@@ -2,10 +2,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.rrd.coresystem.testasist</groupId>
-	<artifactId>testasist</artifactId>
+	<artifactId>hissummer-mockserver</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
-	<name>testasist</name>
+	<packaging>jar</packaging>
+	<name>hissummer-mockserver</name>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -57,6 +57,12 @@
 			</exclusions>
 		</dependency>
 
+
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>4.0.1</version>
+		</dependency>
 
 		<dependency>
 			<groupId>io.projectreactor</groupId>

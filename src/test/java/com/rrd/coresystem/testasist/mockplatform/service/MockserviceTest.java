@@ -7,10 +7,14 @@ import java.lang.reflect.Method;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.hissummer.mockserver.dataplatform.service.DataplatformServiceImpl;
+import com.hissummer.mockserver.mockplatform.service.MockRuleMongoRepository;
+import com.hissummer.mockserver.mockplatform.service.MockserviceImpl;
 import com.rrd.coresystem.testasist.SpringBootTestBase;
-import com.rrd.coresystem.testasist.dataplatform.service.DataplatformServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +29,9 @@ public class MockserviceTest extends SpringBootTestBase {
 	@Autowired
 	MockserviceImpl mockservice;
 
+	@Autowired
+	MockRuleMongoRepository mockservice2;
+	
 	@Test
 	public void test() {
 		fail("Not yet implemented");
@@ -48,11 +55,20 @@ public class MockserviceTest extends SpringBootTestBase {
 	@Test
 	public void testAddMockRule() {
 		
-		mockservice.addMockRule(null, "/haha", "{\"mockResponse\":\"this is the haha mock Response!\"}", null);
+		mockservice.addMockRule(null, "/haha", "{\"mockResponse\":\"this is the haha mock Response!\"}", null,null);
 		
 	}
 	
-	
+	@Test
+	public void testAddMockRule2() {
+		
+		log.info(JSON.toJSONString(mockservice2.findByHost("*", PageRequest.of(0, 5))));
+		
+		log.info(JSON.toJSONString(mockservice2.findByUri("/newtest", PageRequest.of(0, 5))));
+		
+		log.info(JSON.toJSONString(mockservice2.findByHostAndUri("*","/newtest", PageRequest.of(0, 5))));
+		
+	}
 	
 
 }
