@@ -1,5 +1,6 @@
 # Hissummer Mock server 
 
+## Build and start the Mockserver
 1. build admin ui first  <a href="https://github.com/hissummer-mockserver/mockserverAdminUI" target="_blank">See how to build mockserver adminUi</a>
 2. copy the admin ui build files into the mockserver source code
 ```
@@ -21,3 +22,10 @@ Please install mongodb server, version need greater than  or equal 3.2
 ```
 we could change the port 8081 to others
 ```
+
+## Feature
+1. add mock rule
+2. delete mock rule
+3. copy mock rule
+4. update mock rule
+5. mock rule based hostname and uri path.  
