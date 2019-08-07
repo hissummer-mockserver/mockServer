@@ -1,14 +1,16 @@
-package com.rrd.coresystem.testasist.mockplatform.service;
+package com.hissummer.mockserver.mockplatform.service;
 
 import static org.junit.Assert.*;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.hissumemr.mockserver.SpringBootTestBase;
 import com.hissummer.mockserver.mockplatform.MockRule;
 import com.hissummer.mockserver.mockplatform.service.MockRuleMongoRepository;
-import com.rrd.coresystem.testasist.SpringBootTestBase;
 
+@Ignore
 public class MockRuleMongoRepositoryTest extends SpringBootTestBase{
 	
 	@Autowired

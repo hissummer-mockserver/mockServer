@@ -1,26 +1,28 @@
-package com.rrd.coresystem.testasist.mockplatform.service;
+package com.hissummer.mockserver.mockplatform.service;
 
 import static org.junit.Assert.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.hissumemr.mockserver.SpringBootTestBase;
 import com.hissummer.mockserver.dataplatform.service.DataplatformServiceImpl;
 import com.hissummer.mockserver.mockplatform.service.MockRuleMongoRepository;
 import com.hissummer.mockserver.mockplatform.service.MockserviceImpl;
-import com.rrd.coresystem.testasist.SpringBootTestBase;
 
 import lombok.extern.slf4j.Slf4j;
 
 
 
 @Slf4j
+@Ignore
 public class MockserviceTest extends SpringBootTestBase {
 
 	@Autowired

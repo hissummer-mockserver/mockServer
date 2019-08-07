@@ -1,4 +1,4 @@
-package com.rrd.coresystem.testasist;
+package com.hissumemr.mockserver;
 
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
