@@ -13,11 +13,12 @@ mvn clean package -Dmaven.test.skip=true
 ```
 4. Install mongodb. 
 ```
-Please install mongodb server, version need greater than  or equal 3.2. Assumer mongodb server listen on the localhost:27017
+Please install mongodb server, version need greater than  or equal 3.2. 
 ```
 * <a href="https://docs.mongodb.com/manual/installation/">Mongodb install guide</a>  or <a href="https://hub.docker.com/_/mongo"> start docker </a>
 5. Start mockserver.
 ```
+Assumer mongodb server listen on the default localhost:27017 and just run the application.
 java -jar target/hissummer-mockserver-0.0.1-SNAPSHOT.jar  --server.port=8081 --spring.data.mongodb.host=localhost
 ```
 6. Browser access http://localhost:8081/
