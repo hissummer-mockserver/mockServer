@@ -25,7 +25,7 @@ java -jar target/hissummer-mockserver-0.0.1-SNAPSHOT.jar  --server.port=8081 --s
 ```
 we could change the port 8081 to others
 ```
-## start Mockserver and Mockserver adminUI 
+## Docker compose  to start Mockserver and Mockserver adminUI 
 
 ## Feature
 1. add mock rule
