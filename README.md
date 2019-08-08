@@ -26,7 +26,7 @@ java -jar target/hissummer-mockserver-0.0.1-SNAPSHOT.war  --server.port=8081 --s
 ```
 Why java -jar *.war (not *.jar) ,please read into this https://stackoverflow.com/questions/47258695/mvn-spring-bootrun-vs-java-jar
 
-6. Browser access http://localhost:8081/
+6. Browser access http://localhost:8081/ (will render /webapp/templates/index.html ) or  http://localhost:8081/index.html ( will access the /resource/static/index.html directly)
 ```
 We could specify other port than 8081 when starting the application.
 ```
