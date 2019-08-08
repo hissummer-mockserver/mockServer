@@ -3,8 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.hissummer.mockserver</groupId>
 	<artifactId>hissummer-mockserver</artifactId>
-	<version>0.0.1-alpha</version>
-	<packaging>war</packaging>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
 	<name>hissummer-mockserver</name>
 
 	<parent>
@@ -21,7 +21,7 @@
 			<artifactId>spring-boot-dependencies</artifactId>
 			<version>2.0.9.RELEASE</version>
 			<type>pom</type>
-			<scope>compile</scope>
+			<scope>import</scope>
 		</dependency>
 
 
