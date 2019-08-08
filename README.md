@@ -1,8 +1,11 @@
 # Hissummer Mockserver 
 
 ## Build and start the Mockserver manually
+```
+If we want run one server integrated with mockServer and mockServer adminUi. If we don't do step1 and step2, we need serve the Mockserver AdminUI in another webserver like nginx. 
+```
 1. Build admin ui first.  <a href="https://github.com/hissummer-mockserver/mockserverAdminUI" target="_blank">See how to build mockserver adminUi</a>
-2. Copy the admin ui build files into the Mockserver source code.  That we could run one server integrated with mockServer and mockServer adminUi. If we don't do this step, we need build the Mockserver AdminUI and serve it in another webserver like nginx. 
+2. Copy the admin ui build files into the Mockserver source code.  
 ```
 cp the dist/* to src/main/resource/static/
 cp the dist/index.html to src/main/webapp/templates/
