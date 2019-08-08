@@ -26,7 +26,7 @@ java -jar target/hissummer-mockserver-0.0.1-SNAPSHOT.jar  --server.port=8081 --s
 ```
 6. Browser access http://localhost:8081/
 ```
-we could change the port 8081 to others
+We could specify other port than 8081 when starting the application.
 ```
 ## Docker compose  to start Mockserver and Mockserver adminUI 
 
