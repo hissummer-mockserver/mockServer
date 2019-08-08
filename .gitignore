@@ -1,5 +1,5 @@
 catalina.base_IS_UNDEFINED/
 target/
-src/main/webapp/WEB-INF/templates/*
+src/main/webapp/templates/*
 src/main/resources/static/*
 .project
