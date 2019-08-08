@@ -24,7 +24,7 @@ Assumer mongodb server listen on the default localhost:27017 and just run the ap
 ```
 java -jar target/hissummer-mockserver-0.0.1-SNAPSHOT.war  --server.port=8081 --spring.data.mongodb.host=localhost --spring.data.mongodb.port=27017
 ```
-Why java -jar *.war ,please read into this https://stackoverflow.com/questions/47258695/mvn-spring-bootrun-vs-java-jar
+Why java -jar *.war (not *.jar) ,please read into this https://stackoverflow.com/questions/47258695/mvn-spring-bootrun-vs-java-jar
 
 6. Browser access http://localhost:8081/
 ```
