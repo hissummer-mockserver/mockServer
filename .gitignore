@@ -3,3 +3,4 @@ target/
 src/main/webapp/templates/*
 src/main/resources/static/*
 .project
+.classpath
