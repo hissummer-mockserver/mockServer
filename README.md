@@ -1,5 +1,8 @@
 # Hissummer Mockserver 
 
+## Download the standalone war and start directly
+download war here https://github.com/hissummer-mockserver/StandaloneJar
+
 ## Build and start the Mockserver manually
 ```
 If you want run one server integrated with mockServer and mockServer adminUi. You could not do step1 and step2, you need serve the Mockserver AdminUI in another webserver like nginx. 
@@ -31,6 +34,7 @@ Why java -jar *.war (not *.jar) ,please read into this https://stackoverflow.com
 We could specify other port than 8081 when starting the application.
 ```
 ## Docker compose  to start Mockserver and Mockserver adminUI 
+To be done
 
 ## Feature
 1. add mock rule
