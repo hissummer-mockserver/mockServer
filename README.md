@@ -1,7 +1,7 @@
 # Hissummer Mockserver 
 
 ## Download the standalone war and start directly
-download war here https://github.com/hissummer-mockserver/StandaloneJar
+Download war here https://github.com/hissummer-mockserver/StandaloneJar
 
 ## Build and start the Mockserver manually
 ```
