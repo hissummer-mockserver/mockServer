@@ -1,9 +1,9 @@
 package com.hissummer.mockserver.mockplatform.controller;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -120,18 +120,18 @@ public class MockMgmtV2Controller {
 
 		Page<MockRule> rules = null;
 
-		if (StringUtils.isBlank(requestBody.getString("uri")) && StringUtils.isBlank(requestBody.getString("host"))) {
+		if (StringUtils.isEmpty(requestBody.getString("uri")) && StringUtils.isEmpty(requestBody.getString("host"))) {
 			rules = mockService.findAll(page);
-		} else if (!StringUtils.isBlank(requestBody.getString("uri"))
-				&& !StringUtils.isBlank(requestBody.getString("host"))) {
+		} else if (!StringUtils.isEmpty(requestBody.getString("uri"))
+				&& !StringUtils.isEmpty(requestBody.getString("host"))) {
 			rules = mockService.findByHostAndUri(requestBody.getString("host"), requestBody.getString("uri"), page);
 		}
 
-		else if (StringUtils.isBlank(requestBody.getString("uri"))) {
+		else if (StringUtils.isEmpty(requestBody.getString("uri"))) {
 			rules = mockService.findByHost(requestBody.getString("host"), page);
 		}
 
-		else if (StringUtils.isBlank(requestBody.getString("host"))) {
+		else if (StringUtils.isEmpty(requestBody.getString("host"))) {
 			rules = mockService.findByUri(requestBody.getString("uri"), page);
 		}
 

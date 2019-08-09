@@ -14,6 +14,7 @@ import org.bson.json.JsonWriterSettings.Builder;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -23,9 +24,7 @@ import com.hissummer.mockserver.mockplatform.MockResponse;
 import com.hissummer.mockserver.mockplatform.MockRuleWorkMode;
 import com.hissummer.mockserver.mockplatform.NoMockResponseBody;
 import com.hissummer.mockserver.mockplatform.Upstream;
-import com.mysql.jdbc.StringUtils;
 
-import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
 import okhttp3.Headers;
@@ -99,7 +98,7 @@ public class MockserviceImpl {
 				requestUriFormat = requestUri.substring(0, requestUri.length() - 1);
 			}
 
-			if (StringUtil.isNullOrEmpty(hostName) || this.__isIp(hostName))
+			if (StringUtils.isEmpty(hostName) || this.__isIp(hostName))
 				hostNameFormat = "*"; // * meaning including all hostName
 
 			Document addmatachedResult = dataplatformServiceImpl.getDocumentByRunCommand(
@@ -244,7 +243,7 @@ public class MockserviceImpl {
 		String host = hostName;
 
 		// 如果Host是ip地址,则查找mock规则时,则hostName是未定义,只根据uri进行查找匹配规则.
-		if (StringUtils.isNullOrEmpty(hostName) || __isIp(hostName)) {
+		if (StringUtils.isEmpty(hostName) || __isIp(hostName)) {
 			host = "All";
 		}
 
@@ -569,10 +568,10 @@ public class MockserviceImpl {
 		Document findCommand = new Document();
 		Document findFilter = new Document();
 		findCommand.put("find", "mockrules");
-		if (!StringUtils.isNullOrEmpty(hostName) && !hostName.equals("All"))
+		if (!StringUtils.isEmpty(hostName) && !hostName.equals("All"))
 			findFilter.put("host", hostName);
 
-		if (!StringUtils.isNullOrEmpty(requestUri))
+		if (!StringUtils.isEmpty(requestUri))
 			findFilter.put("uri", requestUri);
 
 		findCommand.put("filter", findFilter);
