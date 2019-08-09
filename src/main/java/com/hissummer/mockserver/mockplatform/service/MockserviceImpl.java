@@ -34,7 +34,14 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-
+/**
+ * 
+ * MockserviceImpl
+ * 
+ * @author lihao
+ * 
+ *
+ */
 @Slf4j
 @Service
 public class MockserviceImpl {
@@ -74,8 +81,9 @@ public class MockserviceImpl {
 	 * @param hostName
 	 * @param requestUri
 	 * @param mockResponse
-	 * @return
+	 * @return 返回true则认为添加成功
 	 */
+	@Deprecated
 	public boolean addMockRule(String hostName, String requestUri, String mockResponse,
 			Map<String, String> mockHeaders, String workMode) {
 
@@ -127,6 +135,7 @@ public class MockserviceImpl {
 
 	}
 
+	@Deprecated
 	public boolean updateMockRule(String id, String hostName, String requestUri, String mockResponse,
 			Map<String, String> mockHeaders, String workMode , Upstream upstreamGroup) {
 		// return addmatachedResult.toJson(documentBuilder.build());
@@ -172,6 +181,7 @@ public class MockserviceImpl {
 
 	}
 
+	@Deprecated
 	public boolean deleteMockRule(String id) {
 		try {
 
@@ -227,6 +237,7 @@ public class MockserviceImpl {
 		return updateCommand.toJson();
 	}
 
+	@Deprecated
 	public JSONArray queryMockRules(String hostName, String uri, int pageNumber, int pageSize) {
 		// TODO Auto-generated method stub
 

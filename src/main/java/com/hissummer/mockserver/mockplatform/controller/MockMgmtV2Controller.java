@@ -21,8 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.hissummer.mockserver.mockplatform.EurekaMockRule;
 import com.hissummer.mockserver.mockplatform.MockRule;
 import com.hissummer.mockserver.mockplatform.NoMockResponseBody;
+import com.hissummer.mockserver.mockplatform.service.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mockplatform.service.MockRuleMongoRepository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +43,11 @@ public class MockMgmtV2Controller {
 
 	@Autowired
 	MockRuleMongoRepository mockService;
+	
+	@Autowired
+	EurekaMockRuleMongoRepository eurekaMockService;
+	
+	
 
 	@PostMapping(value = "/addRule")
 	public NoMockResponseBody addRule(@RequestBody MockRule mockRule) {
@@ -146,6 +153,73 @@ public class MockMgmtV2Controller {
 		else
 			return NoMockResponseBody.builder().status(0).success(false).message("No Rules found.").build();
 
+	}
+	
+	@PostMapping(value = "/addEurekaRule")
+	public NoMockResponseBody addRule(@RequestBody EurekaMockRule mockRule) {
+
+		NoMockResponseBody result = null;
+
+		try {
+			EurekaMockRule saveMockRule = eurekaMockService.insert(mockRule);
+			if (saveMockRule != null) {
+				result = NoMockResponseBody.builder().status(0).success(true).message("save success.")
+						.data(saveMockRule).build();
+			} else {
+
+				result = NoMockResponseBody.builder().status(0).success(false).message("save faild.").build();
+			}
+		} catch (Exception e) {
+
+			result = NoMockResponseBody.builder().status(0).success(false).message(e.getMessage()).build();
+		}
+
+		return result;
+
+	}
+
+	@PostMapping(value = "/updateEurekaRule")
+	public NoMockResponseBody updateRule(@RequestBody EurekaMockRule mockRule) {
+
+		NoMockResponseBody result = null;
+		if (mockRule.getId() == null || mockRule.getId().equals("")) {
+			result = NoMockResponseBody.builder().status(0).success(false).message("The id could not be empty.")
+					.build();
+		}
+		try {
+			EurekaMockRule saveMockRule = eurekaMockService.save(mockRule);
+			if (saveMockRule != null) {
+				result = NoMockResponseBody.builder().status(0).success(true).message("save success.")
+						.data(saveMockRule).build();
+			} else {
+				result = NoMockResponseBody.builder().status(0).success(false).message("save faild.").build();
+			}
+		} catch (Exception e) {
+
+			result = NoMockResponseBody.builder().status(0).success(false).message(e.getMessage()).build();
+		}
+
+		return result;
+	}
+
+	@PostMapping(value = "/deleteEurekaRule")
+	public NoMockResponseBody deleteRule(@RequestBody EurekaMockRule mockRule) {
+
+		NoMockResponseBody result = null;
+		if (mockRule.getId() == null || mockRule.getId().equals("")) {
+			result = NoMockResponseBody.builder().status(0).success(false).message("The id could not be empty.")
+					.build();
+		}
+		try {
+			eurekaMockService.deleteById(mockRule.getId());
+
+			result = NoMockResponseBody.builder().status(0).success(true).message("Delete success.").build();
+		} catch (Exception e) {
+
+			result = NoMockResponseBody.builder().status(0).success(false).message(e.getMessage()).build();
+		}
+
+		return result;
 	}
 
 }
