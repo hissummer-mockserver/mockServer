@@ -1,7 +1,5 @@
 package com.hissummer.mockserver.mockplatform;
 
-import com.hissummer.mockserver.mockplatform.MockRule.MockRuleBuilder;
-
 import lombok.Builder;
 import lombok.Data;
 

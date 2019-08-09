@@ -1,10 +1,6 @@
 package com.hissummer.mockserver.mockplatform;
 
-import java.util.List;
-
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import com.hissummer.mockserver.mockplatform.MockRule.MockRuleBuilder;
 
 import lombok.Builder;
 import lombok.Data;

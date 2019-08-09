@@ -1,8 +1,6 @@
 package com.hissummer.mockserver.mockplatform.controller;
 
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.alibaba.fastjson.JSON;
 import com.hissummer.mockserver.mockplatform.NoMockResponseBody;
 import com.hissummer.mockserver.mockplatform.service.MockserviceImpl;
 

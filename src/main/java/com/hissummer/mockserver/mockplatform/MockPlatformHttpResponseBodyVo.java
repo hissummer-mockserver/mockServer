@@ -1,7 +1,5 @@
 package com.hissummer.mockserver.mockplatform;
 
-import java.util.Map;
-
 import lombok.Builder;
 import lombok.Data;
 

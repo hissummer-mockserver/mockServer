@@ -2,7 +2,6 @@ package com.hissummer.mockserver.mockplatform.service;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -12,7 +11,6 @@ import com.netflix.appinfo.InstanceInfo;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
-import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
