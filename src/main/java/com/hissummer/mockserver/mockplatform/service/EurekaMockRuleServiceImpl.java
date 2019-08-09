@@ -30,7 +30,7 @@ public class EurekaMockRuleServiceImpl {
 		 * Input: JSON/XML payload HTTP Code: 204 on success
 		 * 
 		 */
-		InstanceInfo registerInfo = InstanceInfo.Builder.newBuilder().setAppName(rule.getServiceName()).setInstanceId(rule.getHostName()+":"+rule.setPort(port))
+		InstanceInfo registerInfo = InstanceInfo.Builder.newBuilder().setAppName(rule.getServiceName()).setInstanceId(rule.getHostName()+":"+rule.getPort())
 				.build();
 
 		RequestBody okHttpRequestBody = null;
