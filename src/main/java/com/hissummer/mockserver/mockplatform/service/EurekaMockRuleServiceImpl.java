@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.hissummer.mockserver.mockplatform.EurekaMockRule;
 import com.netflix.appinfo.InstanceInfo;
@@ -18,7 +22,11 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 @Slf4j
+@Service
 public class EurekaMockRuleServiceImpl {
+	
+	@Autowired
+	EurekaMockRuleMongoRepository eurekaMockRepository;
 
 	public boolean register(EurekaMockRule rule) {
 
@@ -28,18 +36,20 @@ public class EurekaMockRuleServiceImpl {
 		 * Input: JSON/XML payload HTTP Code: 204 on success
 		 * 
 		 */
-		InstanceInfo registerInfo = InstanceInfo.Builder.newBuilder().setAppName(rule.getServiceName()).setInstanceId(rule.getHostName()+":"+rule.getPort())
-				.build();
+		InstanceInfo registerInfo = InstanceInfo.Builder.newBuilder().setAppName(rule.getServiceName())
+				.setInstanceId(rule.getHostName() + ":" + rule.getPort()).build();
 
 		RequestBody okHttpRequestBody = null;
 		if (registerInfo != null) {
-			okHttpRequestBody = RequestBody.create(JSON.toJSONString(registerInfo), MediaType.parse("application/json"));
+			okHttpRequestBody = RequestBody.create(JSON.toJSONString(registerInfo),
+					MediaType.parse("application/json"));
 		}
-		
+
 		final OkHttpClient client = new OkHttpClient();
 
-		Request request = new Request.Builder().url("http://"+rule.getEurekaServer()+"/eureka/v2/apps/" + rule.getServiceName()).method("PUT",okHttpRequestBody).addHeader("Content-Type", "application/json")
-				.build();
+		Request request = new Request.Builder()
+				.url("http://" + rule.getEurekaServer() + "/eureka/v2/apps/" + rule.getServiceName())
+				.method("PUT", okHttpRequestBody).addHeader("Content-Type", "application/json").build();
 
 		Call call = client.newCall(request);
 		try {
@@ -51,9 +61,8 @@ public class EurekaMockRuleServiceImpl {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		return false;		
+
+		return false;
 
 	}
 
@@ -67,8 +76,8 @@ public class EurekaMockRuleServiceImpl {
 
 		final OkHttpClient client = new OkHttpClient();
 
-		Request request = new Request.Builder().url("http://"+rule.getEurekaServer()+"/eureka/v2/apps/" + rule.getServiceName() + "/"+rule.getHostName()+":"+rule.getPort()).method("PUT",null)
-				.build();
+		Request request = new Request.Builder().url("http://" + rule.getEurekaServer() + "/eureka/v2/apps/"
+				+ rule.getServiceName() + "/" + rule.getHostName() + ":" + rule.getPort()).method("PUT", null).build();
 
 		Call call = client.newCall(request);
 		try {
@@ -80,30 +89,36 @@ public class EurekaMockRuleServiceImpl {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
+
 		return false;
 	}
 
 	public void heartBeatAllRules() {
 
 		List<EurekaMockRule> rules = null;
+		
+		rules = (List<EurekaMockRule>) eurekaMockRepository.findByEnable(Boolean.TRUE);
+		
 		ExecutorService threadPool = Executors.newFixedThreadPool(10);
+		if (rules != null) {
+			for (EurekaMockRule rule : rules) {
+				threadPool.execute(() -> {
 
-		for (EurekaMockRule rule : rules) {
-			threadPool.execute(() -> {
-				try {
+					log.info("{} heart beat to {} ", rule.getServiceName(), rule.getEurekaServer());
 
-					if (!heartBeat(rule)) {
-						register(rule);
+					try {
+
+						if (!heartBeat(rule)) {
+							register(rule);
+						}
+
+					} catch (Exception e) {
+						log.info(e.getMessage());
 					}
+				});
+			}
 
-				} catch (Exception e) {
-					log.info(e.getMessage());
-				}
-			});
 		}
-
 	}
 
 }

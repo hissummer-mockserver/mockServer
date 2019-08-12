@@ -1,6 +1,9 @@
 package com.hissummer.mockserver.mockplatform.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.util.StringUtils;
@@ -112,10 +115,6 @@ public class MockMgmtV2Controller {
 		int pageNumber = requestBody.getIntValue("pageNumber") < 0 ? 0 : requestBody.getIntValue("pageNumber");
 		int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 50 : requestBody.getIntValue("pageSize");
 
-		// MockRule searchRule =
-		// MockRule.builder().uri(requestBody.getString("uri")).host(requestBody.getString("hostName")).workMode(null).protocol(null).build();
-
-		// Example<MockRule> example = Example.of(searchRule);
 		PageRequest page = PageRequest.of(pageNumber, pageSize);
 
 		Page<MockRule> rules = null;
@@ -144,6 +143,35 @@ public class MockMgmtV2Controller {
 			return NoMockResponseBody.builder().status(0).success(false).message("No Rules found.").build();
 
 	}
+	
+	
+	
+	@PostMapping(value = "/queryEurekaRule")
+	public NoMockResponseBody queryEurekaRules(@RequestBody JSONObject requestBody) {
+
+		int pageNumber = requestBody.getIntValue("pageNumber") < 0 ? 0 : requestBody.getIntValue("pageNumber");
+		int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 50 : requestBody.getIntValue("pageSize");
+
+		PageRequest page = PageRequest.of(pageNumber, pageSize);
+
+		Page<EurekaMockRule> rules = null;
+
+		EurekaMockRule ruleExmple = EurekaMockRule.builder().build();
+		ruleExmple.setEurekaServer( StringUtils.isEmpty(requestBody.getString("eurekaServer")) ?null : requestBody.getString("eurekaServer"));
+		ruleExmple.setServiceName(StringUtils.isEmpty(requestBody.getString("serviceName"))?null:requestBody.getString("serviceName"));
+		Example<EurekaMockRule> example = Example.of(ruleExmple);
+		rules = eurekaMockService.findAll(example,page);
+
+		
+		if (rules != null && rules.getContent() != null && rules.getContent().size() > 0)
+			return NoMockResponseBody.builder().status(0).success(true).data(rules).build();
+		else
+			return NoMockResponseBody.builder().status(0).success(false).message("No Rules found.").build();
+
+	}	
+	
+	
+	
 	
 	@PostMapping(value = "/addEurekaRule")
 	public NoMockResponseBody addRule(@RequestBody EurekaMockRule mockRule) {
