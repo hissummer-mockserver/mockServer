@@ -97,7 +97,6 @@ public class EurekaMockRuleServiceImpl {
 					if (!heartBeat(rule)) {
 						register(rule);
 					}
-					;
 
 				} catch (Exception e) {
 					log.info(e.getMessage());

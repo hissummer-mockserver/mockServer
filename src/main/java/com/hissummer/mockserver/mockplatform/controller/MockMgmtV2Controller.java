@@ -192,6 +192,30 @@ public class MockMgmtV2Controller {
 		return result;
 	}
 
+	@PostMapping(value = "/disableEurekaRule")
+	public NoMockResponseBody disableRule(@RequestBody EurekaMockRule mockRule) {
+
+		NoMockResponseBody result = null;
+		if (mockRule.getId() == null || mockRule.getId().equals("")) {
+			result = NoMockResponseBody.builder().status(0).success(false).message("The id could not be empty.")
+					.build();
+		}
+		try {
+			EurekaMockRule saveMockRule = eurekaMockService.save(mockRule);
+			if (saveMockRule != null) {
+				result = NoMockResponseBody.builder().status(0).success(true).message("save success.")
+						.data(saveMockRule).build();
+			} else {
+				result = NoMockResponseBody.builder().status(0).success(false).message("save faild.").build();
+			}
+		} catch (Exception e) {
+
+			result = NoMockResponseBody.builder().status(0).success(false).message(e.getMessage()).build();
+		}
+
+		return result;
+	}	
+	
 	@PostMapping(value = "/deleteEurekaRule")
 	public NoMockResponseBody deleteRule(@RequestBody EurekaMockRule mockRule) {
 
