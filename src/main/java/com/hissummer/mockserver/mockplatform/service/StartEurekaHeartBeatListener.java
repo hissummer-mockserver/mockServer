@@ -27,7 +27,7 @@ public class StartEurekaHeartBeatListener {
 			eurekaMockRuleService.heartBeatAllRules();
 			
 			try {
-				TimeUnit.MINUTES.sleep(1);
+				TimeUnit.SECONDS.sleep(20);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
