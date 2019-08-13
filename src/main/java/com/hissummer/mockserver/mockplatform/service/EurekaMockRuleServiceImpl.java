@@ -45,7 +45,7 @@ public class EurekaMockRuleServiceImpl {
 	public boolean register(EurekaMockRule rule) throws IOException {
 
 		/*
-		 * /eureka/v2/apps/appID
+		 * /eureka/apps/appID
 		 * 
 		 * Input: JSON/XML payload HTTP Code: 204 on success
 		 * 
@@ -113,7 +113,7 @@ public class EurekaMockRuleServiceImpl {
 
 	public boolean heartBeat(EurekaMockRule rule) {
 		/*
-		 * /eureka/v2/apps/appID/instanceID
+		 * /eureka/apps/appID/instanceID
 		 * 
 		 * HTTP Code: 200 on success 404 if instanceID doesn’t exist
 		 * 
