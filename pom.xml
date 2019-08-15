@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.hissummer</groupId>
 	<artifactId>mockserver</artifactId>
-	<version>0.0.2-alpha</version>
+	<version>0.0.1-alpha</version>
 	<packaging>war</packaging>
 	<name>hissummer Mockserver</name>
 
@@ -72,6 +72,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+			<version>4.4.10</version>
 		</dependency>
 
 
