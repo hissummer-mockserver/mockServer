@@ -42,3 +42,4 @@ To be done
 3. copy mock rule
 4. update mock rule
 5. mock rule based hostname and uri path.  
+6. support eureka mock server (register and heartbeat)
