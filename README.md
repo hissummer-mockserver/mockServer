@@ -1,40 +1,9 @@
 # Hissummer Mockserver 
 
-## Download the standalone war and start directly
-Download war here https://github.com/hissummer-mockserver/StandaloneJar
+This is the mockserver backend server project. It is a java project based on springboot. 
 
-## Build and start the Mockserver manually
-```
-If you want run one server integrated with mockServer and mockServer adminUi. You could not do step1 and step2, you need serve the Mockserver AdminUI in another webserver like nginx. 
-```
-1. Build admin ui first.  <a href="https://github.com/hissummer-mockserver/mockserverAdminUI" target="_blank">See how to build mockserver adminUi</a>
-2. Copy the admin ui build files into the Mockserver source code.  
-```
-cp the dist/* to src/main/resource/static/
-cp the dist/index.html to src/main/webapp/templates/
-```
-3. Build the mock server.
-```
-mvn clean package -Dmaven.test.skip=true
-```
-4. Install mongodb. 
-```
-Please install mongodb server, version need greater than  or equal 3.2. 
-```
-* <a href="https://docs.mongodb.com/manual/installation/">Mongodb install guide</a>  or <a href="https://hub.docker.com/_/mongo"> start docker </a>
-5. Start mockserver.
-Assumer mongodb server listen on the default localhost:27017 and just run the application.
-```
-java -jar target/hissummer-mockserver-0.0.1-SNAPSHOT.war  --server.port=8081 --spring.data.mongodb.host=localhost --spring.data.mongodb.port=27017
-```
-Why java -jar *.war (not *.jar) ,please read into this https://stackoverflow.com/questions/47258695/mvn-spring-bootrun-vs-java-jar
+# If You only want use please download the standalone war and start application in one minutes. Link into this https://github.com/hissummer-mockserver/StandaloneWar.
 
-6. Browser access http://localhost:8081/ (will render /webapp/templates/index.html ) or  http://localhost:8081/index.html ( will access the /resource/static/index.html directly)
-```
-We could specify other port than 8081 when starting the application.
-```
-## Docker compose  to start Mockserver and Mockserver adminUI 
-To be done
 
 ## Feature
 1. add mock rule
