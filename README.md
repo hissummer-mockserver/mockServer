@@ -3,7 +3,7 @@
 This is the mockserver backend server project. It is a java project based on springboot. 
 
 # Start mockserver Only
-Start application in one minutes. Link into this https://github.com/hissummer-mockserver/StandaloneWar.
+Start application in one minutes. Link into this https://github.com/hissummer-mockserver/standaloneWars.
 
 
 ## Feature
