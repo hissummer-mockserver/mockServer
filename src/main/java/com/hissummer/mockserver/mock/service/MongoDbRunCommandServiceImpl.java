@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.dataplatform.service;
+package com.hissummer.mockserver.mock.service;
 
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;

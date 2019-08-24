@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mockplatform.mgmt.controller;
+package com.hissummer.mockserver.mgmt.controller;
 
 import java.util.List;
 
@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
-import com.hissummer.mockserver.mockplatform.mgmt.service.EurekaMockRuleMongoRepository;
-import com.hissummer.mockserver.mockplatform.mgmt.service.MockRuleMongoRepository;
-import com.hissummer.mockserver.mockplatform.mgmt.vo.EurekaMockRule;
-import com.hissummer.mockserver.mockplatform.mgmt.vo.MockRule;
-import com.hissummer.mockserver.mockplatform.mgmt.vo.MockRuleMgmtResponseVo;
+import com.hissummer.mockserver.mgmt.service.EurekaMockRuleMongoRepository;
+import com.hissummer.mockserver.mgmt.service.MockRuleMongoRepository;
+import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
+import com.hissummer.mockserver.mgmt.vo.MockRule;
+import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
 
 import lombok.extern.slf4j.Slf4j;
 

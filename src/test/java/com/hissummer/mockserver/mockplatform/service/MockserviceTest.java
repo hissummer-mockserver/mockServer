@@ -13,8 +13,9 @@ import org.springframework.data.domain.PageRequest;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.hissumemr.mockserver.SpringBootTestBase;
-import com.hissummer.mockserver.dataplatform.service.MongoDbRunCommandServiceImpl;
-import com.hissummer.mockserver.mockplatform.mgmt.service.MockRuleMongoRepository;
+import com.hissummer.mockserver.mgmt.service.MockRuleMongoRepository;
+import com.hissummer.mockserver.mgmt.service.MockRuleServiceImpl;
+import com.hissummer.mockserver.mock.service.MongoDbRunCommandServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,7 +29,7 @@ public class MockserviceTest extends SpringBootTestBase {
 	MongoDbRunCommandServiceImpl dataplatformServiceImpl;
 	
 	@Autowired
-	MockserviceImpl mockservice;
+	MockRuleServiceImpl mockservice;
 
 	@Autowired
 	MockRuleMongoRepository mockservice2;

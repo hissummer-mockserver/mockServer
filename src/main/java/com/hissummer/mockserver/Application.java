@@ -22,7 +22,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 
-import com.hissummer.mockserver.mockplatform.mgmt.service.EurekaMockRuleServiceImpl;
+import com.hissummer.mockserver.mgmt.service.EurekaMockRuleServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 

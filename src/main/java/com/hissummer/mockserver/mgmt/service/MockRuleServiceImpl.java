@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mockplatform.mgmt.service;
+package com.hissummer.mockserver.mgmt.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,11 +19,11 @@ import org.springframework.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.hissummer.mockserver.dataplatform.service.MongoDbRunCommandServiceImpl;
-import com.hissummer.mockserver.mockplatform.mgmt.vo.MockRuleMgmtResponseVo;
-import com.hissummer.mockserver.mockplatform.mgmt.vo.MockRuleWorkMode;
-import com.hissummer.mockserver.mockplatform.mgmt.vo.Upstream;
-import com.hissummer.mockserver.mockplatform.vo.MockResponse;
+import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
+import com.hissummer.mockserver.mgmt.vo.MockRuleWorkMode;
+import com.hissummer.mockserver.mgmt.vo.Upstream;
+import com.hissummer.mockserver.mock.service.MongoDbRunCommandServiceImpl;
+import com.hissummer.mockserver.mock.vo.MockResponse;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
@@ -43,7 +43,7 @@ import okhttp3.Response;
  */
 @Slf4j
 @Service
-public class MockRuleserviceImpl {
+public class MockRuleServiceImpl {
 
 	@Deprecated
 	public JSONArray queryMockRules(String hostName, String uri, int pageNumber, int pageSize) {

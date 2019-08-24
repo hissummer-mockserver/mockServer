@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mockplatform.vo;
+package com.hissummer.mockserver.mock.vo;
 
 import java.util.Map;
 

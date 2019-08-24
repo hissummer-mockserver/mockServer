@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mockplatform.mgmt.service;
+package com.hissummer.mockserver.mgmt.service;
 
 import java.io.IOException;
 import java.sql.Date;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hissummer.mockserver.mockplatform.mgmt.vo.EurekaMockRule;
+import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
 import com.netflix.appinfo.DataCenterInfo;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.InstanceInfo.ActionType;

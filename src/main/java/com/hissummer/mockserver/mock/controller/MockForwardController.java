@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mockplatform.controller;
+package com.hissummer.mockserver.mock.controller;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hissummer.mockserver.mockplatform.mgmt.vo.MockRuleMgmtResponseVo;
-import com.hissummer.mockserver.mockplatform.service.MockserviceImpl;
+import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
+import com.hissummer.mockserver.mock.service.MockserviceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @CrossOrigin(origins = "*")
 
 @RestController
-public class ForwardController implements ErrorController {
+public class MockForwardController implements ErrorController {
 
 	@Autowired
 	MockserviceImpl mockservice;

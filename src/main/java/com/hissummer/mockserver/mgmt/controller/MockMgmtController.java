@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mockplatform.mgmt.controller;
+package com.hissummer.mockserver.mgmt.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.hissummer.mockserver.mockplatform.mgmt.service.MockRuleserviceImpl;
-import com.hissummer.mockserver.mockplatform.mgmt.vo.MockRuleMgmtResponseVo;
-import com.hissummer.mockserver.mockplatform.service.MockserviceImpl;
+import com.hissummer.mockserver.mgmt.service.MockRuleServiceImpl;
+import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
+import com.hissummer.mockserver.mock.service.MockserviceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MockMgmtController {
 
 	@Autowired
-	private MockRuleserviceImpl mockRuleservice;
+	private MockRuleServiceImpl mockRuleservice;
 
 	@PostMapping(value = "/addRule")
 	public MockRuleMgmtResponseVo addRule(@RequestBody JSONObject requestBody) {
