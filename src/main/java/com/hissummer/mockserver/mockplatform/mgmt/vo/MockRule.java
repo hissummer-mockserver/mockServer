@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mockplatform;
+package com.hissummer.mockserver.mockplatform.mgmt.vo;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import lombok.Data;
 
 @Data
 @Document(collection = "mockrules")
-@Builder
+com.hissummer.mockserver.mockplatform.mgmt.vo.Builder
 public class MockRule {
 
 	

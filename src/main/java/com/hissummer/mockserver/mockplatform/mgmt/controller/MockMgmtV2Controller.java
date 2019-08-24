@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mockplatform.controller;
+package com.hissummer.mockserver.mockplatform.mgmt.controller;
 
 import java.util.List;
 
@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
-import com.hissummer.mockserver.mockplatform.EurekaMockRule;
-import com.hissummer.mockserver.mockplatform.MockRule;
-import com.hissummer.mockserver.mockplatform.NoMockResponseBody;
-import com.hissummer.mockserver.mockplatform.service.EurekaMockRuleMongoRepository;
-import com.hissummer.mockserver.mockplatform.service.MockRuleMongoRepository;
+import com.hissummer.mockserver.mockplatform.mgmt.service.EurekaMockRuleMongoRepository;
+import com.hissummer.mockserver.mockplatform.mgmt.service.MockRuleMongoRepository;
+import com.hissummer.mockserver.mockplatform.mgmt.vo.EurekaMockRule;
+import com.hissummer.mockserver.mockplatform.mgmt.vo.MockRule;
+import com.hissummer.mockserver.mockplatform.mgmt.vo.MockRuleMgmtResponseVo;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,22 +43,22 @@ public class MockMgmtV2Controller {
 	
 
 	@PostMapping(value = "/addRule")
-	public NoMockResponseBody addRule(@RequestBody MockRule mockRule) {
+	public MockRuleMgmtResponseVo addRule(@RequestBody MockRule mockRule) {
 
-		NoMockResponseBody result = null;
+		MockRuleMgmtResponseVo result = null;
 
 		try {
 			MockRule saveMockRule = mockService.insert(mockRule);
 			if (saveMockRule != null) {
-				result = NoMockResponseBody.builder().status(0).success(true).message("save success.")
+				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
 						.data(saveMockRule).build();
 			} else {
 
-				result = NoMockResponseBody.builder().status(0).success(false).message("save faild.").build();
+				result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild.").build();
 			}
 		} catch (Exception e) {
 
-			result = NoMockResponseBody.builder().status(0).success(false).message(e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getMessage()).build();
 		}
 
 		return result;
@@ -66,51 +66,51 @@ public class MockMgmtV2Controller {
 	}
 
 	@PostMapping(value = "/updateRule")
-	public NoMockResponseBody updateRule(@RequestBody MockRule mockRule) {
+	public MockRuleMgmtResponseVo updateRule(@RequestBody MockRule mockRule) {
 
-		NoMockResponseBody result = null;
+		MockRuleMgmtResponseVo result = null;
 		if (mockRule.getId() == null || mockRule.getId().equals("")) {
-			result = NoMockResponseBody.builder().status(0).success(false).message("The id could not be empty.")
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
 					.build();
 		}
 		try {
 			MockRule saveMockRule = mockService.save(mockRule);
 			if (saveMockRule != null) {
-				result = NoMockResponseBody.builder().status(0).success(true).message("save success.")
+				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
 						.data(saveMockRule).build();
 			} else {
-				result = NoMockResponseBody.builder().status(0).success(false).message("save faild.").build();
+				result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild.").build();
 			}
 		} catch (Exception e) {
 
-			result = NoMockResponseBody.builder().status(0).success(false).message(e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getMessage()).build();
 		}
 
 		return result;
 	}
 
 	@PostMapping(value = "/deleteRule")
-	public NoMockResponseBody deleteRule(@RequestBody MockRule mockRule) {
+	public MockRuleMgmtResponseVo deleteRule(@RequestBody MockRule mockRule) {
 
-		NoMockResponseBody result = null;
+		MockRuleMgmtResponseVo result = null;
 		if (mockRule.getId() == null || mockRule.getId().equals("")) {
-			result = NoMockResponseBody.builder().status(0).success(false).message("The id could not be empty.")
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
 					.build();
 		}
 		try {
 			mockService.deleteById(mockRule.getId());
 
-			result = NoMockResponseBody.builder().status(0).success(true).message("Delete success.").build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Delete success.").build();
 		} catch (Exception e) {
 
-			result = NoMockResponseBody.builder().status(0).success(false).message(e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getMessage()).build();
 		}
 
 		return result;
 	}
 
 	@PostMapping(value = "/queryRule")
-	public NoMockResponseBody queryRules(@RequestBody JSONObject requestBody) {
+	public MockRuleMgmtResponseVo queryRules(@RequestBody JSONObject requestBody) {
 
 		int pageNumber = requestBody.getIntValue("pageNumber") < 0 ? 0 : requestBody.getIntValue("pageNumber");
 		int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 50 : requestBody.getIntValue("pageSize");
@@ -138,16 +138,16 @@ public class MockMgmtV2Controller {
 		// PageRequest.of(pageNumber, pageSize));
 
 		if (rules != null && rules.getContent() != null && rules.getContent().size() > 0)
-			return NoMockResponseBody.builder().status(0).success(true).data(rules).build();
+			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
 		else
-			return NoMockResponseBody.builder().status(0).success(false).message("No Rules found.").build();
+			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("No Rules found.").build();
 
 	}
 	
 	
 	
 	@PostMapping(value = "/queryEurekaRule")
-	public NoMockResponseBody queryEurekaRules(@RequestBody JSONObject requestBody) {
+	public MockRuleMgmtResponseVo queryEurekaRules(@RequestBody JSONObject requestBody) {
 
 		int pageNumber = requestBody.getIntValue("pageNumber") < 0 ? 0 : requestBody.getIntValue("pageNumber");
 		int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 50 : requestBody.getIntValue("pageSize");
@@ -164,9 +164,9 @@ public class MockMgmtV2Controller {
 
 		
 		if (rules != null && rules.getContent() != null && rules.getContent().size() > 0)
-			return NoMockResponseBody.builder().status(0).success(true).data(rules).build();
+			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
 		else
-			return NoMockResponseBody.builder().status(0).success(false).message("No Rules found.").build();
+			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("No Rules found.").build();
 
 	}	
 	
@@ -174,22 +174,22 @@ public class MockMgmtV2Controller {
 	
 	
 	@PostMapping(value = "/addEurekaRule")
-	public NoMockResponseBody addRule(@RequestBody EurekaMockRule mockRule) {
+	public MockRuleMgmtResponseVo addRule(@RequestBody EurekaMockRule mockRule) {
 
-		NoMockResponseBody result = null;
+		MockRuleMgmtResponseVo result = null;
 
 		try {
 			EurekaMockRule saveMockRule = eurekaMockService.insert(mockRule);
 			if (saveMockRule != null) {
-				result = NoMockResponseBody.builder().status(0).success(true).message("save success.")
+				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
 						.data(saveMockRule).build();
 			} else {
 
-				result = NoMockResponseBody.builder().status(0).success(false).message("save faild.").build();
+				result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild.").build();
 			}
 		} catch (Exception e) {
 
-			result = NoMockResponseBody.builder().status(0).success(false).message(e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getMessage()).build();
 		}
 
 		return result;
@@ -197,24 +197,24 @@ public class MockMgmtV2Controller {
 	}
 
 	@PostMapping(value = "/updateEurekaRule")
-	public NoMockResponseBody updateRule(@RequestBody EurekaMockRule mockRule) {
+	public MockRuleMgmtResponseVo updateRule(@RequestBody EurekaMockRule mockRule) {
 
-		NoMockResponseBody result = null;
+		MockRuleMgmtResponseVo result = null;
 		if (mockRule.getId() == null || mockRule.getId().equals("")) {
-			result = NoMockResponseBody.builder().status(0).success(false).message("The id could not be empty.")
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
 					.build();
 		}
 		try {
 			EurekaMockRule saveMockRule = eurekaMockService.save(mockRule);
 			if (saveMockRule != null) {
-				result = NoMockResponseBody.builder().status(0).success(true).message("save success.")
+				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
 						.data(saveMockRule).build();
 			} else {
-				result = NoMockResponseBody.builder().status(0).success(false).message("save faild.").build();
+				result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild.").build();
 			}
 		} catch (Exception e) {
 
-			result = NoMockResponseBody.builder().status(0).success(false).message(e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getMessage()).build();
 		}
 
 		return result;
@@ -222,20 +222,20 @@ public class MockMgmtV2Controller {
 
 	
 	@PostMapping(value = "/deleteEurekaRule")
-	public NoMockResponseBody deleteRule(@RequestBody EurekaMockRule mockRule) {
+	public MockRuleMgmtResponseVo deleteRule(@RequestBody EurekaMockRule mockRule) {
 
-		NoMockResponseBody result = null;
+		MockRuleMgmtResponseVo result = null;
 		if (mockRule.getId() == null || mockRule.getId().equals("")) {
-			result = NoMockResponseBody.builder().status(0).success(false).message("The id could not be empty.")
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
 					.build();
 		}
 		try {
 			eurekaMockService.deleteById(mockRule.getId());
 
-			result = NoMockResponseBody.builder().status(0).success(true).message("Delete success.").build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Delete success.").build();
 		} catch (Exception e) {
 
-			result = NoMockResponseBody.builder().status(0).success(false).message(e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getMessage()).build();
 		}
 
 		return result;

@@ -7,8 +7,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.hissumemr.mockserver.SpringBootTestBase;
-import com.hissummer.mockserver.mockplatform.MockRule;
-import com.hissummer.mockserver.mockplatform.service.MockRuleMongoRepository;
+import com.hissummer.mockserver.mockplatform.mgmt.service.MockRuleMongoRepository;
+import com.hissummer.mockserver.mockplatform.mgmt.vo.MockRule;
 
 @Ignore
 public class MockRuleMongoRepositoryTest extends SpringBootTestBase{

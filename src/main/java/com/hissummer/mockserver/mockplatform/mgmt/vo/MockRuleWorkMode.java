@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mockplatform;
+package com.hissummer.mockserver.mockplatform.mgmt.vo;
 
 public enum MockRuleWorkMode {
 	

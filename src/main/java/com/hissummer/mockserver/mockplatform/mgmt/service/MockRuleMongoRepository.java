@@ -1,10 +1,10 @@
-package com.hissummer.mockserver.mockplatform.service;
+package com.hissummer.mockserver.mockplatform.mgmt.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import com.hissummer.mockserver.mockplatform.MockRule;
+import com.hissummer.mockserver.mockplatform.mgmt.vo.MockRule;
 
 public interface MockRuleMongoRepository extends MongoRepository<MockRule, String> {
 

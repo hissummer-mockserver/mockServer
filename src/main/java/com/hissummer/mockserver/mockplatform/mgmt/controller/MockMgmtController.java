@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mockplatform.controller;
+package com.hissummer.mockserver.mockplatform.mgmt.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.hissummer.mockserver.mockplatform.NoMockResponseBody;
+import com.hissummer.mockserver.mockplatform.mgmt.service.MockRuleserviceImpl;
+import com.hissummer.mockserver.mockplatform.mgmt.vo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mockplatform.service.MockserviceImpl;
 
 import lombok.extern.slf4j.Slf4j;
@@ -38,66 +39,66 @@ import lombok.extern.slf4j.Slf4j;
 public class MockMgmtController {
 
 	@Autowired
-	private MockserviceImpl mockservice;
+	private MockRuleserviceImpl mockRuleservice;
 
 	@PostMapping(value = "/addRule")
-	public NoMockResponseBody addRule(@RequestBody JSONObject requestBody) {
+	public MockRuleMgmtResponseVo addRule(@RequestBody JSONObject requestBody) {
 
 		try {
-			NoMockResponseBody result = NoMockResponseBody.builder().status(0)
-					.success(mockservice.addMockRule(requestBody.getString("hostName"), requestBody.getString("uri"),
+			MockRuleMgmtResponseVo result = MockRuleMgmtResponseVo.builder().status(0)
+					.success(mockRuleservice.addMockRule(requestBody.getString("hostName"), requestBody.getString("uri"),
 							requestBody.getString("mockResponse"), null,requestBody.getString("workMode")))
 					.build();
 			return result;
 		} catch (Exception e) {
 
-			return NoMockResponseBody.builder().status(-1).message(e.getMessage()).success(false).build();
+			return MockRuleMgmtResponseVo.builder().status(-1).message(e.getMessage()).success(false).build();
 
 		}
 	}
 
 	@PostMapping(value = "/updateRule")
-	public NoMockResponseBody updateRule(@RequestBody JSONObject requestBody) {
+	public MockRuleMgmtResponseVo updateRule(@RequestBody JSONObject requestBody) {
 
 		try {
-			NoMockResponseBody result = NoMockResponseBody.builder().status(0)
-					.success(mockservice.updateMockRule(requestBody.getString("id"), requestBody.getString("hostName"),
+			MockRuleMgmtResponseVo result = MockRuleMgmtResponseVo.builder().status(0)
+					.success(mockRuleservice.updateMockRule(requestBody.getString("id"), requestBody.getString("hostName"),
 							requestBody.getString("uri"), requestBody.getString("mockResponse"), null, requestBody.getString("workMode"),null))
 					.build();
 			return result;
 		} catch (Exception e) {
 
-			return NoMockResponseBody.builder().status(-1).message(e.getMessage()).success(false).build();
+			return MockRuleMgmtResponseVo.builder().status(-1).message(e.getMessage()).success(false).build();
 
 		}
 	}
 
 	@PostMapping(value = "/deleteRule")
-	public NoMockResponseBody deleteRule(@RequestBody JSONObject requestBody) {
+	public MockRuleMgmtResponseVo deleteRule(@RequestBody JSONObject requestBody) {
 
 		try {
-			NoMockResponseBody result = NoMockResponseBody.builder().status(0)
-					.success(mockservice.deleteMockRule(requestBody.getString("id"))).build();
+			MockRuleMgmtResponseVo result = MockRuleMgmtResponseVo.builder().status(0)
+					.success(mockRuleservice.deleteMockRule(requestBody.getString("id"))).build();
 			return result;
 		} catch (Exception e) {
 
-			return NoMockResponseBody.builder().status(-1).message(e.getMessage()).success(false).build();
+			return MockRuleMgmtResponseVo.builder().status(-1).message(e.getMessage()).success(false).build();
 
 		}
 	}
 
 	@PostMapping(value = "/queryRule")
-	public NoMockResponseBody queryRules(@RequestBody JSONObject requestBody) {
+	public MockRuleMgmtResponseVo queryRules(@RequestBody JSONObject requestBody) {
 
 		int pageNumber = requestBody.getIntValue("pageNumber") == 0 ? 1 : requestBody.getIntValue("pageNumber");
 		int pageSize = requestBody.getIntValue("pageSize") == 0 ? 50 : requestBody.getIntValue("pageSize");
 		;
-		JSONArray rules = mockservice.queryMockRules(requestBody.getString("hostName"), requestBody.getString("uri"),
+		JSONArray rules = mockRuleservice.queryMockRules(requestBody.getString("hostName"), requestBody.getString("uri"),
 				pageNumber, pageSize);
 		if (rules != null)
-			return NoMockResponseBody.builder().status(0).success(true).data(rules).build();
+			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
 		else
-			return NoMockResponseBody.builder().status(0).success(false).message("No Rules found.").build();
+			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("No Rules found.").build();
 
 	}
 

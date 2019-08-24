@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class DataplatformServiceImpl {
+public class MongoDbRunCommandServiceImpl {
 
 	@Autowired
 	MongoTemplate mongoTemplate;
@@ -30,6 +30,7 @@ public class DataplatformServiceImpl {
 		return mongoResult.toJson();
 	}
 
+	
 	public Document getDocumentByRunCommand(String runCommand) {
 		// TODO Auto-generated method stub
 		log.info("getDocumentByRunCommand: {}", runCommand);

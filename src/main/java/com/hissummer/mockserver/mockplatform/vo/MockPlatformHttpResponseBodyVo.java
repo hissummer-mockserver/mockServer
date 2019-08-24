@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mockplatform;
+package com.hissummer.mockserver.mockplatform.vo;
 
 import lombok.Builder;
 import lombok.Data;

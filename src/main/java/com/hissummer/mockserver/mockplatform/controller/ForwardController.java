@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hissummer.mockserver.mockplatform.NoMockResponseBody;
+import com.hissummer.mockserver.mockplatform.mgmt.vo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mockplatform.service.MockserviceImpl;
 
 import lombok.extern.slf4j.Slf4j;
@@ -87,12 +87,12 @@ public class ForwardController implements ErrorController {
 
 			} else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
 				// 5xx errors
-				return NoMockResponseBody.builder().status(0).success(false).message(errorMessage)
+				return MockRuleMgmtResponseVo.builder().status(0).success(false).message(errorMessage)
 						.build().toString();
 			}
 		}
 		//if statusCode is not 404 or 500 errors , will return default response.
-		return NoMockResponseBody.builder().status(0).success(false).message(errorMessage)
+		return MockRuleMgmtResponseVo.builder().status(0).success(false).message(errorMessage)
 				.build().toString();
 	}
 

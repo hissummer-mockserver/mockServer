@@ -1,11 +1,11 @@
-package com.hissummer.mockserver.mockplatform;
+package com.hissummer.mockserver.mockplatform.mgmt.vo;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class NoMockResponseBody {
+public class MockRuleMgmtResponseVo {
 
 	int status; // server status
 	boolean success; // mock or upstream response status
