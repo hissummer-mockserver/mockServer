@@ -10,7 +10,7 @@ import lombok.Data;
 
 @Data
 @Document(collection = "mockrules")
-com.hissummer.mockserver.mockplatform.mgmt.vo.Builder
+@Builder
 public class MockRule {
 
 	
