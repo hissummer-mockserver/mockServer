@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,6 +42,9 @@ public class MockMgmtV2Controller {
 	
 	@Autowired
 	EurekaMockRuleMongoRepository eurekaMockService;
+	
+	@Autowired
+	MongoTemplate mongoTemplate;
 	
 	
 
@@ -117,28 +123,42 @@ public class MockMgmtV2Controller {
 
 		PageRequest page = PageRequest.of(pageNumber, pageSize);
 
-		Page<MockRule> rules = null;
-
-		if (StringUtils.isEmpty(requestBody.getString("uri")) && StringUtils.isEmpty(requestBody.getString("host"))) {
-			rules = mockService.findAll(page);
-		} else if (!StringUtils.isEmpty(requestBody.getString("uri"))
-				&& !StringUtils.isEmpty(requestBody.getString("host"))) {
-			rules = mockService.findByHostAndUri(requestBody.getString("host"), requestBody.getString("uri"), page);
-		}
-
-		else if (StringUtils.isEmpty(requestBody.getString("uri"))) {
-			rules = mockService.findByHost(requestBody.getString("host"), page);
-		}
-
-		else if (StringUtils.isEmpty(requestBody.getString("host"))) {
-			rules = mockService.findByUri(requestBody.getString("uri"), page);
-		}
-
+//		Page<MockRule> rules = null;
+//
+//		if (StringUtils.isEmpty(requestBody.getString("uri")) && StringUtils.isEmpty(requestBody.getString("host"))) {
+//			rules = mockService.findAll(page);
+//		} else if (!StringUtils.isEmpty(requestBody.getString("uri"))
+//				&& !StringUtils.isEmpty(requestBody.getString("host"))) {
+//			rules = mockService.findByHostAndUri(requestBody.getString("host"), requestBody.getString("uri"), page);
+//		}
+//
+//		else if (StringUtils.isEmpty(requestBody.getString("uri"))) {
+//			rules = mockService.findByHost(requestBody.getString("host"), page);
+//		}
+//
+//		else if (StringUtils.isEmpty(requestBody.getString("host"))) {
+//			rules = mockService.findByUri(requestBody.getString("uri"), page);
+//		}
+		
+		Query query = new Query().with(page);
+		query.limit(10);		
+		if(!StringUtils.isEmpty(requestBody.getString("uri")))
+		query.addCriteria(Criteria.where("uri").regex(requestBody.getString("uri")));
+		
+		if(!StringUtils.isEmpty(requestBody.getString("host")))
+		query.addCriteria(Criteria.where("host").regex(requestBody.getString("host")));		
+		
+		
+		
+		
+		List<MockRule> rulesFromMongoTemplate = mongoTemplate.find(query, MockRule.class);
+		
+		
 		// (requestBody.getString("hostName"), requestBody.getString("uri"),
 		// PageRequest.of(pageNumber, pageSize));
 
-		if (rules != null && rules.getContent() != null && rules.getContent().size() > 0)
-			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
+		if (rulesFromMongoTemplate != null && rulesFromMongoTemplate.size() > 0)
+			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rulesFromMongoTemplate).build();
 		else
 			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("No Rules found.").build();
 
@@ -162,6 +182,8 @@ public class MockMgmtV2Controller {
 		Example<EurekaMockRule> example = Example.of(ruleExmple);
 		rules = eurekaMockService.findAll(example,page);
 
+
+		
 		
 		if (rules != null && rules.getContent() != null && rules.getContent().size() > 0)
 			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
