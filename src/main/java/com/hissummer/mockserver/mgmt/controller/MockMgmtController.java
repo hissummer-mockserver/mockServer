@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.hissummer.mockserver.mgmt.service.MockRuleServiceImpl;
+import com.hissummer.mockserver.mgmt.service.MockRuleManagerServiceImpl;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mock.service.MockserviceImpl;
 
@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MockMgmtController {
 
 	@Autowired
-	private MockRuleServiceImpl mockRuleservice;
+	private MockRuleManagerServiceImpl mockRuleservice;
 
 	@PostMapping(value = "/addRule")
 	public MockRuleMgmtResponseVo addRule(@RequestBody JSONObject requestBody) {

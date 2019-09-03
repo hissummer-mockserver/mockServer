@@ -123,42 +123,58 @@ public class MockMgmtV2Controller {
 
 		PageRequest page = PageRequest.of(pageNumber, pageSize);
 
-//		Page<MockRule> rules = null;
-//
+		Page<MockRule> rules = null;
+		
+		String  uri = ".*";
+		String host = ".*";
+		
 //		if (StringUtils.isEmpty(requestBody.getString("uri")) && StringUtils.isEmpty(requestBody.getString("host"))) {
+//			
 //			rules = mockService.findAll(page);
+//			
 //		} else if (!StringUtils.isEmpty(requestBody.getString("uri"))
 //				&& !StringUtils.isEmpty(requestBody.getString("host"))) {
-//			rules = mockService.findByHostAndUri(requestBody.getString("host"), requestBody.getString("uri"), page);
+//					
 //		}
 //
 //		else if (StringUtils.isEmpty(requestBody.getString("uri"))) {
-//			rules = mockService.findByHost(requestBody.getString("host"), page);
+//			rules = mockService.findByHostWithRegex(requestBody.getString("host"), page);
 //		}
 //
 //		else if (StringUtils.isEmpty(requestBody.getString("host"))) {
-//			rules = mockService.findByUri(requestBody.getString("uri"), page);
+//			rules = mockService.findByUriWithRegex(requestBody.getString("uri"), page);
 //		}
 		
-		Query query = new Query().with(page);
-		query.limit(10);		
-		if(!StringUtils.isEmpty(requestBody.getString("uri")))
-		query.addCriteria(Criteria.where("uri").regex(requestBody.getString("uri")));
+		if (!StringUtils.isEmpty(requestBody.getString("uri"))) {
+			uri = requestBody.getString("uri");
+		}
+		if (!StringUtils.isEmpty(requestBody.getString("host"))) {
+			host = requestBody.getString("host");
+		}
 		
-		if(!StringUtils.isEmpty(requestBody.getString("host")))
-		query.addCriteria(Criteria.where("host").regex(requestBody.getString("host")));		
+		rules = mockService.findByHostAndUriWithRegex(host, uri, page);
 		
 		
 		
+//		Query query = new Query().with(page);
+//		query.limit(10);		
+//		if(!StringUtils.isEmpty(requestBody.getString("uri")))
+//		query.addCriteria(Criteria.where("uri").regex(requestBody.getString("uri")));
+//		
+//		if(!StringUtils.isEmpty(requestBody.getString("host")))
+//		query.addCriteria(Criteria.where("host").regex(requestBody.getString("host")));		
+//		
 		
-		List<MockRule> rulesFromMongoTemplate = mongoTemplate.find(query, MockRule.class);
+		
+		
+//		List<MockRule> rulesFromMongoTemplate = mongoTemplate.find(query, MockRule.class);
 		
 		
 		// (requestBody.getString("hostName"), requestBody.getString("uri"),
 		// PageRequest.of(pageNumber, pageSize));
 
-		if (rulesFromMongoTemplate != null && rulesFromMongoTemplate.size() > 0)
-			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rulesFromMongoTemplate).build();
+		if (rules != null && rules.getContent().size() > 0)
+			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
 		else
 			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("No Rules found.").build();
 

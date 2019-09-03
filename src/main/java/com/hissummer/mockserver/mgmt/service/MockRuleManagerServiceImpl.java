@@ -43,7 +43,7 @@ import okhttp3.Response;
  */
 @Slf4j
 @Service
-public class MockRuleServiceImpl {
+public class MockRuleManagerServiceImpl {
 
 	@Deprecated
 	public JSONArray queryMockRules(String hostName, String uri, int pageNumber, int pageSize) {
