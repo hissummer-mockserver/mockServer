@@ -128,50 +128,25 @@ public class MockMgmtV2Controller {
 		String  uri = ".*";
 		String host = ".*";
 		
-//		if (StringUtils.isEmpty(requestBody.getString("uri")) && StringUtils.isEmpty(requestBody.getString("host"))) {
-//			
-//			rules = mockService.findAll(page);
-//			
-//		} else if (!StringUtils.isEmpty(requestBody.getString("uri"))
-//				&& !StringUtils.isEmpty(requestBody.getString("host"))) {
-//					
-//		}
-//
-//		else if (StringUtils.isEmpty(requestBody.getString("uri"))) {
-//			rules = mockService.findByHostWithRegex(requestBody.getString("host"), page);
-//		}
-//
-//		else if (StringUtils.isEmpty(requestBody.getString("host"))) {
-//			rules = mockService.findByUriWithRegex(requestBody.getString("uri"), page);
-//		}
-		
 		if (!StringUtils.isEmpty(requestBody.getString("uri"))) {
+			
 			uri = requestBody.getString("uri");
+
 		}
 		if (!StringUtils.isEmpty(requestBody.getString("host"))) {
-			host = requestBody.getString("host");
+			
+			
+			if(requestBody.getString("host").equals("*"))
+			{
+				//因为做的是正则匹配查询，所以特殊的*字符转换为\*，即查询包含*字符的host值。 而不是将*认为是正则表达式。
+				host="\\*";	
+			}else {
+				host = requestBody.getString("host");
+			}
+			
 		}
 		
 		rules = mockService.findByHostAndUriWithRegex(host, uri, page);
-		
-		
-		
-//		Query query = new Query().with(page);
-//		query.limit(10);		
-//		if(!StringUtils.isEmpty(requestBody.getString("uri")))
-//		query.addCriteria(Criteria.where("uri").regex(requestBody.getString("uri")));
-//		
-//		if(!StringUtils.isEmpty(requestBody.getString("host")))
-//		query.addCriteria(Criteria.where("host").regex(requestBody.getString("host")));		
-//		
-		
-		
-		
-//		List<MockRule> rulesFromMongoTemplate = mongoTemplate.find(query, MockRule.class);
-		
-		
-		// (requestBody.getString("hostName"), requestBody.getString("uri"),
-		// PageRequest.of(pageNumber, pageSize));
 
 		if (rules != null && rules.getContent().size() > 0)
 			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
@@ -199,8 +174,6 @@ public class MockMgmtV2Controller {
 		rules = eurekaMockService.findAll(example,page);
 
 
-		
-		
 		if (rules != null && rules.getContent() != null && rules.getContent().size() > 0)
 			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
 		else
