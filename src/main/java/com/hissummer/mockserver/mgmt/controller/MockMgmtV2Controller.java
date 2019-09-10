@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
 import com.hissummer.mockserver.mgmt.service.EurekaMockRuleMongoRepository;
+import com.hissummer.mockserver.mgmt.service.EurekaMockRuleServiceImpl;
 import com.hissummer.mockserver.mgmt.service.MockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
 import com.hissummer.mockserver.mgmt.vo.MockRule;
@@ -45,6 +46,11 @@ public class MockMgmtV2Controller {
 	
 	@Autowired
 	MongoTemplate mongoTemplate;
+	
+	@Autowired
+	EurekaMockRuleServiceImpl eurekaMockRuleServiceImpl;
+	
+	
 	
 	
 
@@ -218,6 +224,9 @@ public class MockMgmtV2Controller {
 		try {
 			EurekaMockRule saveMockRule = eurekaMockService.save(mockRule);
 			if (saveMockRule != null) {
+				
+				eurekaMockRuleServiceImpl.unRegisterApp(mockRule);
+				
 				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
 						.data(saveMockRule).build();
 			} else {

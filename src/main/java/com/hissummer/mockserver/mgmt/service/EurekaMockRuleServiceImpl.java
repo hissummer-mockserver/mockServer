@@ -200,6 +200,41 @@ public class EurekaMockRuleServiceImpl {
 
 		return false;
 	}
+	
+	
+	public boolean unRegisterApp(EurekaMockRule rule) {
+		
+		
+		final OkHttpClient client = new OkHttpClient();
+
+		Response response = null;
+
+		Request request = new Request.Builder()
+				.url("http://" + rule.getEurekaServer() + "/eureka/apps/" + rule.getServiceName() + "/"
+						+ rule.getHostName() + ":" + rule.getPort())
+				.header(HttpHeaders.AUTHORIZATION, credentials)
+				.method("DELETE", RequestBody.create("", MediaType.parse("application/json"))).build();
+
+		Call call = client.newCall(request);
+		try {
+			response = call.execute();
+			log.info(response.toString());
+			return response.isSuccessful();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (response != null) {
+				response.close();
+			}
+		}
+		
+		
+		return false;
+		
+	}
+	
 
 	public void heartBeatAllRules() {
 
