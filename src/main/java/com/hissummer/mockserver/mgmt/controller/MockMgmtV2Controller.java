@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSONObject;
 import com.hissummer.mockserver.mgmt.service.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.service.EurekaMockRuleServiceImpl;
-import com.hissummer.mockserver.mgmt.service.MockRuleMongoRepository;
+import com.hissummer.mockserver.mgmt.service.MockRuleMgmtMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
 import com.hissummer.mockserver.mgmt.vo.MockRule;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MockMgmtV2Controller {
 
 	@Autowired
-	MockRuleMongoRepository mockService;
+	MockRuleMgmtMongoRepository mockService;
 	
 	@Autowired
 	EurekaMockRuleMongoRepository eurekaMockService;

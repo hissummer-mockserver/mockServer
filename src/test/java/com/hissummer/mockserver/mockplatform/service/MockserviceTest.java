@@ -13,7 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.hissumemr.mockserver.SpringBootTestBase;
-import com.hissummer.mockserver.mgmt.service.MockRuleMongoRepository;
+import com.hissummer.mockserver.mgmt.service.MockRuleMgmtMongoRepository;
 import com.hissummer.mockserver.mgmt.service.MockRuleManagerServiceImpl;
 import com.hissummer.mockserver.mock.service.MongoDbRunCommandServiceImpl;
 
@@ -32,7 +32,7 @@ public class MockserviceTest extends SpringBootTestBase {
 	MockRuleManagerServiceImpl mockservice;
 
 	@Autowired
-	MockRuleMongoRepository mockservice2;
+	MockRuleMgmtMongoRepository mockservice2;
 	
 	@Test
 	public void test() {
@@ -68,7 +68,7 @@ public class MockserviceTest extends SpringBootTestBase {
 		
 		log.info(JSON.toJSONString(mockservice2.findByUri("/newtest", PageRequest.of(0, 5))));
 		
-		log.info(JSON.toJSONString(mockservice2.findByHostAndUri("*","/newtest", PageRequest.of(0, 5))));
+		log.info(JSON.toJSONString(mockservice2.findByHostAndUri("*","/newtest")));
 		
 	}
 	

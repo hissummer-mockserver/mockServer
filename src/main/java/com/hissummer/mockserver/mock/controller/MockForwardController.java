@@ -82,7 +82,7 @@ public class MockForwardController implements ErrorController {
 					log.info(e.getMessage());
 				}
 
-				return mockservice.getMockResponse(headers, host, request.getMethod(),
+				return mockservice.getResponse(headers, host, request.getMethod(),
 						(String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI), requestBody);
 
 			} else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {

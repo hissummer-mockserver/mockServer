@@ -36,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/mock/old/")
+@Deprecated
 public class MockMgmtController {
 
 	@Autowired

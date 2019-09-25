@@ -7,11 +7,11 @@ import org.springframework.data.mongodb.repository.Query;
 
 import com.hissummer.mockserver.mgmt.vo.MockRule;
 
-public interface MockRuleMongoRepository extends MongoRepository<MockRule, String> {
+public interface MockRuleMgmtMongoRepository extends MongoRepository<MockRule, String> {
 
 	Page<MockRule> findAll(Pageable pageable);
 	
-	Page<MockRule> findByHostAndUri(String host, String uri,Pageable pageable);
+	MockRule findByHostAndUri(String host, String uri);
 	
 	Page<MockRule> findByHost(String host,Pageable pageable);
 	 
