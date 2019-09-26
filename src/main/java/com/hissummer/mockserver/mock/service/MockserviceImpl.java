@@ -23,6 +23,7 @@ import com.hissummer.mockserver.mgmt.vo.MockRule;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mgmt.vo.MockRuleWorkMode;
 import com.hissummer.mockserver.mgmt.vo.Upstream;
+import com.hissummer.mockserver.mock.service.mockResponseConverter.MockResponseConverter;
 import com.hissummer.mockserver.mock.vo.MockResponse;
 
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +49,9 @@ public class MockserviceImpl {
 
 	@Autowired
 	MongoDbRunCommandServiceImpl dataplatformServiceImpl;
+
+	@Autowired
+	List<MockResponseConverter> mockResponseConverters;
 
 	@Autowired
 	MockRuleMongoRepository mockRuleRepository;
@@ -123,11 +127,19 @@ public class MockserviceImpl {
 			}
 
 			// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
-			return MockResponse.builder().responseBody(matchedResult.getMockResponse().replace("\r\n", "").replaceAll("\n", "")).build();
+			return MockResponse.builder().responseBody(__interpreterResponse(matchedResult.getMockResponse())).build();
 
 		} else
 			return null;
 
+	}
+
+	private String __interpreterResponse(String originalMockResponse) {
+		String mockResponse = originalMockResponse;
+		for (MockResponseConverter mockResponseConverter : mockResponseConverters) {
+			mockResponse = mockResponseConverter.converter(mockResponse);
+		}
+		return mockResponse;
 	}
 
 	private String __getUpstreamResponse(String protocol, Map<String, String> headers, String upstream, String method,
