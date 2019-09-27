@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 @Document(collection = "mockrules")
 @Builder
-public class MockRule {
+public class HttpMockRule {
 
 	
 	private String id; 
@@ -27,7 +27,7 @@ public class MockRule {
 	private UpstreamGroup upstreamGroup;
 
 	@Builder.Default
-	private MockRuleWorkMode workMode = MockRuleWorkMode.MOCK;
+	private HttpMockWorkMode workMode = HttpMockWorkMode.MOCK;
 
 	@Builder.Default
 	private Boolean enable = true;

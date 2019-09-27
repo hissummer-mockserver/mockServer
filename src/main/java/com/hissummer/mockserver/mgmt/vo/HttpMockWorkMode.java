@@ -1,6 +1,6 @@
 package com.hissummer.mockserver.mgmt.vo;
 
-public enum MockRuleWorkMode {
+public enum HttpMockWorkMode {
 	
 	MOCK,UPSTREAM
 	

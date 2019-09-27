@@ -20,7 +20,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
-import com.hissummer.mockserver.mgmt.vo.MockRuleWorkMode;
+import com.hissummer.mockserver.mgmt.vo.HttpMockWorkMode;
 import com.hissummer.mockserver.mgmt.vo.Upstream;
 import com.hissummer.mockserver.mock.service.MongoDbRunCommandServiceImpl;
 import com.hissummer.mockserver.mock.vo.MockResponse;

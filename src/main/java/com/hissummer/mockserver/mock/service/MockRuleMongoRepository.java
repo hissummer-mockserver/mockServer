@@ -2,12 +2,12 @@ package com.hissummer.mockserver.mock.service;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import com.hissummer.mockserver.mgmt.vo.MockRule;
+import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
 
-public interface MockRuleMongoRepository extends MongoRepository<MockRule, String> {
+public interface MockRuleMongoRepository extends MongoRepository<HttpMockRule, String> {
 
 	
-	MockRule findByHostAndUri(String host, String uri);
+	HttpMockRule findByHostAndUri(String host, String uri);
 	
 
 	

@@ -21,7 +21,7 @@ import com.hissummer.mockserver.mgmt.service.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.service.EurekaMockRuleServiceImpl;
 import com.hissummer.mockserver.mgmt.service.MockRuleMgmtMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
-import com.hissummer.mockserver.mgmt.vo.MockRule;
+import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
 
 import lombok.extern.slf4j.Slf4j;
@@ -55,12 +55,12 @@ public class MockMgmtV2Controller {
 	
 
 	@PostMapping(value = "/addRule")
-	public MockRuleMgmtResponseVo addRule(@RequestBody MockRule mockRule) {
+	public MockRuleMgmtResponseVo addRule(@RequestBody HttpMockRule mockRule) {
 
 		MockRuleMgmtResponseVo result = null;
 
 		try {
-			MockRule saveMockRule = mockService.insert(mockRule);
+			HttpMockRule saveMockRule = mockService.insert(mockRule);
 			if (saveMockRule != null) {
 				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
 						.data(saveMockRule).build();
@@ -78,7 +78,7 @@ public class MockMgmtV2Controller {
 	}
 
 	@PostMapping(value = "/updateRule")
-	public MockRuleMgmtResponseVo updateRule(@RequestBody MockRule mockRule) {
+	public MockRuleMgmtResponseVo updateRule(@RequestBody HttpMockRule mockRule) {
 
 		MockRuleMgmtResponseVo result = null;
 		if (mockRule.getId() == null || mockRule.getId().equals("")) {
@@ -86,7 +86,7 @@ public class MockMgmtV2Controller {
 					.build();
 		}
 		try {
-			MockRule saveMockRule = mockService.save(mockRule);
+			HttpMockRule saveMockRule = mockService.save(mockRule);
 			if (saveMockRule != null) {
 				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
 						.data(saveMockRule).build();
@@ -102,7 +102,7 @@ public class MockMgmtV2Controller {
 	}
 
 	@PostMapping(value = "/deleteRule")
-	public MockRuleMgmtResponseVo deleteRule(@RequestBody MockRule mockRule) {
+	public MockRuleMgmtResponseVo deleteRule(@RequestBody HttpMockRule mockRule) {
 
 		MockRuleMgmtResponseVo result = null;
 		if (mockRule.getId() == null || mockRule.getId().equals("")) {
@@ -129,7 +129,7 @@ public class MockMgmtV2Controller {
 
 		PageRequest page = PageRequest.of(pageNumber, pageSize);
 
-		Page<MockRule> rules = null;
+		Page<HttpMockRule> rules = null;
 		
 		String  uri = ".*";
 		String host = ".*";

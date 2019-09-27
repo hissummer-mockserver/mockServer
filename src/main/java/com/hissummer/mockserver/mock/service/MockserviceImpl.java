@@ -19,9 +19,9 @@ import org.springframework.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.hissummer.mockserver.mgmt.vo.MockRule;
+import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
-import com.hissummer.mockserver.mgmt.vo.MockRuleWorkMode;
+import com.hissummer.mockserver.mgmt.vo.HttpMockWorkMode;
 import com.hissummer.mockserver.mgmt.vo.Upstream;
 import com.hissummer.mockserver.mock.service.mockResponseConverter.MockResponseConverter;
 import com.hissummer.mockserver.mock.vo.MockResponse;
@@ -97,7 +97,7 @@ public class MockserviceImpl {
 			host = "*";
 		}
 		// 第一次匹配规则
-		MockRule matchedResult = __getMatchedMockRulesByHostnameAndUrl(host, requestUri);
+		HttpMockRule matchedResult = __getMatchedMockRulesByHostnameAndUrl(host, requestUri);
 
 		// 如果第一次查找时,Host是域名,且没有找到对应的规则,则会重新假设Host为null时,重新再查找一次.
 		if (matchedResult == null && host != null && !host.equals("*")) {
@@ -115,11 +115,11 @@ public class MockserviceImpl {
 				log.info("{} mockrule : upstream data is not defined{}", matchedResult.getId(),
 						matchedResult.getUpstreamGroup());
 			}
-			MockRuleWorkMode workMode = matchedResult.getWorkMode();
+			HttpMockWorkMode workMode = matchedResult.getWorkMode();
 
 			String protocol = matchedResult.getProtocol();
 
-			if (workMode != null && workMode.equals(MockRuleWorkMode.UPSTREAM) && upstream != null) {
+			if (workMode != null && workMode.equals(HttpMockWorkMode.UPSTREAM) && upstream != null) {
 
 				// mock rule 的工作模式为upstream模式
 				String response = __getUpstreamResponse(protocol, headers, upstream, method, requestUri, requestBody);
@@ -212,7 +212,7 @@ public class MockserviceImpl {
 	/*
 	 * 
 	 */
-	private MockRule __getMatchedMockRulesByHostnameAndUrl(String hostName, String requestUri) {
+	private HttpMockRule __getMatchedMockRulesByHostnameAndUrl(String hostName, String requestUri) {
 
 		String requestUriFormat = requestUri;
 		if (requestUri != null && requestUri.length() > 0 && requestUri.charAt(requestUri.length() - 1) == '/') {
@@ -233,7 +233,7 @@ public class MockserviceImpl {
 				matchRequestURIString = "/";
 			}
 
-			MockRule matchedMockRule = mockRuleRepository.findByHostAndUri(hostName, matchRequestURIString);
+			HttpMockRule matchedMockRule = mockRuleRepository.findByHostAndUri(hostName, matchRequestURIString);
 
 			if (matchedMockRule != null)
 				return matchedMockRule;
