@@ -68,7 +68,7 @@ public class MockserviceTest extends SpringBootTestBase {
 		
 		log.info(JSON.toJSONString(mockservice2.findByUri("/newtest", PageRequest.of(0, 5))));
 		
-		log.info(JSON.toJSONString(mockservice2.findByHostAndUri("*","/newtest")));
+		log.info(JSON.toJSONString(mockservice2.findByHostAndUri("*","/test1/test2")));
 		
 	}
 	

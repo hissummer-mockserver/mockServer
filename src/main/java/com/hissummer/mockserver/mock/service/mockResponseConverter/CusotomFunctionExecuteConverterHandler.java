@@ -34,23 +34,26 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseConve
 		
 		//boolean firstMatch=true;
 		
-		String replaceString="";
+		String replaceString=null;
 		int offposition = 0;
 		
 		while (m.find()) {
-			log.info("Found custom function: " + m.group(0));
-			log.info("start{} end{}", m.start(), m.end());
-			log.info("Found args: " + m.group(1));
-			log.info("Found args: " + m.group(2));
+			log.info("CusotomFunctionExecuteConverterHandler - Found custom function: " + m.group(0));
+			log.info("CusotomFunctionExecuteConverterHandler - start{} end{}", m.start(), m.end());
+			log.info("CusotomFunctionExecuteConverterHandler - Found args: " + m.group(1));
+			log.info("CusotomFunctionExecuteConverterHandler - Found args: " + m.group(2));
 
-			log.info("ran custom function");
 
 			log.info(originalResponse);
 			
 			
 			
 			try {
+			
+		    // 获取到自定义方法
 			CustomFunctionInterface function = (CustomFunctionInterface) context.getBean("CustomFunction" + m.group(1));
+			
+			
 			if(function != null)
 			{
 				
@@ -60,13 +63,14 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseConve
 				 newStart = m.start() + offposition;
 				 newEnd = m.end() + offposition;
 
-				// TODO bug need to be fixed
 				replaceString = function.execute(this.getCustomFunctionArguments(m.group(2)));
 				
-				offposition = replaceString.length() - m.group(0).length();
+				if(replaceString !=null)
+				{
+				offposition = offposition + replaceString.length() - m.group(0).length();
 				
 				originalResponse = originalResponse.substring(0, newStart) + replaceString+ originalResponse.substring(newEnd);
-			
+				}
 			
 			}
 			log.info(originalResponse);
@@ -121,11 +125,11 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseConve
 		return argumentArray;
 	}
 
-	public static void main(String args[]) {
-
-		new CusotomFunctionExecuteConverterHandler()
-				.converter("${__randomString(a,b)} sjdfksjkdfjskdjfkkke\r\nkekekff  ${__randomString(c,d)}");
-
-	}
+//	public static void main(String args[]) {
+//
+//		new CusotomFunctionExecuteConverterHandler()
+//				.converter("${__randomString(a,b)} sjdfksjkdfjskdjfkkke\r\nkekekff  ${__randomString(c,d)}");
+//
+//	}
 
 }

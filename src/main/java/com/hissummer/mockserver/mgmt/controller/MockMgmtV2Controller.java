@@ -50,16 +50,18 @@ public class MockMgmtV2Controller {
 	@Autowired
 	EurekaMockRuleServiceImpl eurekaMockRuleServiceImpl;
 	
-	
-	
-	
-
 	@PostMapping(value = "/addRule")
 	public MockRuleMgmtResponseVo addRule(@RequestBody HttpMockRule mockRule) {
 
 		MockRuleMgmtResponseVo result = null;
 
 		try {
+			
+			if( mockService.findByHostAndUri(mockRule.getHost(), mockRule.getUri()) != null) {
+				result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("mockrule already exist.").build();
+				return result;
+			}
+			
 			HttpMockRule saveMockRule = mockService.insert(mockRule);
 			if (saveMockRule != null) {
 				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")

@@ -1,7 +1,8 @@
 package com.hissummer.mockserver.mock.service.mockResponseConverter.customFunction;
 
 import java.time.LocalDateTime;
-import java.util.Random;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.stereotype.Component;
 
@@ -10,34 +11,35 @@ public class CustomFunctionNowDate implements CustomFunctionInterface {
 
 	public String execute(String[] args) {
 
-		if(args.length == 0)
-			 return this.nowDate();
-		
+		if (args.length == 0)
+			return this.nowDate();
+
 		if (args.length == 1)
 			return this.nowDate(args[0]);
 
-		if (args.length == 2)
-			return this.nowDate(args[0], args[1]);
 
 		return null;
 
 	}
 
 	private String nowDate() {
-		
+
 		return String.valueOf(System.currentTimeMillis());
 	}
 
-	private String nowDate(String lengthStr, String charactors) {
 
+	private String nowDate(String specifyDateTime) {
 
-		return null;
+		try {
 
-	}
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			LocalDateTime localDateTime = LocalDateTime.parse(specifyDateTime, formatter);
 
-	private String nowDate(String lengthStr) {
+			return String.valueOf(localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+		} catch (Exception e) {
 
-      return null;
+			return null;
+		}
 
 	}
 

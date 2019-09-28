@@ -23,19 +23,25 @@ public class StartEurekaHeartBeatListener {
 	@EventListener(ApplicationReadyEvent.class)
 	public void doSomethingAfterStartup() {
 		
-		while(true) {
-		
-			log.info("eureka heart beat.");
-			eurekaMockRuleService.heartBeatAllRules();
+		//start a new thread to run the eucreka heart beat background service
+		//if we don't start a new thread, the main thread will running looply, will prevent the test case  be testing.
+		new Thread(() -> {
 			
-			try {
-				TimeUnit.SECONDS.sleep(20);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			while(true) {
+				
+				log.info("eureka heart beat.");
+				eurekaMockRuleService.heartBeatAllRules();
+				
+				try {
+					TimeUnit.SECONDS.sleep(20);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
-		}
-		
+			
+		}).start(); 
 		
 		
 	}
