@@ -20,7 +20,9 @@ public class IndexController  {
 	@Autowired
 	private ApplicationContext appContext;
 
-	
+	/*
+	 * return index.html homepage
+	 */
 	@GetMapping(value = "/")	
 	public String index( Model model) {
 

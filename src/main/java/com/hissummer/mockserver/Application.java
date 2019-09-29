@@ -39,35 +39,34 @@ public class Application extends SpringBootServletInitializer {
 	
 
 	
-	private static ApplicationContext context= null;
+//	private static ApplicationContext context= null;
 	
-	@Bean
-	public ApplicationRunner beforeRun(ApplicationContext ctx) {
-		
-		
-		context = ctx;
-		
-		
-		return (ApplicationArguments args) -> {
-
-			log.info("Let's inspect the beans provided by Spring Boot:");
-
-			String[] beanNames = ctx.getBeanDefinitionNames();
-			Arrays.sort(beanNames);
-			for (String beanName : beanNames) {
-				log.info(beanName);
-			}
-
-		};
-	}
+//	@Bean
+//	public ApplicationRunner beforeRun(ApplicationContext ctx) {
+//		
+//		
+//		context = ctx;
+//		
+//		
+//		return (ApplicationArguments args) -> {
+//
+//			log.info("Let's inspect the beans provided by Spring Boot:");
+//
+//			String[] beanNames = ctx.getBeanDefinitionNames();
+//			Arrays.sort(beanNames);
+//			for (String beanName : beanNames) {
+//				log.info(beanName);
+//			}
+//
+//		};
+//	}
 	
-
-
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(Application.class);
 	}
 
 	public static void main(String[] args) throws Exception {
+		log.info("starting mock server ...");
 		SpringApplication.run(Application.class, args);
 
 	}
