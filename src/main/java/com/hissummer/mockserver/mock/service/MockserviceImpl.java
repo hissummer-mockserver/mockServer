@@ -125,19 +125,19 @@ public class MockserviceImpl {
 				String response = __getUpstreamResponse(protocol, headers, upstream, method, requestUri, requestBody);
 				return MockResponse.builder().responseBody(response).build();
 			}
-
+			else {
 			// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
-			return MockResponse.builder().responseBody(__interpreterResponse(matchedResult.getMockResponse())).build();
-
+			return MockResponse.builder().responseBody(__interpreterResponse(matchedResult.getMockResponse(),headers,requestBody)).build();
+			}
 		} else
 			return null;
 
 	}
 
-	private String __interpreterResponse(String originalMockResponse) {
+	private String __interpreterResponse(String originalMockResponse,Map<String, String> requestHeders, String requestBody) {
 		String mockResponse = originalMockResponse;
 		for (MockResponseConverter mockResponseConverter : mockResponseConverters) {
-			mockResponse = mockResponseConverter.converter(mockResponse);
+			mockResponse = mockResponseConverter.converter(mockResponse,requestHeders,requestBody);
 		}
 		return mockResponse;
 	}

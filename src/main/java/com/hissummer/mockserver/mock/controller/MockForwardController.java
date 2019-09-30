@@ -45,6 +45,9 @@ public class MockForwardController implements ErrorController {
 	public Object forward(HttpServletRequest request, @RequestHeader Map<String, String> headers,
 			@Nullable @RequestBody String requestBody, HttpServletResponse response) {
 
+		String[] data1 = request.getParameterValues("test1");
+		log.info("{}",data1);
+
 		Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
 		String errorMessage = (String) request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
 		String host = request.getServerName();

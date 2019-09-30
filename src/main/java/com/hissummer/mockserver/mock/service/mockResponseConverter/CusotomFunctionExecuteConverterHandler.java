@@ -1,5 +1,6 @@
 package com.hissummer.mockserver.mock.service.mockResponseConverter;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,7 +15,7 @@ import com.hissummer.mockserver.mock.service.mockResponseConverter.customFunctio
 import lombok.extern.slf4j.Slf4j;
 
 @Component
-@Order(value = 1)
+@Order(value = 2)
 @Slf4j
 public class CusotomFunctionExecuteConverterHandler implements MockResponseConverter {
 
@@ -22,7 +23,7 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseConve
 	ApplicationContext context;
 
 	@Override
-	public String converter(String originalResponse) {
+	public String converter(String originalResponse, Map<String, String> requestHeders, String requestBody) {
 
 		String pattern = "\\$\\{__([a-zA-Z0-9]*)\\((.*?)\\)\\}";
 
@@ -45,9 +46,7 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseConve
 
 
 			log.info(originalResponse);
-			
-			
-			
+									
 			try {
 			
 		    // 获取到自定义方法
@@ -70,6 +69,9 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseConve
 				offposition = offposition + replaceString.length() - m.group(0).length();
 				
 				originalResponse = originalResponse.substring(0, newStart) + replaceString+ originalResponse.substring(newEnd);
+				}
+				else {
+					log.warn("replacement string is null");
 				}
 			
 			}

@@ -1,5 +1,7 @@
 package com.hissummer.mockserver.mock.service.mockResponseConverter;
 
+import java.util.Map;
+
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -10,11 +12,11 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-@Order(value=2)
+@Order(value=3)
 public class TrimNewLineCharactorsConverterHandler implements MockResponseConverter{
 
 	@Override
-	public String converter(String originalResponse) {
+	public String converter(String originalResponse,Map<String, String> requestHeders, String requestBody) {
 		
 		return originalResponse.replaceAll("\r\n", "").replaceAll("\n", "");
 	}
