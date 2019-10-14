@@ -65,12 +65,6 @@ public class HelperController {
 					pSources.put(ps.getName(), properties);
 
 				});
-		// .map(ps -> ((EnumerablePropertySource) ps).getPropertyNames())
-		// .flatMap(Arrays::stream)
-		// .distinct()
-		// // .filter(prop -> !(prop.contains("credentials") ||
-		// prop.contains("password")))
-		// .forEach(prop -> log.info("{}: {}", prop, env.getProperty(prop)));
 
 		log.info("===========================================");
 
