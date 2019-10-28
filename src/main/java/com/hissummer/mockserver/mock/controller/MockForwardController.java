@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alibaba.fastjson.JSON;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mock.service.MockserviceImpl;
 
@@ -41,12 +42,13 @@ public class MockForwardController implements ErrorController {
 	 * @param response 
 	 * @return
 	 */
-	@RequestMapping(value = "/forward")
+	@RequestMapping(value = "/forward",produces={"application/json"})
 	public Object forward(HttpServletRequest request, @RequestHeader Map<String, String> headers,
 			@Nullable @RequestBody String requestBody, HttpServletResponse response) {
 
-		String[] data1 = request.getParameterValues("test1");
-		log.info("{}",data1);
+
+		log.info("headers: {}",JSON.toJSONString(headers));
+		
 
 		Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
 		String errorMessage = (String) request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
@@ -73,6 +75,11 @@ public class MockForwardController implements ErrorController {
 					Field httpstatus = getField(coyoteResponse.getClass(), "status");
 					httpstatus.setAccessible(true);
 					httpstatus.set(coyoteResponse, 200);
+					
+					Field httpContentType = getField(coyoteResponse.getClass(), "contentType");
+					httpContentType.setAccessible(true);
+					httpContentType.set(coyoteResponse, "application/json");					
+					
 					// This code should not throw exception.
 					
 				} catch (NoSuchFieldException e) {
