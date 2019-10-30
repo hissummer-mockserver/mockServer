@@ -36,25 +36,28 @@ public class MockForwardController implements ErrorController {
 
 	/**
 	 * forward to the mocked rules or upstream.
-	 * @param request : HttpServletRequest
-	 * @param headers : request headers
-	 * @param requestBody :  nullAble ( requestBody is null when request with HTTP get method)
-	 * @param response 
+	 * 
+	 * @param request
+	 *            : HttpServletRequest
+	 * @param headers
+	 *            : request headers
+	 * @param requestBody
+	 *            : nullAble ( requestBody is null when request with HTTP get
+	 *            method)
+	 * @param response
 	 * @return
 	 */
-	@RequestMapping(value = "/forward",produces={"application/json"})
+	@RequestMapping(value = "/forward", produces = { "application/json" })
 	public Object forward(HttpServletRequest request, @RequestHeader Map<String, String> headers,
 			@Nullable @RequestBody String requestBody, HttpServletResponse response) {
 
-
-		log.info("headers: {}",JSON.toJSONString(headers));
-		
+		log.info("headers: {}", JSON.toJSONString(headers));
 
 		Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
 		String errorMessage = (String) request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
 		String host = request.getServerName();
-		
-		log.info("{},{},{}",status,errorMessage,host);
+
+		log.info("{},{},{}", status, errorMessage, host);
 
 		if (status != null) {
 			Integer statusCode = Integer.valueOf(status.toString());
@@ -67,7 +70,8 @@ public class MockForwardController implements ErrorController {
 				try {
 
 					// Here use reflect to modify return http status code 404 to 200.
-					// More details please linke into https://blog.hissummer.com/2019/07/%E5%88%A9%E7%94%A8springboot%E5%AE%9E%E7%8E%B0http-mock-%E6%9C%8D%E5%8A%A1/
+					// More details please linke into
+					// https://blog.hissummer.com/2019/07/%E5%88%A9%E7%94%A8springboot%E5%AE%9E%E7%8E%B0http-mock-%E6%9C%8D%E5%8A%A1/
 					Field innerResponse = getField(responsefacade.getClass(), "response");
 					innerResponse.setAccessible(true);
 					Response innterResponseObject = (Response) innerResponse.get(responsefacade);
@@ -75,13 +79,13 @@ public class MockForwardController implements ErrorController {
 					Field httpstatus = getField(coyoteResponse.getClass(), "status");
 					httpstatus.setAccessible(true);
 					httpstatus.set(coyoteResponse, 200);
-					
+
 					Field httpContentType = getField(coyoteResponse.getClass(), "contentType");
 					httpContentType.setAccessible(true);
-					httpContentType.set(coyoteResponse, "application/json");					
-					
+					httpContentType.set(coyoteResponse, "application/json");
+
 					// This code should not throw exception.
-					
+
 				} catch (NoSuchFieldException e) {
 					log.info(e.getMessage());
 				} catch (IllegalArgumentException e) {
@@ -97,17 +101,17 @@ public class MockForwardController implements ErrorController {
 
 			} else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
 				// 5xx errors
-				return MockRuleMgmtResponseVo.builder().status(0).success(false).message(errorMessage)
-						.build().toString();
+				return MockRuleMgmtResponseVo.builder().status(0).success(false).message(errorMessage).build()
+						.toString();
 			}
 		}
-		//if statusCode is not 404 or 500 errors , will return default response.
-		return MockRuleMgmtResponseVo.builder().status(0).success(false).message(errorMessage)
-				.build().toString();
+		// if statusCode is not 404 or 500 errors , will return default response.
+		return MockRuleMgmtResponseVo.builder().status(0).success(false).message(errorMessage).build().toString();
 	}
 
 	/**
-	 * This is not used actually. "server.error.path=/forward" in application.properties will define the error path to be the "/forward".
+	 * This is not used actually. "server.error.path=/forward" in
+	 * application.properties will define the error path to be the "/forward".
 	 */
 	@Override
 	public String getErrorPath() {
@@ -117,6 +121,7 @@ public class MockForwardController implements ErrorController {
 
 	/**
 	 * Get java object field by the field Name.
+	 * 
 	 * @param clazz
 	 * @param fieldName
 	 * @return Field

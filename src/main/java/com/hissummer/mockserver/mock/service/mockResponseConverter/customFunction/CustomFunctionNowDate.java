@@ -17,7 +17,6 @@ public class CustomFunctionNowDate implements CustomFunctionInterface {
 		if (args.length == 1)
 			return this.nowDate(args[0]);
 
-
 		return null;
 
 	}
@@ -26,7 +25,6 @@ public class CustomFunctionNowDate implements CustomFunctionInterface {
 
 		return String.valueOf(System.currentTimeMillis());
 	}
-
 
 	private String nowDate(String specifyDateTime) {
 

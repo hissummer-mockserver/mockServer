@@ -7,18 +7,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Builder;
 import lombok.Data;
 
-
 @Data
 @Document(collection = "mockrules")
 @Builder
 public class HttpMockRule {
 
-	
-	private String id; 
-	
+	private String id;
+
 	@Builder.Default
 	private String host = "*"; // if we do not specify hostName , host will be "*" , that mean will match all
-							// hostName.
+								// hostName.
 	private String uri;
 	@Builder.Default
 	private String protocol = "http";
@@ -31,7 +29,5 @@ public class HttpMockRule {
 
 	@Builder.Default
 	private Boolean enable = true;
-	
-	
 
 }

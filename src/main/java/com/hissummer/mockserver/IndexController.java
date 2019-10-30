@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @CrossOrigin(origins = "*")
 @Controller
-public class IndexController  {
+public class IndexController {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
@@ -23,13 +23,11 @@ public class IndexController  {
 	/*
 	 * return index.html homepage
 	 */
-	@GetMapping(value = "/")	
-	public String index( Model model) {
-
+	@GetMapping(value = "/")
+	public String index(Model model) {
 
 		return "index";
-		
+
 	}
-	
 
 }

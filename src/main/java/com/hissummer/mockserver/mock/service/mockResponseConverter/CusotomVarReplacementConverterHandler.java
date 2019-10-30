@@ -57,18 +57,18 @@ public class CusotomVarReplacementConverterHandler implements MockResponseConver
 				newEnd = m.end() + offposition;
 
 				if (m.group(1).startsWith("requestBody.")) {
-					replaceString = getReplaceStringFromBody(m.group(1).substring(12),requestHeaders,requestBody);
+					replaceString = getReplaceStringFromBody(m.group(1).substring(12), requestHeaders, requestBody);
 				} else if (m.group(1).startsWith("requestHeader.")) {
 					// requestHeader.$."headerKey"
 					// m.group(1).substring(15) get the "headerkey" used to get header value.
-					replaceString = getReplaceStringFromHeader(m.group(1).substring(16),requestHeaders);
+					replaceString = getReplaceStringFromHeader(m.group(1).substring(16), requestHeaders);
 				}
 				if (replaceString != null) {
 					offposition = offposition + replaceString.length() - m.group(0).length();
 
 					originalResponse = originalResponse.substring(0, newStart) + replaceString
 							+ originalResponse.substring(newEnd);
-				}else {
+				} else {
 					log.warn("replacement string is null");
 				}
 
@@ -87,42 +87,38 @@ public class CusotomVarReplacementConverterHandler implements MockResponseConver
 
 		// header is lowercase string
 		extractPath = extractPath.toLowerCase();
-		log.info("get from headers:{} ",extractPath);
+		log.info("get from headers:{} ", extractPath);
 
-		
-		String returnValue = requestHeaders.get(extractPath);	
-		if(returnValue == null) returnValue = "null";
+		String returnValue = requestHeaders.get(extractPath);
+		if (returnValue == null)
+			returnValue = "null";
 		return returnValue;
-		
+
 	}
 
-	private String getReplaceStringFromBody(String extractPath, Map<String, String> requestHeaders, String requestBody) {
-		log.info("get from body:{} ",extractPath);
-		
-		if(requestHeaders.containsValue("application/x-www-form-urlencoded"))
-		{
-		log.warn("www-form-urlencode not support to extract!");	
+	private String getReplaceStringFromBody(String extractPath, Map<String, String> requestHeaders,
+			String requestBody) {
+		log.info("get from body:{} ", extractPath);
+
+		if (requestHeaders.containsValue("application/x-www-form-urlencoded")) {
+			log.warn("www-form-urlencode not support to extract!");
+		} else if (requestHeaders.containsValue("application/xml")) {
+			log.warn("www-form-urlencode not support  to extract!");
+		} else {
+			try {
+				ReadContext ctx = JsonPath.parse(requestBody);
+				String jsonValue = ctx.read(extractPath);
+				if (jsonValue == null)
+					jsonValue = "null";
+				return jsonValue;
+
+			} catch (Exception e) {
+				log.warn("read json path error: ", e);
+			}
 		}
-		else if(requestHeaders.containsValue("application/xml")) {
-		log.warn("www-form-urlencode not support  to extract!");	
-		}
-		else {
-		try {
-			ReadContext ctx = JsonPath.parse(requestBody);
-			String jsonValue = ctx.read(extractPath);
-			if(jsonValue == null) jsonValue = "null";
-			return jsonValue;
-		
-		}
-		catch(Exception e)
-		{
-			log.warn("read json path error: ",e);
-		}
-		}
-		
+
 		return null;
 	}
-
 
 	// public static void main(String args[]) {
 	//

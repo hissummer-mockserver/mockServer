@@ -47,8 +47,9 @@ public class MockMgmtController {
 
 		try {
 			MockRuleMgmtResponseVo result = MockRuleMgmtResponseVo.builder().status(0)
-					.success(mockRuleservice.addMockRule(requestBody.getString("hostName"), requestBody.getString("uri"),
-							requestBody.getString("mockResponse"), null,requestBody.getString("workMode")))
+					.success(
+							mockRuleservice.addMockRule(requestBody.getString("hostName"), requestBody.getString("uri"),
+									requestBody.getString("mockResponse"), null, requestBody.getString("workMode")))
 					.build();
 			return result;
 		} catch (Exception e) {
@@ -63,8 +64,9 @@ public class MockMgmtController {
 
 		try {
 			MockRuleMgmtResponseVo result = MockRuleMgmtResponseVo.builder().status(0)
-					.success(mockRuleservice.updateMockRule(requestBody.getString("id"), requestBody.getString("hostName"),
-							requestBody.getString("uri"), requestBody.getString("mockResponse"), null, requestBody.getString("workMode"),null))
+					.success(mockRuleservice.updateMockRule(requestBody.getString("id"),
+							requestBody.getString("hostName"), requestBody.getString("uri"),
+							requestBody.getString("mockResponse"), null, requestBody.getString("workMode"), null))
 					.build();
 			return result;
 		} catch (Exception e) {
@@ -94,8 +96,8 @@ public class MockMgmtController {
 		int pageNumber = requestBody.getIntValue("pageNumber") == 0 ? 1 : requestBody.getIntValue("pageNumber");
 		int pageSize = requestBody.getIntValue("pageSize") == 0 ? 50 : requestBody.getIntValue("pageSize");
 		;
-		JSONArray rules = mockRuleservice.queryMockRules(requestBody.getString("hostName"), requestBody.getString("uri"),
-				pageNumber, pageSize);
+		JSONArray rules = mockRuleservice.queryMockRules(requestBody.getString("hostName"),
+				requestBody.getString("uri"), pageNumber, pageSize);
 		if (rules != null)
 			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
 		else

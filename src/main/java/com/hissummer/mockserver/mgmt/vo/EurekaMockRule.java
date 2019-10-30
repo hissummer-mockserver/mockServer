@@ -11,9 +11,9 @@ import lombok.Data;
 public class EurekaMockRule {
 
 	private String id;
-    private String port;
-    private String hostName;
-    private String serviceName;
-    private String eurekaServer;
-    private Boolean enable;
+	private String port;
+	private String hostName;
+	private String serviceName;
+	private String eurekaServer;
+	private Boolean enable;
 }

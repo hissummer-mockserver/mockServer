@@ -11,38 +11,36 @@ import com.hissummer.mockserver.mgmt.service.EurekaMockRuleServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
-
 @Slf4j
 @Component
 public class StartEurekaHeartBeatListener {
 
 	@Autowired
 	EurekaMockRuleServiceImpl eurekaMockRuleService;
-	
-	
+
 	@EventListener(ApplicationReadyEvent.class)
 	public void doSomethingAfterStartup() {
-		
-		//start a new thread to run the eucreka heart beat background service
-		//if we don't start a new thread, the main thread will running looply, will prevent the test case  be testing.
+
+		// start a new thread to run the eucreka heart beat background service
+		// if we don't start a new thread, the main thread will running looply, will
+		// prevent the test case be testing.
 		new Thread(() -> {
-			
-			while(true) {
-				
+
+			while (true) {
+
 				log.info("eureka heart beat.");
 				eurekaMockRuleService.heartBeatAllRules();
-				
+
 				try {
 					TimeUnit.SECONDS.sleep(20);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 			}
-			
-		}).start(); 
-		
-		
+
+		}).start();
+
 	}
 }
