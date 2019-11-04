@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Order(value = 1)
 @Slf4j
-public class CusotomVarReplacementConverterHandler implements MockResponseConverter {
+public class CusotomVarReplacementConverterHandler implements MockResponseConverterInterface {
 
 	@Autowired
 	ApplicationContext context;

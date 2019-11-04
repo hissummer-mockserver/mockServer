@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-@Order(value = 3)
-public class TrimNewLineCharactorsConverterHandler implements MockResponseConverter {
+@Order(value = 1)
+public class TrimNewLineCharactorsConverterHandler implements MockResponseTearDownConverterInterface {
 
 	@Override
 	public String converter(String originalResponse, Map<String, String> requestHeders, String requestBody) {

@@ -16,6 +16,7 @@ public class MockRuleMongoRepositoryTest extends SpringBootTestBase{
 	@Autowired
 	MockRuleMgmtMongoRepository mockRuleMongoRepository;
 
+	
 	@Test
 	public void test() {
 		

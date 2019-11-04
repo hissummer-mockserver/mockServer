@@ -23,7 +23,9 @@ import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mgmt.vo.HttpMockWorkMode;
 import com.hissummer.mockserver.mgmt.vo.Upstream;
-import com.hissummer.mockserver.mock.service.mockResponseConverter.MockResponseConverter;
+import com.hissummer.mockserver.mock.service.mockResponseConverter.GroovyScriptsHandler;
+import com.hissummer.mockserver.mock.service.mockResponseConverter.MockResponseConverterInterface;
+import com.hissummer.mockserver.mock.service.mockResponseConverter.MockResponseTearDownConverterInterface;
 import com.hissummer.mockserver.mock.vo.MockResponse;
 
 import lombok.extern.slf4j.Slf4j;
@@ -51,10 +53,14 @@ public class MockserviceImpl {
 	MongoDbRunCommandServiceImpl dataplatformServiceImpl;
 
 	@Autowired
-	List<MockResponseConverter> mockResponseConverters;
-
+	List<MockResponseConverterInterface> mockResponseConverters;
+	@Autowired
+	List<MockResponseTearDownConverterInterface> mockResponseTearDownConverters;
 	@Autowired
 	MockRuleMongoRepository mockRuleRepository;
+	
+	@Autowired
+	GroovyScriptsHandler groovyScriptsHandler;
 
 	final private String NOMATCHED = "Sorry , No rules matched.";
 
@@ -138,9 +144,18 @@ public class MockserviceImpl {
 	private String __interpreterResponse(String originalMockResponse, Map<String, String> requestHeders,
 			String requestBody) {
 		String mockResponse = originalMockResponse;
-		for (MockResponseConverter mockResponseConverter : mockResponseConverters) {
+		for (MockResponseConverterInterface mockResponseConverter : mockResponseConverters) {
 			mockResponse = mockResponseConverter.converter(mockResponse, requestHeders, requestBody);
 		}
+		
+		if( originalMockResponse.startsWith("//groovy") ) {
+			mockResponse = groovyScriptsHandler.converter(mockResponse, requestHeders, requestBody);
+		}
+		
+		for (MockResponseTearDownConverterInterface mockResponseConverter : mockResponseTearDownConverters) {
+			mockResponse = mockResponseConverter.converter(mockResponse, requestHeders, requestBody);
+		}
+			
 		return mockResponse;
 	}
 

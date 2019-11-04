@@ -37,28 +37,6 @@ import lombok.extern.slf4j.Slf4j;
 		DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class })
 public class Application extends SpringBootServletInitializer {
 
-	// private static ApplicationContext context= null;
-
-	// @Bean
-	// public ApplicationRunner beforeRun(ApplicationContext ctx) {
-	//
-	//
-	// context = ctx;
-	//
-	//
-	// return (ApplicationArguments args) -> {
-	//
-	// log.info("Let's inspect the beans provided by Spring Boot:");
-	//
-	// String[] beanNames = ctx.getBeanDefinitionNames();
-	// Arrays.sort(beanNames);
-	// for (String beanName : beanNames) {
-	// log.info(beanName);
-	// }
-	//
-	// };
-	// }
-
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(Application.class);
 	}

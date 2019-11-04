@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Order(value = 2)
 @Slf4j
-public class CusotomFunctionExecuteConverterHandler implements MockResponseConverter {
+public class CusotomFunctionExecuteConverterHandler implements MockResponseConverterInterface {
 
 	@Autowired
 	ApplicationContext context;
