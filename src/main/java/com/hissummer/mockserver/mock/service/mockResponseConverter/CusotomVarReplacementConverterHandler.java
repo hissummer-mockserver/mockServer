@@ -1,5 +1,8 @@
 package com.hissummer.mockserver.mock.service.mockResponseConverter;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -11,6 +14,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.hissummer.mockserver.mock.service.mockResponseConverter.customFunction.CustomFunctionInterface;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
@@ -101,13 +105,15 @@ public class CusotomVarReplacementConverterHandler implements MockResponseConver
 		log.info("get from body:{} ", extractPath);
 
 		if (requestHeaders.containsValue("application/x-www-form-urlencoded")) {
-			log.warn("www-form-urlencode not support to extract!");
+
+			return wwwformtoMap(requestBody).get(extractPath.replace("$.", ""));
+
 		} else if (requestHeaders.containsValue("application/xml")) {
-			log.warn("www-form-urlencode not support  to extract!");
-		} else {
+			log.warn("content type : xml not support  to extract!");
+		} else if (requestHeaders.containsValue("application/json")) {
 			try {
 				ReadContext ctx = JsonPath.parse(requestBody);
-				String jsonValue = ctx.read(extractPath);
+				String jsonValue = JSON.toJSONString(ctx.read(extractPath));
 				if (jsonValue == null)
 					jsonValue = "null";
 				return jsonValue;
@@ -115,9 +121,46 @@ public class CusotomVarReplacementConverterHandler implements MockResponseConver
 			} catch (Exception e) {
 				log.warn("read json path error: ", e);
 			}
+		} else {
+			log.warn(" {} not support  to extract!", requestHeaders.get("content-type"));
 		}
 
 		return null;
+	}
+
+	/**
+	 * 把x-www-form-urlencode的字符串转为Map
+	 * 例如 a=b 转为  Map<"a","b">
+	 * @param requestBody
+	 * @return 
+	 */
+	private Map<String, String> wwwformtoMap(String requestBody) {
+
+
+		Map<String, String> requestBodyMap = new HashMap<>();
+
+		try {
+			requestBody = URLDecoder.decode(requestBody, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return requestBodyMap;
+		}
+		
+		String[] parameters = requestBody.split("&");
+
+		for (int i = 0; i < parameters.length; i++) {
+
+			String[] pandvalue = parameters[i].split("=");
+
+			if (pandvalue.length > 1) {
+				requestBodyMap.put(pandvalue[0], pandvalue[1]);
+			} else if (pandvalue.length == 1) {
+				requestBodyMap.put(pandvalue[0], "");
+			}
+
+		}
+		return requestBodyMap;
 	}
 
 	// public static void main(String args[]) {

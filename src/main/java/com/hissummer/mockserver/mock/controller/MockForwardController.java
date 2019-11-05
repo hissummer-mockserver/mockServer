@@ -80,9 +80,9 @@ public class MockForwardController implements ErrorController {
 					httpstatus.setAccessible(true);
 					httpstatus.set(coyoteResponse, 200);
 
-					Field httpContentType = getField(coyoteResponse.getClass(), "contentType");
-					httpContentType.setAccessible(true);
-					httpContentType.set(coyoteResponse, "application/json");
+//					Field httpContentType = getField(coyoteResponse.getClass(), "contentType");
+//					httpContentType.setAccessible(true);
+//					httpContentType.set(coyoteResponse, "application/json");
 
 					// This code should not throw exception.
 
@@ -115,7 +115,7 @@ public class MockForwardController implements ErrorController {
 	 */
 	@Override
 	public String getErrorPath() {
-		log.info("get error path");
+		log.info("get forward path");
 		return "/forward";
 	}
 

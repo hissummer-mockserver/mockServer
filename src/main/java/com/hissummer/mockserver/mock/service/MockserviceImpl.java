@@ -143,6 +143,12 @@ public class MockserviceImpl {
 
 	private String __interpreterResponse(String originalMockResponse, Map<String, String> requestHeders,
 			String requestBody) {
+		
+		// multipart 暂不支持requestBody的解析，multipart的请求报文待确认后支持
+		if(requestHeders.get("content-type").contains("multipart")) {
+			requestBody = ""; 
+		}
+				
 		String mockResponse = originalMockResponse;
 		for (MockResponseConverterInterface mockResponseConverter : mockResponseConverters) {
 			mockResponse = mockResponseConverter.converter(mockResponse, requestHeders, requestBody);
