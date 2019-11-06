@@ -23,9 +23,10 @@ import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mgmt.vo.HttpMockWorkMode;
 import com.hissummer.mockserver.mgmt.vo.Upstream;
+import com.hissummer.mockserver.mock.service.jpa.MockRuleMongoRepository;
 import com.hissummer.mockserver.mock.service.mockResponseConverter.GroovyScriptsHandler;
-import com.hissummer.mockserver.mock.service.mockResponseConverter.MockResponseConverterInterface;
-import com.hissummer.mockserver.mock.service.mockResponseConverter.MockResponseTearDownConverterInterface;
+import com.hissummer.mockserver.mock.service.mockResponseConverter.converterInterface.MockResponseSetUpConverterInterface;
+import com.hissummer.mockserver.mock.service.mockResponseConverter.converterInterface.MockResponseTearDownConverterInterface;
 import com.hissummer.mockserver.mock.vo.MockResponse;
 
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +54,7 @@ public class MockserviceImpl {
 	MongoDbRunCommandServiceImpl dataplatformServiceImpl;
 
 	@Autowired
-	List<MockResponseConverterInterface> mockResponseConverters;
+	List<MockResponseSetUpConverterInterface> mockResponseConverters;
 	@Autowired
 	List<MockResponseTearDownConverterInterface> mockResponseTearDownConverters;
 	@Autowired
@@ -150,7 +151,7 @@ public class MockserviceImpl {
 		}
 				
 		String mockResponse = originalMockResponse;
-		for (MockResponseConverterInterface mockResponseConverter : mockResponseConverters) {
+		for (MockResponseSetUpConverterInterface mockResponseConverter : mockResponseConverters) {
 			mockResponse = mockResponseConverter.converter(mockResponse, requestHeders, requestBody);
 		}
 		

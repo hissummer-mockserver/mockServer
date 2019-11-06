@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
-import com.hissummer.mockserver.mgmt.service.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.service.EurekaMockRuleServiceImpl;
-import com.hissummer.mockserver.mgmt.service.MockRuleMgmtMongoRepository;
+import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
+import com.hissummer.mockserver.mgmt.service.jpa.MockRuleMgmtMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
 import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;

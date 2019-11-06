@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mgmt.service;
+package com.hissummer.mockserver.mgmt.service.jpa;
 
 import java.util.List;
 

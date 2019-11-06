@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mgmt.service;
+package com.hissummer.mockserver.mgmt.service.jpa;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

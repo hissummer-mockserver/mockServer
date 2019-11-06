@@ -13,8 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.hissumemr.mockserver.SpringBootTestBase;
-import com.hissummer.mockserver.mgmt.service.MockRuleMgmtMongoRepository;
 import com.hissummer.mockserver.mgmt.service.MockRuleManagerServiceImpl;
+import com.hissummer.mockserver.mgmt.service.jpa.MockRuleMgmtMongoRepository;
 import com.hissummer.mockserver.mock.service.MongoDbRunCommandServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;

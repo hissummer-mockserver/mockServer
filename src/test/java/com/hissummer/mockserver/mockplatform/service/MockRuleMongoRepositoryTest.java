@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.hissumemr.mockserver.SpringBootTestBase;
-import com.hissummer.mockserver.mgmt.service.MockRuleMgmtMongoRepository;
+import com.hissummer.mockserver.mgmt.service.jpa.MockRuleMgmtMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
 
 @Ignore

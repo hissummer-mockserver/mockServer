@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mock.service.mockResponseConverter;
+package com.hissummer.mockserver.mock.service.mockResponseConverter.converterInterface;
 
 import java.util.Map;
 

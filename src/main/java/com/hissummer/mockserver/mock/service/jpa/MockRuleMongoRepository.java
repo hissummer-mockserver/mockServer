@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mock.service;
+package com.hissummer.mockserver.mock.service.jpa;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 

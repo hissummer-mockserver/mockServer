@@ -15,6 +15,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
+import com.hissummer.mockserver.mock.service.mockResponseConverter.converterInterface.MockResponseSetUpConverterInterface;
 import com.hissummer.mockserver.mock.service.mockResponseConverter.customFunction.CustomFunctionInterface;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
@@ -24,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Order(value = 1)
 @Slf4j
-public class CusotomVarReplacementConverterHandler implements MockResponseConverterInterface {
+public class CusotomVarReplacementConverterHandler implements MockResponseSetUpConverterInterface {
 
 	@Autowired
 	ApplicationContext context;
