@@ -1,6 +1,7 @@
 package com.hissummer.mockserver.mgmt.vo;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -21,6 +22,8 @@ public class HttpMockRule {
 	@Builder.Default
 	private String protocol = "http";
 	private String mockResponse;
+	
+	private Map<String,String> responseHeaders;
 	private List<Plugin> plugins;
 	private UpstreamGroup upstreamGroup;
 

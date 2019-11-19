@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSON;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mock.service.MockserviceImpl;
+import com.hissummer.mockserver.mock.vo.MockResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,60 +70,40 @@ public class MockForwardController implements ErrorController {
 
 			if (statusCode == HttpStatus.NOT_FOUND.value()) {
 
-				// 404 errors
-//				ResponseFacade responsefacade = (ResponseFacade) response;
-
-				try {
-
-					// Here use reflect to modify return http status code 404 to 200.
-					// More details please linke into
-					// https://blog.hissummer.com/2019/07/%E5%88%A9%E7%94%A8springboot%E5%AE%9E%E7%8E%B0http-mock-%E6%9C%8D%E5%8A%A1/
-//					Field innerResponse = getField(responsefacade.getClass(), "response");
-//					innerResponse.setAccessible(true);
-//					Response innterResponseObject = (Response) innerResponse.get(responsefacade);
-//					org.apache.coyote.Response coyoteResponse = innterResponseObject.getCoyoteResponse();
-//					Field httpstatus = getField(coyoteResponse.getClass(), "status");
-//					httpstatus.setAccessible(true);
-//					httpstatus.set(coyoteResponse, 200);
-
-//					Field httpContentType = getField(coyoteResponse.getClass(), "contentType");
-//					httpContentType.setAccessible(true);
-//					httpContentType.set(coyoteResponse, "application/json");
-
-					// This code should not throw exception.
-
-//				} catch (NoSuchFieldException e) {
-//					log.info(e.getMessage());
-				} catch (IllegalArgumentException e) {
-					log.info(e.getMessage());
-//				} catch (IllegalAccessException e) {
-//					log.info(e.getMessage());
-				} catch (Exception e) {
-					log.info(e.getMessage());
-				}
-
+				// 404 not found
 				HttpHeaders responseHeaders = new HttpHeaders();
-				  responseHeaders.setContentType(new MediaType("application", "json"));
-				
-				return new ResponseEntity<String>(mockservice.getResponse(headers, host, request.getMethod(),
-						(String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI), requestBody), responseHeaders, HttpStatus.OK);
-						
+				MockResponse responseVo = mockservice.getResponse(headers, host, request.getMethod(),
+						(String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI), requestBody);
+
+				responseVo.getHeaders().keySet().forEach(header -> {
+
+					responseHeaders.add(header, responseVo.getHeaders().get(header));
+
+				});
+				if (responseHeaders.getContentType() == null) {
+
+					responseHeaders.setContentType(new MediaType("application", "json"));
+
+				}
+				return new ResponseEntity<String>(responseVo.getResponseBody(), responseHeaders, HttpStatus.OK);
 
 			} else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
-				
+
 				HttpHeaders responseHeaders = new HttpHeaders();
-				  responseHeaders.setContentType(new MediaType("application", "json"));
+				responseHeaders.setContentType(new MediaType("application", "json"));
 				// 5xx errors
-				return new ResponseEntity<>(MockRuleMgmtResponseVo.builder().status(0).success(false).message(errorMessage).build()
-						.toString(),responseHeaders,HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<>(MockRuleMgmtResponseVo.builder().status(0).success(false)
+						.message(errorMessage).build().toString(), responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		}
-		
+
 		HttpHeaders responseHeaders = new HttpHeaders();
-		  responseHeaders.setContentType(new MediaType("application", "json"));
-		  
+		responseHeaders.setContentType(new MediaType("application", "json"));
+
 		// if statusCode is not 404 or 500 errors , will return default response.
-		return new ResponseEntity<>(MockRuleMgmtResponseVo.builder().status(0).success(false).message(errorMessage).build().toString(),responseHeaders,HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<>(
+				MockRuleMgmtResponseVo.builder().status(0).success(false).message(errorMessage).build().toString(),
+				responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	/**

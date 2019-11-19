@@ -72,19 +72,27 @@ public class MockserviceImpl {
 	 * @param requestUri
 	 * @return mock的报文
 	 */
-	public String getResponse(Map<String, String> headers, String hostname, String method, String requestUri,
+	public String getResponseBody(Map<String, String> headers, String hostname, String method, String requestUri,
+			String requestBody) {
+
+		MockResponse response = getResponse(headers, hostname, method, requestUri, requestBody);
+
+		return response.getResponseBody();
+	}
+
+	public MockResponse getResponse(Map<String, String> headers, String hostname, String method, String requestUri,
 			String requestBody) {
 
 		MockResponse response = __getResponse(headers, hostname, method, requestUri, requestBody);
 
 		if (response != null) {
-			return response.getResponseBody();
+			return response;
 		} else {
-			return JSON
-					.toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(false).message(NOMATCHED).build());
+			return MockResponse.builder().responseBody(JSON
+					.toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(false).message(NOMATCHED).build())).build();
 		}
-	}
-
+	}	
+	
 	/**
 	 * 根据hostName和请求Url地址，获取到Mock报文的具体实现
 	 * 
@@ -135,6 +143,7 @@ public class MockserviceImpl {
 				// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
 				return MockResponse.builder()
 						.responseBody(__interpreterResponse(matchedResult.getMockResponse(), headers, requestBody))
+						.isMock(true).headers(matchedResult.getResponseHeaders())
 						.build();
 			}
 		} else
@@ -146,7 +155,7 @@ public class MockserviceImpl {
 			String requestBody) {
 		
 		// multipart 暂不支持requestBody的解析，multipart的请求报文待确认后支持
-		if(requestHeders.get("content-type").contains("multipart")) {
+		if(requestHeders.get("content-type")== null || requestHeders.get("content-type").contains("multipart")) {
 			requestBody = ""; 
 		}
 				
