@@ -69,17 +69,40 @@ public class MockForwardController implements ErrorController {
 			Integer statusCode = Integer.valueOf(status.toString());
 
 			if (statusCode == HttpStatus.NOT_FOUND.value()) {
+				try {
+					ResponseFacade responsefacade = (ResponseFacade) response;
+					Field innerResponse = getField(responsefacade.getClass(), "response");
+					innerResponse.setAccessible(true);
+					Response innterResponseObject = (Response) innerResponse.get(responsefacade);
+					org.apache.coyote.Response coyoteResponse = innterResponseObject.getCoyoteResponse();
+					Field httpstatus = getField(coyoteResponse.getClass(), "status");
+					httpstatus.setAccessible(true);
+					httpstatus.set(coyoteResponse, 200);
+				}
 
-				// 404 not found
+				catch (NoSuchFieldException e) {
+					log.info(e.getMessage());
+				} catch (IllegalArgumentException e) {
+					log.info(e.getMessage());
+				} catch (IllegalAccessException e) {
+					log.info(e.getMessage());
+				} catch (Exception e) {
+					log.info(e.getMessage());
+				}
+
+				// 404 not found1
 				HttpHeaders responseHeaders = new HttpHeaders();
 				MockResponse responseVo = mockservice.getResponse(headers, host, request.getMethod(),
 						(String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI), requestBody);
 
-				responseVo.getHeaders().keySet().forEach(header -> {
+				if (responseVo.getHeaders() != null) {
 
-					responseHeaders.add(header, responseVo.getHeaders().get(header));
+					responseVo.getHeaders().keySet().forEach(header -> {
 
-				});
+						responseHeaders.add(header, responseVo.getHeaders().get(header));
+
+					});
+				}
 				if (responseHeaders.getContentType() == null) {
 
 					responseHeaders.setContentType(new MediaType("application", "json"));
