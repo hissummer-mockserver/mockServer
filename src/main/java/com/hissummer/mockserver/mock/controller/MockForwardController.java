@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
@@ -99,15 +100,24 @@ public class MockForwardController implements ErrorController {
 
 					responseVo.getHeaders().keySet().forEach(header -> {
 
-						responseHeaders.add(header, responseVo.getHeaders().get(header));
+							responseHeaders.add(header, responseVo.getHeaders().get(header));
 
 					});
 				}
-				if (responseHeaders.getContentType() == null) {
+
+				try {
+					if (responseHeaders.getContentType() == null) {
+
+						responseHeaders.setContentType(new MediaType("application", "json"));
+
+					}
+				} catch (Exception e) {
 
 					responseHeaders.setContentType(new MediaType("application", "json"));
-
 				}
+
+				log.info("-------------------{}", JSON.toJSONString(responseHeaders));
+
 				return new ResponseEntity<String>(responseVo.getResponseBody(), responseHeaders, HttpStatus.OK);
 
 			} else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
