@@ -25,8 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/help")
 @RestController
 public class HelperController {
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
+	
 	@Autowired
 	private ApplicationContext appContext;
 
