@@ -22,7 +22,7 @@ After started succesfully , access http://localhost:8081/
 5. mock rule based hostname and uri path.  
 6. support eureka mock server (register and heartbeat)
 
-## Version
+## Download software
 * <a href="#"> 0.0.1-alpha </a> 
 * <a href="https://pkg.githubusercontent.com/199478482/34f13c00-1ba5-11ea-9074-b6b2365e7c6d?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20191210%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20191210T153505Z&X-Amz-Expires=300&X-Amz-Signature=7193bf34b93af1fce81246e49b03b53333725880d6aa0a46879d4fde9802772b&X-Amz-SignedHeaders=host&actor_id=784170&response-content-disposition=filename%3Dmockserver-0.0.2-alpha.war&response-content-type=application%2Foctet-stream"> 0.0.2-alpha </a>
 
