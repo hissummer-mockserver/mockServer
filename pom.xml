@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.hissummer</groupId>
 	<artifactId>mockserver</artifactId>
-	<version>0.0.3-alpha</version>
+	<version>0.0.2-alpha</version>
 	<packaging>war</packaging>
 	<name>hissummer Mockserver</name>
 
@@ -165,5 +165,11 @@
 			</snapshots>
 		</repository>
 	</repositories>
-
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub OWNER Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/hissummer-mockserver/mockServer</url>
+		</repository>
+	</distributionManagement>
 </project>
