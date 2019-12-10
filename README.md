@@ -8,9 +8,9 @@ This is the mockserver backend server project. It is a java project based on spr
 
 ## Start application
 * Download war
-* Start spring-boot application
+* Start spring-boot application  
 ```
-The wars was packaged by following the steps in https://github.com/hissummer-mockserver/mockserver. The every version of war are including mockserver(backend) and mockserverAdminUI projects.
+Note: You need setup mongodb server before start mockserver application!
 ```
 Assume mongodb server is up and listen on the localhost:27017.  Please note , mongodb server version need greater than 3.2.0 or equal. Run below command:
 ```
@@ -25,3 +25,6 @@ After started succesfully , access http://localhost:8081/
 4. update mock rule
 5. mock rule based hostname and uri path.  
 6. support eureka v1 mock server (register and heartbeat)
+
+## source Code
+The wars was packaged by mockserver backend (hissummer-mockserver/mockServer) and frontend (hissummer-mockserver/mockserverAdminUI) tegother.
