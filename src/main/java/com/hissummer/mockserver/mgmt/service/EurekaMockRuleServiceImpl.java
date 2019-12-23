@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -214,37 +215,45 @@ public class EurekaMockRuleServiceImpl {
 	public void heartBeatAllRules() {
 
 		List<EurekaMockRule> rules = null;
+		ExecutorService threadPool = Executors.newFixedThreadPool(20);
+		
+		while (true) {
 
-		rules = (List<EurekaMockRule>) eurekaMockRepository.findByEnable(Boolean.TRUE);
+			rules = (List<EurekaMockRule>) eurekaMockRepository.findByEnable(Boolean.TRUE);
 
-		ExecutorService threadPool = Executors.newFixedThreadPool(10);
-		if (rules != null) {
-			for (EurekaMockRule rule : rules) {
-				threadPool.execute(() -> {
+			if (rules != null) {
+				
+				for (EurekaMockRule rule : rules) {
+					threadPool.execute(() -> {
 
-					log.info("{} heart beat to {} ", rule.getServiceName(), rule.getEurekaServer());
+						log.info("{} heart beat to {} ", rule.getServiceName(), rule.getEurekaServer());
 
-					try {
+						try {
 
-						if (!heartBeat(rule)) {
-							register(rule);
+							if (!heartBeat(rule)) {
+								register(rule);
+							}
+
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
+					});
+				}
 
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				});
+			}
+
+			try {
+				TimeUnit.SECONDS.sleep(20);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 
 		}
 		
-		threadPool.shutdown();
+
 		
-		if(!threadPool.isTerminated()) {
-			log.info("shutdown eureka rules executor thread pool now!");
-			threadPool.shutdownNow();
-		}
-		
+
 	}
 
 	private class Myown implements DataCenterInfo {

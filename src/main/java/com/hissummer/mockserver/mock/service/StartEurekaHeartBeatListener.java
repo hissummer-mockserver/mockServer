@@ -27,19 +27,7 @@ public class StartEurekaHeartBeatListener {
 		log.info("start execute eureka rules after application ready!");
 		new Thread(() -> {
 
-			while (true) {
-
-				log.info("eureka heart beat.");
 				eurekaMockRuleService.heartBeatAllRules();
-
-				try {
-					TimeUnit.SECONDS.sleep(20);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-			}
 
 		}).start();
 
