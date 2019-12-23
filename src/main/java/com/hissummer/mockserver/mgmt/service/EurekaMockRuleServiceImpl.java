@@ -237,6 +237,14 @@ public class EurekaMockRuleServiceImpl {
 			}
 
 		}
+		
+		threadPool.shutdown();
+		
+		if(!threadPool.isTerminated()) {
+			log.info("shutdown eureka rules executor thread pool now!");
+			threadPool.shutdownNow();
+		}
+		
 	}
 
 	private class Myown implements DataCenterInfo {
