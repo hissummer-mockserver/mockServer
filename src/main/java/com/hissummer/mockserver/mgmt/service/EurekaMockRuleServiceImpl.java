@@ -47,7 +47,7 @@ public class EurekaMockRuleServiceImpl {
 
 	private String credentials = Credentials.basic("user", "pass");
 
-	public boolean register(EurekaMockRule rule) throws IOException {
+	public boolean register(EurekaMockRule rule) {
 
 		/*
 		 * /eureka/apps/appID
@@ -116,8 +116,6 @@ public class EurekaMockRuleServiceImpl {
 		okHttpRequestBody = RequestBody.create(jsonstr, MediaType.parse("application/json"));
 		log.info("requestBody: {}", jsonstr);
 
-		log.info("content-length: {}", okHttpRequestBody.contentLength());
-
 		final OkHttpClient client = new OkHttpClient();
 
 		Request request = new Request.Builder()
@@ -133,8 +131,7 @@ public class EurekaMockRuleServiceImpl {
 			return response.isSuccessful();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.warn(e.toString());
 		} finally {
 			if (response != null) {
 				response.close();
@@ -170,8 +167,7 @@ public class EurekaMockRuleServiceImpl {
 			return response.isSuccessful();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.warn(e.toString());
 		} finally {
 			if (response != null) {
 				response.close();
@@ -201,7 +197,7 @@ public class EurekaMockRuleServiceImpl {
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.warn(e.toString());
 		} finally {
 			if (response != null) {
 				response.close();
@@ -216,27 +212,22 @@ public class EurekaMockRuleServiceImpl {
 
 		List<EurekaMockRule> rules = null;
 		ExecutorService threadPool = Executors.newFixedThreadPool(20);
-		
+
 		while (true) {
 
-			rules = (List<EurekaMockRule>) eurekaMockRepository.findByEnable(Boolean.TRUE);
+			rules = eurekaMockRepository.findByEnable(Boolean.TRUE);
 
 			if (rules != null) {
-				
+
 				for (EurekaMockRule rule : rules) {
 					threadPool.execute(() -> {
 
 						log.info("{} heart beat to {} ", rule.getServiceName(), rule.getEurekaServer());
 
-						try {
-
 							if (!heartBeat(rule)) {
 								register(rule);
 							}
 
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
 					});
 				}
 
@@ -245,22 +236,42 @@ public class EurekaMockRuleServiceImpl {
 			try {
 				TimeUnit.SECONDS.sleep(20);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.warn("heartbeat sleep interrupted: {}", e);
+				shutdownAndAwaitTermination(threadPool);
+				Thread.currentThread().interrupt();
+				throw new RuntimeException("interrupted");
+
 			}
 
 		}
-		
 
-		
+	}
 
+	void shutdownAndAwaitTermination(ExecutorService pool) {
+		pool.shutdown();
+		// Disable new tasks from being submitted
+		try {
+			// Wait a while for existing tasks to terminate
+			if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
+				pool.shutdownNow();
+				// Cancel currently executing tasks
+
+				// Wait a while for tasks to respond to being cancelled
+				if (!pool.awaitTermination(60, TimeUnit.SECONDS))
+					log.error("Pool did not terminate");
+			}
+		} catch (InterruptedException ie) {
+			// (Re-)Cancel if current thread also interrupted
+			pool.shutdownNow();
+			// Preserve interrupt status
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	private class Myown implements DataCenterInfo {
 
 		@Override
 		public Name getName() {
-			// TODO Auto-generated method stub
 			return DataCenterInfo.Name.MyOwn;
 		}
 	}
