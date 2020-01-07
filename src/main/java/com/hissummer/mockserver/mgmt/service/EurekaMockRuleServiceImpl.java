@@ -1,9 +1,6 @@
 package com.hissummer.mockserver.mgmt.service;
 
 import java.io.IOException;
-import java.sql.Date;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,13 +10,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
@@ -196,7 +191,7 @@ public class EurekaMockRuleServiceImpl {
 			return response.isSuccessful();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			log.warn(e.toString());
 		} finally {
 			if (response != null) {
@@ -291,7 +286,7 @@ public class EurekaMockRuleServiceImpl {
 
 		ObjectMapper mapperObj = new ObjectMapper();
 
-		Map<String, Object> instanceInfoRequest = new HashMap();
+		Map<String, Object> instanceInfoRequest = new HashMap<String, Object>();
 
 		instanceInfoRequest.put("instance", registerInfo);
 
