@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mock.service.mockResponseConverter.customFunction;
+package com.hissummer.mockserver.mock.service.mockresponseconverters.customfunction;
 
 import java.util.Random;
 
@@ -20,8 +20,6 @@ public class CustomFunctionRandomString implements CustomFunctionInterface {
 	}
 
 	private String randomString(String lengthStr, String charactors) {
-		// TODO Auto-generated method stub
-
 		int length;
 
 		try {
@@ -46,8 +44,6 @@ public class CustomFunctionRandomString implements CustomFunctionInterface {
 	}
 
 	private String randomString(String lengthStr) {
-
-		// TODO Auto-generated method stub
 		int length;
 
 		try {
@@ -59,7 +55,7 @@ public class CustomFunctionRandomString implements CustomFunctionInterface {
 
 		}
 
-		String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+		String  SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 		StringBuilder salt = new StringBuilder();
 		Random rnd = new Random();
 		while (salt.length() < length) { // length of the random string.

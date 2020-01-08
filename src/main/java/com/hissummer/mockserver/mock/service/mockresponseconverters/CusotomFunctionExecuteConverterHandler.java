@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mock.service.mockResponseConverter;
+package com.hissummer.mockserver.mock.service.mockresponseconverters;
 
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -10,8 +10,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.hissummer.mockserver.mock.service.mockResponseConverter.converterInterface.MockResponseSetUpConverterInterface;
-import com.hissummer.mockserver.mock.service.mockResponseConverter.customFunction.CustomFunctionInterface;
+import com.hissummer.mockserver.mock.service.mockresponseconverters.converterinterface.MockResponseSetUpConverterInterface;
+import com.hissummer.mockserver.mock.service.mockresponseconverters.customfunction.CustomFunctionInterface;
 
 import lombok.extern.slf4j.Slf4j;
 

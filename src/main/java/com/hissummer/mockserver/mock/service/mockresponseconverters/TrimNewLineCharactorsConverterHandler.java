@@ -1,11 +1,11 @@
-package com.hissummer.mockserver.mock.service.mockResponseConverter;
+package com.hissummer.mockserver.mock.service.mockresponseconverters;
 
 import java.util.Map;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.hissummer.mockserver.mock.service.mockResponseConverter.converterInterface.MockResponseTearDownConverterInterface;
+import com.hissummer.mockserver.mock.service.mockresponseconverters.converterinterface.MockResponseTearDownConverterInterface;
 
 /**
  * 

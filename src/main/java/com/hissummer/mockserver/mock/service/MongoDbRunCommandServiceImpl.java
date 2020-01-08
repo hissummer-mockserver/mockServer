@@ -31,7 +31,6 @@ public class MongoDbRunCommandServiceImpl {
 	}
 
 	public Document getDocumentByRunCommand(String runCommand) {
-		// TODO Auto-generated method stub
 		log.info("getDocumentByRunCommand: {}", runCommand);
 		return mongoTemplate.executeCommand(runCommand);
 	}

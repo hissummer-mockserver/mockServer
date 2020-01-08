@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mock.service.mockResponseConverter.customFunction;
+package com.hissummer.mockserver.mock.service.mockresponseconverters.customfunction;
 
 public interface CustomFunctionInterface {
 
