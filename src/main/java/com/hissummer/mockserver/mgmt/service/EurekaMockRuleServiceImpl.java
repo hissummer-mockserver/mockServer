@@ -72,42 +72,13 @@ public class EurekaMockRuleServiceImpl {
 				"http://" + rule.getHostName() + ":" + rule.getPort() + "/status", rule.getServiceName(),
 				rule.getServiceName(), rule.getHostName(), rule.getPort(), rule.getPort());
 
-		// LeaseInfo lease =
-		// LeaseInfo.Builder.newBuilder().setRegistrationTimestamp(System.currentTimeMillis()).build();
-		//
-		// DataCenterInfo centerInfo = new Myown();
-		//
-		// InstanceInfo registerInfo =
-		// InstanceInfo.Builder.newBuilder().setAppName(rule.getServiceName())
-		// .setHostName(rule.getHostName())
-		// .setStatusPageUrl("/status", "http://" + rule.getHostName() + ":" +
-		// rule.getPort() + "/status")
-		// .setSecureVIPAddress(rule.getHostName()).setIPAddr(rule.getHostName())
-		// .setVIPAddress(rule.getServiceName()).setPort(Integer.valueOf(rule.getPort())).setSecurePort(Integer.valueOf(rule.getPort())).enablePort(InstanceInfo.PortType.UNSECURE,
-		// true)
-		// .setActionType(ActionType.ADDED).setOverriddenStatus(InstanceStatus.UNKNOWN)
-		// .setDataCenterInfo(centerInfo).setCountryId(1).enablePort(InstanceInfo.PortType.SECURE,
-		// false)
-		// .setHostName(rule.getHostName()).setInstanceId(rule.getHostName() + ":" +
-		// rule.getPort())
-		// .setStatus(InstanceStatus.UP).setLeaseInfo(lease).build();
-		//
-		// log.info("port is {}",registerInfo.getPort());
 
 		RequestBody okHttpRequestBody = null;
 
-		// ObjectMapper mapperObj = new ObjectMapper();
 
 		Response response = null;
 
-		// Map<String, Object> instanceInfoRequest = new HashMap();
-		//
-		// instanceInfoRequest.put("instance", registerInfo);
-		//
-		// if (registerInfo != null) {
-		// okHttpRequestBody = RequestBody.create(jsonstr,
-		// MediaType.parse("application/json"));
-		// }
+
 		okHttpRequestBody = RequestBody.create(jsonstr, MediaType.parse("application/json"));
 		log.info("requestBody: {}", jsonstr);
 

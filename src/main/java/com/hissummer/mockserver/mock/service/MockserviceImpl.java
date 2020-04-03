@@ -77,12 +77,23 @@ public class MockserviceImpl {
 
 		if (response != null) {
 			return response;
-		} else {
+		} else if(!__isIpv4(hostname) && __getUpstream(hostname)) {
+						
+			return MockResponse.builder().responseBody(__getUpstreamResponse("http",headers, hostname, method, requestUri, requestBody)).build();
+			
+		}
+		else{
 			return MockResponse.builder().responseBody(JSON
 					.toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(false).message(NOMATCHED).build())).build();
 		}
 	}	
 	
+
+	private boolean __getUpstream(String hostname) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	/**
 	 * 根据hostName和请求Url地址，获取到Mock报文的具体实现
 	 * 
@@ -98,7 +109,7 @@ public class MockserviceImpl {
 		log.info("host in headers: ", host);
 
 		// 如果Host是ip地址,则查找mock规则时,则hostName是未定义,只根据uri进行查找匹配规则.
-		if (__isIp(host)) {
+		if (__isIpv4(host)) {
 			host = "*";
 		}
 		// 第一次匹配规则
@@ -126,7 +137,7 @@ public class MockserviceImpl {
 
 			if (workMode != null && workMode.equals(HttpMockWorkMode.UPSTREAM) && upstream != null) {
 
-				// mock rule 的工作模式为upstream模式
+				// mock rule 的工作模式为upstream模式. 后期将upstream作为hostname的rule单独管理，这里的代码将会移除！
 				String response = __getUpstreamResponse(protocol, headers, upstream, method, requestUri, requestBody);
 				return MockResponse.builder().responseBody(response).build();
 			} else {
@@ -202,9 +213,9 @@ public class MockserviceImpl {
 	}
 
 	/*
-	 * isIp 判断是否是ip地址
+	 * isIp 判断是否是ipv4地址
 	 */
-	private boolean __isIp(String host) {
+	private boolean __isIpv4(String host) {
 		try {
 			if (host == null || host.isEmpty()) {
 				return false;
