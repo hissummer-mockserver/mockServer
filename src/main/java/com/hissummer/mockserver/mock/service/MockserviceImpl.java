@@ -7,21 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.bson.Document;
-import org.bson.json.JsonMode;
-import org.bson.json.JsonWriterSettings;
-import org.bson.json.JsonWriterSettings.Builder;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
-import com.hissummer.mockserver.mgmt.vo.MockRuleWorkMode;
-import com.hissummer.mockserver.mgmt.vo.Upstream;
+import com.hissummer.mockserver.mgmt.vo.HttpMockWorkMode;
+import com.hissummer.mockserver.mock.service.jpa.MockRuleMongoRepository;
+import com.hissummer.mockserver.mock.service.mockresponseconverters.GroovyScriptsHandler;
+import com.hissummer.mockserver.mock.service.mockresponseconverters.converterinterface.MockResponseSetUpConverterInterface;
+import com.hissummer.mockserver.mock.service.mockresponseconverters.converterinterface.MockResponseTearDownConverterInterface;
 import com.hissummer.mockserver.mock.vo.MockResponse;
 
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +27,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
 /**
  * 
  * MockserviceImpl
@@ -46,8 +42,18 @@ public class MockserviceImpl {
 
 	@Autowired
 	MongoDbRunCommandServiceImpl dataplatformServiceImpl;
+
+	@Autowired
+	List<MockResponseSetUpConverterInterface> mockResponseConverters;
+	@Autowired
+	List<MockResponseTearDownConverterInterface> mockResponseTearDownConverters;
+	@Autowired
+	MockRuleMongoRepository mockRuleRepository;
 	
-    final private  String NOMATCHED = "Sorry , No rules matched.";
+	@Autowired
+	GroovyScriptsHandler groovyScriptsHandler;
+
+	final private String NOMATCHED = "Sorry , No rules matched.";
 
 	/**
 	 * 根据hostName和请求Url地址，获取到Mock报文.
@@ -56,20 +62,36 @@ public class MockserviceImpl {
 	 * @param requestUri
 	 * @return mock的报文
 	 */
-	public String getMockResponse(Map<String, String> headers, String hostname, String method, String requestUri,
+	public String getResponseBody(Map<String, String> headers, String hostname, String method, String requestUri,
 			String requestBody) {
 
-		MockResponse response = __getMatchedMockResponse(headers, hostname, method, requestUri, requestBody);
+		MockResponse response = getResponse(headers, hostname, method, requestUri, requestBody);
 
-		if (response != null)
-		{
-			return response.getResponseBody();
+		return response.getResponseBody();
+	}
+
+	public MockResponse getResponse(Map<String, String> headers, String hostname, String method, String requestUri,
+			String requestBody) {
+
+		MockResponse response = __getResponse(headers, hostname, method, requestUri, requestBody);
+
+		if (response != null) {
+			return response;
+		} else if(!__isIpv4(hostname) && __getUpstream(hostname)) {
+						
+			return MockResponse.builder().responseBody(__getUpstreamResponse("http",headers, hostname, method, requestUri, requestBody)).build();
+			
 		}
-		else
-		{
-			return JSON.toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(false)
-					.message(NOMATCHED).build());
+		else{
+			return MockResponse.builder().responseBody(JSON
+					.toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(false).message(NOMATCHED).build())).build();
 		}
+	}	
+	
+
+	private boolean __getUpstream(String hostname) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	/**
@@ -79,19 +101,19 @@ public class MockserviceImpl {
 	 * @param requestUri
 	 * @return
 	 */
-	private MockResponse __getMatchedMockResponse(Map<String, String> headers, String hostName, String method,
-			String requestUri, String requestBody) {
+	private MockResponse __getResponse(Map<String, String> headers, String hostName, String method, String requestUri,
+			String requestBody) {
 
 		String host = hostName;
 		headers.get("Host");
 		log.info("host in headers: ", host);
 
 		// 如果Host是ip地址,则查找mock规则时,则hostName是未定义,只根据uri进行查找匹配规则.
-		if (__isIp(host)) {
+		if (__isIpv4(host)) {
 			host = "*";
 		}
 		// 第一次匹配规则
-		JSONObject matchedResult = __getMatchedMockRulesByHostnameAndUrl(host, requestUri);
+		HttpMockRule matchedResult = __getMatchedMockRulesByHostnameAndUrl(host, requestUri);
 
 		// 如果第一次查找时,Host是域名,且没有找到对应的规则,则会重新假设Host为null时,重新再查找一次.
 		if (matchedResult == null && host != null && !host.equals("*")) {
@@ -102,29 +124,60 @@ public class MockserviceImpl {
 
 		if (matchedResult != null) {
 			// 获取到匹配的结果
-
-			String upstream = ((JSONObject) matchedResult).getString("upstream");
-
-			String workMode = ((JSONObject) matchedResult).getString("workMode");
-			
-			String protocol = ((JSONObject) matchedResult).getString("protocol");
-
-			if (workMode != null && workMode.equals(MockRuleWorkMode.UPSTREAM.name()) && upstream != null) {
-
-				String response = __getUpstreamResponse(protocol,headers, upstream, method, requestUri, requestBody);				
-				return MockResponse.builder().responseBody(response).build();
+			String upstream = null;
+			try {
+				upstream = matchedResult.getUpstreamGroup().getUpstreams().get(0).getUpstreamAddress();
+			} catch (Exception e) {
+				log.info("{} mockrule : upstream data is not defined{}", matchedResult.getId(),
+						matchedResult.getUpstreamGroup());
 			}
+			HttpMockWorkMode workMode = matchedResult.getWorkMode();
 
-			return MockResponse.builder().responseBody((((JSONObject) matchedResult).getString("mockResponse")))
-					.build();
+			String protocol = matchedResult.getProtocol();
 
+			if (workMode != null && workMode.equals(HttpMockWorkMode.UPSTREAM) && upstream != null) {
+
+				// mock rule 的工作模式为upstream模式. 后期将upstream作为hostname的rule单独管理，这里的代码将会移除！
+				String response = __getUpstreamResponse(protocol, headers, upstream, method, requestUri, requestBody);
+				return MockResponse.builder().responseBody(response).build();
+			} else {
+				// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
+				return MockResponse.builder()
+						.responseBody(__interpreterResponse(matchedResult.getMockResponse(), headers, requestBody))
+						.isMock(true).headers(matchedResult.getResponseHeaders())
+						.build();
+			}
 		} else
 			return null;
 
 	}
 
-	private String __getUpstreamResponse(String protocol, Map<String, String> headers, String upstream, String method, String requestUri,
+	private String __interpreterResponse(String originalMockResponse, Map<String, String> requestHeders,
 			String requestBody) {
+		
+		// multipart 暂不支持requestBody的解析，multipart的请求报文待确认后支持
+		if(requestHeders.get("content-type")== null || requestHeders.get("content-type").contains("multipart")) {
+			requestBody = ""; 
+		}
+				
+		String mockResponse = originalMockResponse;
+		for (MockResponseSetUpConverterInterface mockResponseConverter : mockResponseConverters) {
+			mockResponse = mockResponseConverter.converter(mockResponse, requestHeders, requestBody);
+		}
+		
+		if( originalMockResponse.startsWith("//groovy") ) {
+			mockResponse = groovyScriptsHandler.converter(mockResponse, requestHeders, requestBody);
+		}
+		
+		for (MockResponseTearDownConverterInterface mockResponseConverter : mockResponseTearDownConverters) {
+			mockResponse = mockResponseConverter.converter(mockResponse, requestHeders, requestBody);
+		}
+			
+		return mockResponse;
+	}
+
+	private String __getUpstreamResponse(String protocol, Map<String, String> headers, String upstream, String method,
+			String requestUri, String requestBody) {
 		// TODO Auto-generated method stub
 
 		final OkHttpClient client = new OkHttpClient();
@@ -141,8 +194,8 @@ public class MockserviceImpl {
 		if (requestBody != null) {
 			okHttpRequestBody = RequestBody.create(requestBody, MediaType.parse(headers.get("content-type")));
 		}
-		Request request = new Request.Builder().url(protocol+"://" + upstream + requestUri).method(method, okHttpRequestBody)
-				.headers(requestHeaders).build();
+		Request request = new Request.Builder().url(protocol + "://" + upstream + requestUri)
+				.method(method, okHttpRequestBody).headers(requestHeaders).build();
 
 		Call call = client.newCall(request);
 		try {
@@ -160,9 +213,9 @@ public class MockserviceImpl {
 	}
 
 	/*
-	 * isIp 判断是否是ip地址
+	 * isIp 判断是否是ipv4地址
 	 */
-	private boolean __isIp(String host) {
+	private boolean __isIpv4(String host) {
 		try {
 			if (host == null || host.isEmpty()) {
 				return false;
@@ -193,7 +246,7 @@ public class MockserviceImpl {
 	/*
 	 * 
 	 */
-	private JSONObject __getMatchedMockRulesByHostnameAndUrl(String hostName, String requestUri) {
+	private HttpMockRule __getMatchedMockRulesByHostnameAndUrl(String hostName, String requestUri) {
 
 		String requestUriFormat = requestUri;
 		if (requestUri != null && requestUri.length() > 0 && requestUri.charAt(requestUri.length() - 1) == '/') {
@@ -214,71 +267,12 @@ public class MockserviceImpl {
 				matchRequestURIString = "/";
 			}
 
-			Document matachedResult = dataplatformServiceImpl
-					.getDocumentByRunCommand(__generateFindMockRuleCommand(hostName, matchRequestURIString));
+			HttpMockRule matchedMockRule = mockRuleRepository.findByHostAndUri(hostName, matchRequestURIString);
 
-			Builder documentBuilder = JsonWriterSettings.builder();
-			documentBuilder.outputMode(JsonMode.EXTENDED);
-			JSONObject queryResultJson = (JSONObject) JSON.parse(matachedResult.toJson(documentBuilder.build()));
-			log.info(queryResultJson.toJSONString());
-
-			// 查看是否找到匹配的mock 规则
-			if (__isGetMatchRule(queryResultJson)) {
-
-				return (JSONObject) ((JSONObject) queryResultJson.get("cursor")).getJSONArray("firstBatch").get(0);
-
-			}
-
+			if (matchedMockRule != null)
+				return matchedMockRule;
 		}
-
 		return null;
-	}
-
-	private boolean __isGetMatchRule(JSONObject queryResult) {
-
-		if (((JSONObject) queryResult.get("cursor")).getJSONArray("firstBatch").size() > 0) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-
-
-	/**
-	 * 根据hostName和requestUri 找到第一条mock规则(可能返回未找到)
-	 * 
-	 * @param hostName
-	 *            如果传入的为null或者为空字符串,则hostName认为是* 并进行查找
-	 * @param requestUri
-	 *            requestUri 从业务场景来看, 不可能为null或者空字符串. 如果传入,则找不到. (因为添加规则时,
-	 *            不可能出现uri为null和空串的可能性)
-	 * @return
-	 */
-	private String __generateFindMockRuleCommand(String hostName, String requestUri) {
-
-		// String generatedCommand =
-		// String.format("{find:'mockrules',filter:{host:{},uri:'{}'}}",
-		// hostName == null ? "null" : "'" + hostName + "'", requestUri);
-		//
-
-		Document findCommand = new Document();
-		Document findFilter = new Document();
-		findCommand.put("find", "mockrules");
-		findFilter.put("host", hostName == null || hostName.trim().equals("") ? "*" : hostName);
-		findFilter.put("uri", requestUri);
-		findCommand.put("filter", findFilter);
-
-		// jsonobject will sort keys automatically when get json string
-		// JSONObject findCommand = new JSONObject();
-		// JSONObject findFilter = new JSONObject();
-		// findCommand.put("find", "mockrules");
-		// findFilter.put("host", hostName);
-		// findFilter.put("uri", requestUri);
-		// findCommand.put("filter", findFilter);
-
-		log.info("生成的Find命令:{}", findCommand.toJson());
-		return findCommand.toJson();
 	}
 
 }

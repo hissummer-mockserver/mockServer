@@ -1,12 +1,6 @@
 package com.hissummer.mockserver.mgmt.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import org.bson.Document;
 import org.bson.json.JsonMode;
 import org.bson.json.JsonWriterSettings;
@@ -19,20 +13,10 @@ import org.springframework.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
-import com.hissummer.mockserver.mgmt.vo.MockRuleWorkMode;
 import com.hissummer.mockserver.mgmt.vo.Upstream;
 import com.hissummer.mockserver.mock.service.MongoDbRunCommandServiceImpl;
-import com.hissummer.mockserver.mock.vo.MockResponse;
-
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Call;
-import okhttp3.Headers;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+
 /**
  * 
  * MockserviceImpl
@@ -72,10 +56,10 @@ public class MockRuleManagerServiceImpl {
 
 		return null;
 	}
-	
+
 	@Autowired
 	MongoDbRunCommandServiceImpl dataplatformServiceImpl;
-	
+
 	/**
 	 * 添加mock 规则, 一个规则包含 hostname, uri, mock的报文. hostname可以为null.
 	 * 后续会增加支持返回mockheader支持.
@@ -86,8 +70,8 @@ public class MockRuleManagerServiceImpl {
 	 * @return 返回true则认为添加成功
 	 */
 	@Deprecated
-	public boolean addMockRule(String hostName, String requestUri, String mockResponse,
-			Map<String, String> mockHeaders, String workMode) {
+	public boolean addMockRule(String hostName, String requestUri, String mockResponse, Map<String, String> mockHeaders,
+			String workMode) {
 
 		// return addmatachedResult.toJson(documentBuilder.build());
 		try {
@@ -105,7 +89,7 @@ public class MockRuleManagerServiceImpl {
 				hostNameFormat = "*"; // * meaning including all hostName
 
 			Document addmatachedResult = dataplatformServiceImpl.getDocumentByRunCommand(
-					__generateInsertMockRuleCommand(hostNameFormat, requestUriFormat, mockResponse,workMode));
+					__generateInsertMockRuleCommand(hostNameFormat, requestUriFormat, mockResponse, workMode));
 			// 设置document output 到json的设置
 			Builder documentBuilder = JsonWriterSettings.builder();
 			documentBuilder.outputMode(JsonMode.EXTENDED);
@@ -139,7 +123,7 @@ public class MockRuleManagerServiceImpl {
 
 	@Deprecated
 	public boolean updateMockRule(String id, String hostName, String requestUri, String mockResponse,
-			Map<String, String> mockHeaders, String workMode , Upstream upstreamGroup) {
+			Map<String, String> mockHeaders, String workMode, Upstream upstreamGroup) {
 		// return addmatachedResult.toJson(documentBuilder.build());
 		try {
 			String requestUriFormat = requestUri;
@@ -152,7 +136,7 @@ public class MockRuleManagerServiceImpl {
 			}
 
 			Document addmatachedResult = dataplatformServiceImpl.getDocumentByRunCommand(
-					__generateUpdateMockRuleCommand(id, hostName, requestUriFormat, mockResponse,workMode));
+					__generateUpdateMockRuleCommand(id, hostName, requestUriFormat, mockResponse, workMode));
 			// 设置document output 到json的设置
 			Builder documentBuilder = JsonWriterSettings.builder();
 			documentBuilder.outputMode(JsonMode.EXTENDED);
@@ -240,8 +224,6 @@ public class MockRuleManagerServiceImpl {
 		return updateCommand.toJson();
 	}
 
-
-
 	/**
 	 * 
 	 * @param requestUri
@@ -265,7 +247,8 @@ public class MockRuleManagerServiceImpl {
 	 * @param requestUri
 	 * @return
 	 */
-	private String __generateInsertMockRuleCommand(String hostName, String requestUri, String mockResponse,String workMode) {
+	private String __generateInsertMockRuleCommand(String hostName, String requestUri, String mockResponse,
+			String workMode) {
 
 		// String generatedCommand =
 		// String.format("{insert:'mockrules',documents:[{host:%s,uri:'%s',mockResponse:'%s'}]}",
@@ -286,7 +269,8 @@ public class MockRuleManagerServiceImpl {
 		return insertCommand.toJson();
 	}
 
-	private String __generateUpdateMockRuleCommand(String id, String hostName, String requestUri, String mockResponse,String workMode) {
+	private String __generateUpdateMockRuleCommand(String id, String hostName, String requestUri, String mockResponse,
+			String workMode) {
 
 		// String generatedCommand =
 		// String.format("{insert:'mockrules',documents:[{host:%s,uri:'%s',mockResponse:'%s'}]}",
@@ -307,7 +291,7 @@ public class MockRuleManagerServiceImpl {
 		updateData.put("host", hostName == null || hostName.trim().equals("") ? "*" : hostName);
 		updateData.put("uri", requestUri);
 		updateData.put("mockResponse", mockResponse);
-		updateData.put("workMode",workMode);
+		updateData.put("workMode", workMode);
 		updateDocument.put("u", updateData);
 		updateDocument.put("q", query);
 		updateDocument.put("upsert", false);
@@ -387,7 +371,7 @@ public class MockRuleManagerServiceImpl {
 		log.info("生成的Find命令:{}", findCommand.toJson());
 		return findCommand.toJson();
 	}
-	
+
 	/*
 	 * isIp 判断是否是ip地址
 	 */
@@ -427,5 +411,5 @@ public class MockRuleManagerServiceImpl {
 			return false;
 		}
 	}
-	
+
 }

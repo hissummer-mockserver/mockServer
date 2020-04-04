@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mgmt.service;
+package com.hissummer.mockserver.mgmt.service.jpa;
 
 import java.util.List;
 
@@ -8,10 +8,9 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
 
-
 public interface EurekaMockRuleMongoRepository extends MongoRepository<EurekaMockRule, String> {
 
-	
-	Page<EurekaMockRule> findByEnable( Boolean enable,Pageable pageable);
-	List<EurekaMockRule> findByEnable( Boolean enable);
+	Page<EurekaMockRule> findByEnable(Boolean enable, Pageable pageable);
+
+	List<EurekaMockRule> findByEnable(Boolean enable);
 }

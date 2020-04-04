@@ -30,9 +30,7 @@ public class MongoDbRunCommandServiceImpl {
 		return mongoResult.toJson();
 	}
 
-	
 	public Document getDocumentByRunCommand(String runCommand) {
-		// TODO Auto-generated method stub
 		log.info("getDocumentByRunCommand: {}", runCommand);
 		return mongoTemplate.executeCommand(runCommand);
 	}

@@ -11,5 +11,5 @@ public class MockRuleMgmtResponseVo {
 	boolean success; // mock or upstream response status
 	Object data; // business data
 	String message; // message
-	
+
 }

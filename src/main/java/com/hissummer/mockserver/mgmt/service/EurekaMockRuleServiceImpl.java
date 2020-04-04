@@ -1,25 +1,22 @@
 package com.hissummer.mockserver.mgmt.service;
 
 import java.io.IOException;
-import java.sql.Date;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
 import com.netflix.appinfo.DataCenterInfo;
 import com.netflix.appinfo.InstanceInfo;
@@ -45,7 +42,7 @@ public class EurekaMockRuleServiceImpl {
 
 	private String credentials = Credentials.basic("user", "pass");
 
-	public boolean register(EurekaMockRule rule) throws IOException {
+	public boolean register(EurekaMockRule rule) {
 
 		/*
 		 * /eureka/apps/appID
@@ -55,88 +52,35 @@ public class EurekaMockRuleServiceImpl {
 		 * 
 		 */
 
-		
-		String registerInfoStringFormatter  = "{" + 
-				"	\"instance\": {" + 
-				"		\"instanceId\": \"%s\"," + 
-				"		\"app\": \"%s\"," + 
-				"		\"appGroutName\": null," + 
-				"		\"ipAddr\": \"%s\"," + 
-				"		\"sid\": \"na\"," + 
-				"		\"homePageUrl\": null," + 
-				"		\"statusPageUrl\": \"%s\"," + 
-				"		\"healthCheckUrl\": null," + 
-				"		\"secureHealthCheckUrl\": null," + 
-				"		\"vipAddress\": \"%s\"," + 
-				"		\"secureVipAddress\": \"%s\"," + 
-				"		\"countryId\": 1," + 
-				"		\"dataCenterInfo\": {" + 
-				"			\"@class\": \"com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo\"," + 
-				"			\"name\": \"MyOwn\"" + 
-				"		}," + 
-				"		\"hostName\": \"%s\"," + 
-				"		\"status\": \"UP\"," + 
-				"		\"leaseInfo\": null," + 
-				"		\"isCoordinatingDiscoveryServer\": false," + 
-				"		\"lastUpdatedTimestamp\": null," + 
-				"		\"lastDirtyTimestamp\": null," + 
-				"		\"actionType\": null," + 
-				"		\"asgName\": null," + 
-				"		\"overridden_status\": \"UNKNOWN\"," + 
-				"		\"port\": {" + 
-				"			\"$\": %s," + 
-				"			\"@enabled\": \"true\"" + 
-				"		}," + 
-				"		\"securePort\": {" + 
-				"			\"$\": %s," + 
-				"			\"@enabled\": \"false\"" + 
-				"		}," + 
-				"		\"metadata\": {" + 
-				"			\"@class\": \"java.util.Collections$EmptyMap\"" + 
-				"		}" + 
-				"	}" + 
-				"}" + 
-				"";
-		String jsonstr=String.format(registerInfoStringFormatter, rule.getHostName() + ":" + rule.getPort(),rule.getServiceName()
-				,rule.getHostName(),"http://" + rule.getHostName() + ":" + rule.getPort() + "/status",rule.getServiceName()
-				,rule.getServiceName(),rule.getHostName(),rule.getPort(),rule.getPort()
-				);
-		
-//		LeaseInfo lease = LeaseInfo.Builder.newBuilder().setRegistrationTimestamp(System.currentTimeMillis()).build();
-//
-//		DataCenterInfo centerInfo = new Myown();
-//
-//		InstanceInfo registerInfo = InstanceInfo.Builder.newBuilder().setAppName(rule.getServiceName())
-//				.setHostName(rule.getHostName())
-//				.setStatusPageUrl("/status", "http://" + rule.getHostName() + ":" + rule.getPort() + "/status")
-//				.setSecureVIPAddress(rule.getHostName()).setIPAddr(rule.getHostName())
-//				.setVIPAddress(rule.getServiceName()).setPort(Integer.valueOf(rule.getPort())).setSecurePort(Integer.valueOf(rule.getPort())).enablePort(InstanceInfo.PortType.UNSECURE, true)
-//				.setActionType(ActionType.ADDED).setOverriddenStatus(InstanceStatus.UNKNOWN)
-//				.setDataCenterInfo(centerInfo).setCountryId(1).enablePort(InstanceInfo.PortType.SECURE, false)
-//				.setHostName(rule.getHostName()).setInstanceId(rule.getHostName() + ":" + rule.getPort())
-//				.setStatus(InstanceStatus.UP).setLeaseInfo(lease).build();
-//		
-//		log.info("port is {}",registerInfo.getPort());
-		
+		String registerInfoStringFormatter = "{" + "	\"instance\": {" + "		\"instanceId\": \"%s\","
+				+ "		\"app\": \"%s\"," + "		\"appGroutName\": null," + "		\"ipAddr\": \"%s\","
+				+ "		\"sid\": \"na\"," + "		\"homePageUrl\": null," + "		\"statusPageUrl\": \"%s\","
+				+ "		\"healthCheckUrl\": null," + "		\"secureHealthCheckUrl\": null,"
+				+ "		\"vipAddress\": \"%s\"," + "		\"secureVipAddress\": \"%s\"," + "		\"countryId\": 1,"
+				+ "		\"dataCenterInfo\": {"
+				+ "			\"@class\": \"com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo\","
+				+ "			\"name\": \"MyOwn\"" + "		}," + "		\"hostName\": \"%s\","
+				+ "		\"status\": \"UP\"," + "		\"leaseInfo\": {\"evictionDurationInSecs\":180},"
+				+ "		\"isCoordinatingDiscoveryServer\": false," + "		\"lastUpdatedTimestamp\": null,"
+				+ "		\"lastDirtyTimestamp\": null," + "		\"actionType\": null," + "		\"asgName\": null,"
+				+ "		\"overridden_status\": \"UNKNOWN\"," + "		\"port\": {" + "			\"$\": %s,"
+				+ "			\"@enabled\": \"true\"" + "		}," + "		\"securePort\": {" + "			\"$\": %s,"
+				+ "			\"@enabled\": \"false\"" + "		}," + "		\"metadata\": {"
+				+ "			\"@class\": \"java.util.Collections$EmptyMap\"" + "		}" + "	}" + "}" + "";
+		String jsonstr = String.format(registerInfoStringFormatter, rule.getHostName() + ":" + rule.getPort(),
+				rule.getServiceName(), rule.getHostName(),
+				"http://" + rule.getHostName() + ":" + rule.getPort() + "/status", rule.getServiceName(),
+				rule.getServiceName(), rule.getHostName(), rule.getPort(), rule.getPort());
+
+
 		RequestBody okHttpRequestBody = null;
 
-//		ObjectMapper mapperObj = new ObjectMapper();
-		
+
 		Response response = null;
 
-//		Map<String, Object> instanceInfoRequest = new HashMap();
-//		
-//		instanceInfoRequest.put("instance", registerInfo);
-//
-//		if (registerInfo != null) {
-//			okHttpRequestBody = RequestBody.create(jsonstr,
-//					MediaType.parse("application/json"));
-//		}
-		okHttpRequestBody = RequestBody.create(jsonstr,
-				MediaType.parse("application/json"));
-		log.info("requestBody: {}", jsonstr);
 
-		log.info("content-length: {}", okHttpRequestBody.contentLength());
+		okHttpRequestBody = RequestBody.create(jsonstr, MediaType.parse("application/json"));
+		log.info("requestBody: {}", jsonstr);
 
 		final OkHttpClient client = new OkHttpClient();
 
@@ -153,8 +97,7 @@ public class EurekaMockRuleServiceImpl {
 			return response.isSuccessful();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.warn(e.toString());
 		} finally {
 			if (response != null) {
 				response.close();
@@ -190,8 +133,7 @@ public class EurekaMockRuleServiceImpl {
 			return response.isSuccessful();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.warn(e.toString());
 		} finally {
 			if (response != null) {
 				response.close();
@@ -200,11 +142,9 @@ public class EurekaMockRuleServiceImpl {
 
 		return false;
 	}
-	
-	
+
 	public boolean unRegisterApp(EurekaMockRule rule) {
-		
-		
+
 		final OkHttpClient client = new OkHttpClient();
 
 		Response response = null;
@@ -222,45 +162,75 @@ public class EurekaMockRuleServiceImpl {
 			return response.isSuccessful();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+			log.warn(e.toString());
 		} finally {
 			if (response != null) {
 				response.close();
 			}
 		}
-		
-		
+
 		return false;
-		
+
 	}
-	
 
 	public void heartBeatAllRules() {
 
 		List<EurekaMockRule> rules = null;
+		ExecutorService threadPool = Executors.newFixedThreadPool(20);
 
-		rules = (List<EurekaMockRule>) eurekaMockRepository.findByEnable(Boolean.TRUE);
+		while (true) {
 
-		ExecutorService threadPool = Executors.newFixedThreadPool(10);
-		if (rules != null) {
-			for (EurekaMockRule rule : rules) {
-				threadPool.execute(() -> {
+			rules = eurekaMockRepository.findByEnable(Boolean.TRUE);
 
-					log.info("{} heart beat to {} ", rule.getServiceName(), rule.getEurekaServer());
+			if (rules != null) {
 
-					try {
+				for (EurekaMockRule rule : rules) {
+					threadPool.execute(() -> {
 
-						if (!heartBeat(rule)) {
-							register(rule);
-						}
+						log.info("{} heart beat to {} ", rule.getServiceName(), rule.getEurekaServer());
 
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				});
+							if (!heartBeat(rule)) {
+								register(rule);
+							}
+
+					});
+				}
+
 			}
 
+			try {
+				TimeUnit.SECONDS.sleep(20);
+			} catch (InterruptedException e) {
+				log.warn("heartbeat sleep interrupted: {}", e);
+				shutdownAndAwaitTermination(threadPool);
+				Thread.currentThread().interrupt();
+				throw new RuntimeException("interrupted");
+
+			}
+
+		}
+
+	}
+
+	void shutdownAndAwaitTermination(ExecutorService pool) {
+		pool.shutdown();
+		// Disable new tasks from being submitted
+		try {
+			// Wait a while for existing tasks to terminate
+			if (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
+				pool.shutdownNow();
+				// Cancel currently executing tasks
+
+				// Wait a while for tasks to respond to being cancelled
+				if (!pool.awaitTermination(60, TimeUnit.SECONDS))
+					log.error("Pool did not terminate");
+			}
+		} catch (InterruptedException ie) {
+			// (Re-)Cancel if current thread also interrupted
+			pool.shutdownNow();
+			// Preserve interrupt status
+			Thread.currentThread().interrupt();
 		}
 	}
 
@@ -268,43 +238,34 @@ public class EurekaMockRuleServiceImpl {
 
 		@Override
 		public Name getName() {
-			// TODO Auto-generated method stub
 			return DataCenterInfo.Name.MyOwn;
 		}
 	}
-	
+
 	public static void main(String[] args) throws JsonProcessingException {
 		LeaseInfo lease = LeaseInfo.Builder.newBuilder().setRegistrationTimestamp(System.currentTimeMillis()).build();
 
+		InstanceInfo registerInfo = InstanceInfo.Builder.newBuilder().setAppName("11080").setHostName("aaa")
+				.setStatusPageUrl("/status", "http://" + "abcd.com" + ":" + "11080" + "/status").setSecureVIPAddress("")
+				.setIPAddr("").setVIPAddress("").setPort(Integer.valueOf("11080"))
+				.setSecurePort(Integer.valueOf("11080")).enablePort(InstanceInfo.PortType.UNSECURE, true)
+				.setActionType(ActionType.ADDED).setOverriddenStatus(InstanceStatus.UNKNOWN).setCountryId(1)
+				.enablePort(InstanceInfo.PortType.SECURE, false).setHostName("11080")
+				.setInstanceId("11080" + ":" + "11080").setStatus(InstanceStatus.UP).setLeaseInfo(lease).build();
 
-
-		InstanceInfo registerInfo = InstanceInfo.Builder.newBuilder().setAppName("11080")
-				.setHostName("aaa")
-				.setStatusPageUrl("/status", "http://" + "abcd.com" + ":" + "11080" + "/status")
-				.setSecureVIPAddress("").setIPAddr("")
-				.setVIPAddress("").setPort(Integer.valueOf("11080")).setSecurePort(Integer.valueOf("11080")).enablePort(InstanceInfo.PortType.UNSECURE, true)
-				.setActionType(ActionType.ADDED).setOverriddenStatus(InstanceStatus.UNKNOWN)
-				.setCountryId(1).enablePort(InstanceInfo.PortType.SECURE, false)
-				.setHostName("11080").setInstanceId("11080" + ":" + "11080")
-				.setStatus(InstanceStatus.UP).setLeaseInfo(lease).build();
-		
-		log.info("port is {}",registerInfo.getPort());
-		
-
+		log.info("port is {}", registerInfo.getPort());
 
 		ObjectMapper mapperObj = new ObjectMapper();
-		
 
-		Map<String, Object> instanceInfoRequest = new HashMap();
-		
+		Map<String, Object> instanceInfoRequest = new HashMap<String, Object>();
+
 		instanceInfoRequest.put("instance", registerInfo);
 
-
 		log.info("requestBody: {}", mapperObj.writeValueAsString(instanceInfoRequest));
-		
+
 		mapperObj.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
 		log.info("requestBody: {}", mapperObj.writeValueAsString(registerInfo));
-		
+
 	}
 
 }

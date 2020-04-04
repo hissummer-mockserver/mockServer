@@ -11,8 +11,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.hissummer.mockserver.mgmt.service.MockRuleManagerServiceImpl;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
-import com.hissummer.mockserver.mock.service.MockserviceImpl;
-
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -36,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/mock/old/")
+@Deprecated
 public class MockMgmtController {
 
 	@Autowired
@@ -46,8 +45,9 @@ public class MockMgmtController {
 
 		try {
 			MockRuleMgmtResponseVo result = MockRuleMgmtResponseVo.builder().status(0)
-					.success(mockRuleservice.addMockRule(requestBody.getString("hostName"), requestBody.getString("uri"),
-							requestBody.getString("mockResponse"), null,requestBody.getString("workMode")))
+					.success(
+							mockRuleservice.addMockRule(requestBody.getString("hostName"), requestBody.getString("uri"),
+									requestBody.getString("mockResponse"), null, requestBody.getString("workMode")))
 					.build();
 			return result;
 		} catch (Exception e) {
@@ -62,8 +62,9 @@ public class MockMgmtController {
 
 		try {
 			MockRuleMgmtResponseVo result = MockRuleMgmtResponseVo.builder().status(0)
-					.success(mockRuleservice.updateMockRule(requestBody.getString("id"), requestBody.getString("hostName"),
-							requestBody.getString("uri"), requestBody.getString("mockResponse"), null, requestBody.getString("workMode"),null))
+					.success(mockRuleservice.updateMockRule(requestBody.getString("id"),
+							requestBody.getString("hostName"), requestBody.getString("uri"),
+							requestBody.getString("mockResponse"), null, requestBody.getString("workMode"), null))
 					.build();
 			return result;
 		} catch (Exception e) {
@@ -77,9 +78,9 @@ public class MockMgmtController {
 	public MockRuleMgmtResponseVo deleteRule(@RequestBody JSONObject requestBody) {
 
 		try {
-			MockRuleMgmtResponseVo result = MockRuleMgmtResponseVo.builder().status(0)
+			// MockRuleMgmtResponseVo result = 
+			return   MockRuleMgmtResponseVo.builder().status(0)
 					.success(mockRuleservice.deleteMockRule(requestBody.getString("id"))).build();
-			return result;
 		} catch (Exception e) {
 
 			return MockRuleMgmtResponseVo.builder().status(-1).message(e.getMessage()).success(false).build();
@@ -92,9 +93,8 @@ public class MockMgmtController {
 
 		int pageNumber = requestBody.getIntValue("pageNumber") == 0 ? 1 : requestBody.getIntValue("pageNumber");
 		int pageSize = requestBody.getIntValue("pageSize") == 0 ? 50 : requestBody.getIntValue("pageSize");
-		;
-		JSONArray rules = mockRuleservice.queryMockRules(requestBody.getString("hostName"), requestBody.getString("uri"),
-				pageNumber, pageSize);
+		JSONArray rules = mockRuleservice.queryMockRules(requestBody.getString("hostName"),
+				requestBody.getString("uri"), pageNumber, pageSize);
 		if (rules != null)
 			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
 		else
