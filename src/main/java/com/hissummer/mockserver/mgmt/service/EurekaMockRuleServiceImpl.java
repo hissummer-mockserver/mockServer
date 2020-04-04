@@ -60,7 +60,7 @@ public class EurekaMockRuleServiceImpl {
 				+ "		\"dataCenterInfo\": {"
 				+ "			\"@class\": \"com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo\","
 				+ "			\"name\": \"MyOwn\"" + "		}," + "		\"hostName\": \"%s\","
-				+ "		\"status\": \"UP\"," + "		\"leaseInfo\": null,"
+				+ "		\"status\": \"UP\"," + "		\"leaseInfo\": {\"evictionDurationInSecs\":180},"
 				+ "		\"isCoordinatingDiscoveryServer\": false," + "		\"lastUpdatedTimestamp\": null,"
 				+ "		\"lastDirtyTimestamp\": null," + "		\"actionType\": null," + "		\"asgName\": null,"
 				+ "		\"overridden_status\": \"UNKNOWN\"," + "		\"port\": {" + "			\"$\": %s,"
