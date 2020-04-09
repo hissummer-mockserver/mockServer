@@ -16,5 +16,5 @@ public class EurekaMockRule {
 	private String serviceName;
 	private String eurekaServer;
 	private Boolean enable;
-	private String version;
+//	private String version;
 }
