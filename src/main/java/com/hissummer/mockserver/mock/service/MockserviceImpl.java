@@ -195,16 +195,16 @@ public class MockserviceImpl {
 		}
 		Request request = new Request.Builder().url(protocol + "://" + upstream + requestUri)
 				.method(method, okHttpRequestBody).headers(requestHeaders).build();
-
+		log.info("upstream request: {} \r\n {}",JSON.toJSONString(request.headers()) ,JSON.toJSONString(request.body()) );
 		Call call = client.newCall(request);
 		try {
 			Response response = call.execute();
-			log.info(response.toString());
+			log.info("upstream response:{} \r\n {} \r\n {}",JSON.toJSONString(response.code()),JSON.toJSONString(response.headers()),JSON.toJSONString(response.body()));
 			if (response.isSuccessful())
 				return response.body().string();
 
 			else
-				return response.toString();
+				return JSON.toJSONString(response.toString());
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
