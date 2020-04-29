@@ -41,19 +41,16 @@ import okhttp3.Response;
 public class MockserviceImpl {
 
 	@Autowired
-	MongoDbRunCommandServiceImpl dataplatformServiceImpl;
-
-	@Autowired
 	List<MockResponseSetUpConverterInterface> mockResponseConverters;
 	@Autowired
 	List<MockResponseTearDownConverterInterface> mockResponseTearDownConverters;
 	@Autowired
 	MockRuleMongoRepository mockRuleRepository;
-	
+
 	@Autowired
 	GroovyScriptsHandler groovyScriptsHandler;
 
-	final private String NOMATCHED = "Sorry , No rules matched.";
+	private static final String NOMATCHED = "Sorry , No rules matched.";
 
 	/**
 	 * 根据hostName和请求Url地址，获取到Mock报文.
@@ -77,22 +74,14 @@ public class MockserviceImpl {
 
 		if (response != null) {
 			return response;
-		} else if(!__isIpv4(hostname) && __getUpstream(hostname)) {
-						
-			return MockResponse.builder().responseBody(__getUpstreamResponse("http",headers, hostname, method, requestUri, requestBody)).build();
-			
+		}  else {
+			return MockResponse.builder()
+					.responseBody(JSON.toJSONString(
+							MockRuleMgmtResponseVo.builder().status(0).success(false).message(NOMATCHED).build()))
+					.build();
 		}
-		else{
-			return MockResponse.builder().responseBody(JSON
-					.toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(false).message(NOMATCHED).build())).build();
-		}
-	}	
-	
-
-	private boolean __getUpstream(String hostname) {
-		// TODO Auto-generated method stub
-		return false;
 	}
+
 
 	/**
 	 * 根据hostName和请求Url地址，获取到Mock报文的具体实现
@@ -144,35 +133,35 @@ public class MockserviceImpl {
 				// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
 				return MockResponse.builder()
 						.responseBody(__interpreterResponse(matchedResult.getMockResponse(), headers, requestBody))
-						.isMock(true).headers(matchedResult.getResponseHeaders())
-						.build();
+						.isMock(true).headers(matchedResult.getResponseHeaders()).build();
 			}
 		} else
-			return null;
-
+		{
+			return MockResponse.builder().responseBody(NOMATCHED).build();
+		}
 	}
 
 	private String __interpreterResponse(String originalMockResponse, Map<String, String> requestHeders,
 			String requestBody) {
-		
+
 		// multipart 暂不支持requestBody的解析，multipart的请求报文待确认后支持
-		if(requestHeders.get("content-type")== null || requestHeders.get("content-type").contains("multipart")) {
-			requestBody = ""; 
+		if (requestHeders.get("content-type") == null || requestHeders.get("content-type").contains("multipart")) {
+			requestBody = "";
 		}
-				
+
 		String mockResponse = originalMockResponse;
 		for (MockResponseSetUpConverterInterface mockResponseConverter : mockResponseConverters) {
 			mockResponse = mockResponseConverter.converter(mockResponse, requestHeders, requestBody);
 		}
-		
-		if( originalMockResponse.startsWith("//groovy") ) {
+
+		if (originalMockResponse.startsWith("//groovy")) {
 			mockResponse = groovyScriptsHandler.converter(mockResponse, requestHeders, requestBody);
 		}
-		
+
 		for (MockResponseTearDownConverterInterface mockResponseConverter : mockResponseTearDownConverters) {
 			mockResponse = mockResponseConverter.converter(mockResponse, requestHeders, requestBody);
 		}
-			
+
 		return mockResponse;
 	}
 
@@ -204,12 +193,14 @@ public class MockserviceImpl {
 			if (response.isSuccessful())
 				return response.body().string();
 
+			else
+				return response.toString();
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return e.toString();
 		}
 
-		return null;
 	}
 
 	/*
