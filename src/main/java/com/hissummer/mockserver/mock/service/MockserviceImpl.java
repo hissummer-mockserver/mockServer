@@ -113,21 +113,31 @@ public class MockserviceImpl {
 
 		if (matchedResult != null) {
 			// 获取到匹配的结果
-			String upstream = null;
+			String upstreamAddress = "mockserver.hissummer.com";
+			String protocol = "http";
+			String upstreamUri="/";
 			try {
-				upstream = matchedResult.getUpstreamGroup().getUpstreams().get(0).getUpstreamAddress();
+				if(matchedResult.getUpstreams().getNodes().get(0).getAddress() != null)
+					upstreamAddress = matchedResult.getUpstreams().getNodes().get(0).getAddress() ;		
+				
+				if(matchedResult.getUpstreams().getNodes().get(0).getProtocol() != null)
+					protocol = matchedResult.getUpstreams().getNodes().get(0).getProtocol();
+					
+				if(matchedResult.getUpstreams().getNodes().get(0).getUri() != null)
+					upstreamUri = matchedResult.getUpstreams().getNodes().get(0).getUri();
+				
 			} catch (Exception e) {
 				log.info("{} mockrule : upstream data is not defined{}", matchedResult.getId(),
-						matchedResult.getUpstreamGroup());
+						matchedResult.getUpstreams());
 			}
 			HttpMockWorkMode workMode = matchedResult.getWorkMode();
 
-			String protocol = matchedResult.getProtocol();
 
-			if (workMode != null && workMode.equals(HttpMockWorkMode.UPSTREAM) && upstream != null) {
+
+			if (workMode != null && workMode.equals(HttpMockWorkMode.UPSTREAM)) {
 
 				// mock rule 的工作模式为upstream模式. 后期将upstream作为hostname的rule单独管理，这里的代码将会移除！
-				String response = __getUpstreamResponse(protocol, headers, upstream, method, requestUri, requestBody);
+				String response = __getUpstreamResponse(protocol, headers, upstreamAddress, method, upstreamUri, requestBody);
 				return MockResponse.builder().responseBody(response).build();
 			} else {
 				// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可

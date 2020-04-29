@@ -5,9 +5,12 @@ import lombok.Data;
 
 @Data
 @Builder
-public class Upstream {
+public class UpstreamNode {
 
-	private String upstreamAddress;
+	@Builder.Default
+	private String protocol = "http";
+	private String address;
+	private String uri;
 	private UpstreamPolicy upstreamPolicy;
 
 }
