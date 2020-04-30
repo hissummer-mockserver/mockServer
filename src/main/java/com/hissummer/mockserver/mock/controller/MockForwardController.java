@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
@@ -55,6 +56,7 @@ public class MockForwardController implements ErrorController {
 	 * @return
 	 */
 	@RequestMapping(value = "/forward")
+	// we don't specify method for this @RequestMapping , because we would like support all methods for mock service.
 	public ResponseEntity<?> forward(HttpServletRequest request, @RequestHeader Map<String, String> headers,
 			@Nullable @RequestBody String requestBody, final HttpServletResponse response) {
 
@@ -71,6 +73,9 @@ public class MockForwardController implements ErrorController {
 
 			if (statusCode == HttpStatus.NOT_FOUND.value()) {
 				try {
+					/**
+					 * change http response code 404(notfound) to 200.  
+					 */
 					ResponseFacade responsefacade = (ResponseFacade) response;
 					Field innerResponse = getField(responsefacade.getClass(), "response");
 					innerResponse.setAccessible(true);
@@ -91,7 +96,7 @@ public class MockForwardController implements ErrorController {
 					log.info(e.getMessage());
 				}
 
-				// 404 not found1
+				// 404 not found
 				HttpHeaders responseHeaders = new HttpHeaders();
 				MockResponse responseVo = mockservice.getResponse(headers, host, request.getMethod(),
 						(String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI), requestBody);
@@ -115,10 +120,7 @@ public class MockForwardController implements ErrorController {
 
 					responseHeaders.setContentType(new MediaType("application", "json"));
 				}
-
-				log.info("-------------------{}", JSON.toJSONString(responseHeaders));
-
-				return new ResponseEntity<String>(responseVo.getResponseBody(), responseHeaders, HttpStatus.OK);
+				return new ResponseEntity<>(responseVo.getResponseBody(), responseHeaders, HttpStatus.OK);
 
 			} else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
 

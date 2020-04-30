@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mgmt.vo.HttpMockWorkMode;
@@ -77,7 +78,7 @@ public class MockserviceImpl {
 		}  else {
 			return MockResponse.builder()
 					.responseBody(JSON.toJSONString(
-							MockRuleMgmtResponseVo.builder().status(0).success(false).message(NOMATCHED).build()))
+							MockRuleMgmtResponseVo.builder().status(0).success(true).message(NOMATCHED).build()))
 					.build();
 		}
 	}
@@ -138,16 +139,16 @@ public class MockserviceImpl {
 
 				// mock rule 的工作模式为upstream模式. 后期将upstream作为hostname的rule单独管理，这里的代码将会移除！
 				String response = __getUpstreamResponse(protocol, headers, upstreamAddress, method, upstreamUri, requestBody);
-				return MockResponse.builder().responseBody(response).build();
+				return MockResponse.builder().responseBody(response).isUpstream(true).isMock(false).build();
 			} else {
 				// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
 				return MockResponse.builder()
 						.responseBody(__interpreterResponse(matchedResult.getMockResponse(), headers, requestBody))
-						.isMock(true).headers(matchedResult.getResponseHeaders()).build();
+						.isMock(true).isUpstream(false).headers(matchedResult.getResponseHeaders()).build();
 			}
 		} else
 		{
-			return MockResponse.builder().responseBody(NOMATCHED).build();
+			return null;
 		}
 	}
 
@@ -184,7 +185,13 @@ public class MockserviceImpl {
 		Headers.Builder headerBuilder = new Headers.Builder();
 
 		for (Entry<String, String> header : headers.entrySet()) {
-			headerBuilder.add(header.getKey(), header.getValue());
+			if(header.getKey().equalsIgnoreCase("host")) {
+				headerBuilder.add(header.getKey(), getHost(upstream));
+			}
+			else
+			{
+				headerBuilder.add(header.getKey(), header.getValue());
+			}
 		}
 
 		Headers requestHeaders = headerBuilder.build();
@@ -195,22 +202,40 @@ public class MockserviceImpl {
 		}
 		Request request = new Request.Builder().url(protocol + "://" + upstream + requestUri)
 				.method(method, okHttpRequestBody).headers(requestHeaders).build();
-		log.info("upstream request: {} \r\n {}",JSON.toJSONString(request.headers()) ,JSON.toJSONString(request.body()) );
+		log.info("upstream request: {} | {}",JSON.toJSONString(request.headers()) ,JSON.toJSONString(request.body()) );
 		Call call = client.newCall(request);
 		try {
 			Response response = call.execute();
-			log.info("upstream response:{} \r\n {} \r\n {}",JSON.toJSONString(response.code()),JSON.toJSONString(response.headers()),JSON.toJSONString(response.body()));
-			if (response.isSuccessful())
-				return response.body().string();
+			log.info("upstream response:{} | {} | {}",JSON.toJSONString(response.code()),JSON.toJSONString(response.headers()),response.body().toString());
 
-			else
-				return JSON.toJSONString(response.toString());
+				JSONObject responseJson = new JSONObject();
+				
+				if(response.isSuccessful())
+					return response.body().string();
+				
+				else {
+					
+					Map<String, List<String>> readableHeaders = response.headers().toMultimap();
+					
+					responseJson.put("code", response.code());
+					responseJson.put("message", response.message());
+					responseJson.put("networkResponse", response.networkResponse());					
+					responseJson.put("headers",readableHeaders);
+					responseJson.put("body", response.body().string());
+	
+					
+					return responseJson.toJSONString();
+				}
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			return e.toString();
 		}
 
+	}
+
+	private String getHost(String upstream) {
+		return upstream.split(":")[0];
 	}
 
 	/*
