@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 将logback.xml 改为 logback-spring.xml 文件用于spring重定义的property的加载 -->
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
 
 	<include resource="org/springframework/boot/logging/logback/defaults.xml" />
 	<include resource="org/springframework/boot/logging/logback/console-appender.xml" />
     <jmxConfigurator/>
 	<!-- 日志文件输出目录（tomcat/logs） -->
-	<property name="LOG_HOME" value="${catalina.base}/logs" />
+	<property name="LOG_HOME" value="${LOGBASE}/logs" />
 	<!-- 日志文件名 -->
 	<property name="LOG_FILE" value="test-asist" />
 	<!-- 日志格式 -->
