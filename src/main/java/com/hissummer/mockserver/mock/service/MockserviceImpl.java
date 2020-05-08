@@ -20,6 +20,7 @@ import com.hissummer.mockserver.mock.service.mockresponseconverters.converterint
 import com.hissummer.mockserver.mock.service.mockresponseconverters.converterinterface.MockResponseTearDownConverterInterface;
 import com.hissummer.mockserver.mock.vo.MockResponse;
 
+import kotlin.Pair;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
 import okhttp3.Headers;
@@ -116,7 +117,7 @@ public class MockserviceImpl {
 			// 获取到匹配的结果
 			String upstreamAddress = "mockserver.hissummer.com";
 			String protocol = "http";
-			String upstreamUri="/";
+			String upstreamUri="/docs";
 			try {
 				if(matchedResult.getUpstreams().getNodes().get(0).getAddress() != null)
 					upstreamAddress = matchedResult.getUpstreams().getNodes().get(0).getAddress() ;		
@@ -138,8 +139,8 @@ public class MockserviceImpl {
 			if (workMode != null && workMode.equals(HttpMockWorkMode.UPSTREAM)) {
 
 				// mock rule 的工作模式为upstream模式. 后期将upstream作为hostname的rule单独管理，这里的代码将会移除！
-				String response = __getUpstreamResponse(protocol, headers, upstreamAddress, method, upstreamUri, requestBody);
-				return MockResponse.builder().responseBody(response).isUpstream(true).isMock(false).build();
+				return   __getUpstreamResponse(protocol, headers, upstreamAddress, method, upstreamUri, requestBody);
+				 
 			} else {
 				// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
 				return MockResponse.builder()
@@ -176,7 +177,7 @@ public class MockserviceImpl {
 		return mockResponse;
 	}
 
-	private String __getUpstreamResponse(String protocol, Map<String, String> headers, String upstream, String method,
+	private MockResponse __getUpstreamResponse(String protocol, Map<String, String> headers, String upstream, String method,
 			String requestUri, String requestBody) {
 		// TODO Auto-generated method stub
 
@@ -211,8 +212,15 @@ public class MockserviceImpl {
 				JSONObject responseJson = new JSONObject();
 				
 				if(response.isSuccessful())
-					return response.body().string();
-				
+				{
+				response.headers().iterator();
+					while(response.headers().iterator().hasNext()) {
+						Pair<String, String> responseHeader = response.headers().iterator().next();
+						headers.put(responseHeader.getFirst(), responseHeader.getSecond());
+					}
+					
+					return MockResponse.builder().headers(headers).responseBody(response.body().string()).isUpstream(true).isMock(false).build();
+				}
 				else {
 					
 					Map<String, List<String>> readableHeaders = response.headers().toMultimap();
@@ -223,13 +231,13 @@ public class MockserviceImpl {
 					responseJson.put("headers",readableHeaders);
 					responseJson.put("body", response.body().string());
 	
-					
-					return responseJson.toJSONString();
+					return MockResponse.builder().responseBody(responseJson.toJSONString()).isUpstream(true).isMock(false).build();
+
 				}
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			return e.toString();
+			return MockResponse.builder().responseBody(e.toString()).isUpstream(true).isMock(false).build();
+
 		}
 
 	}
