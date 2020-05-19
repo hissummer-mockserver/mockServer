@@ -290,16 +290,19 @@ public class MockserviceImpl {
 		String[] requestURIArray = requestUriFormat.split("/");
 		List<String> matchRequestURI = new ArrayList<String>(Arrays.asList(requestURIArray));
 		String matchRequestURIString = requestUriFormat;
-
-		for (int i = 0; i <= matchRequestURI.size(); i++) {
+		int loops = matchRequestURI.size(); 
+		for (int i = 0; i <= loops; i++) {
 
 			if (i != 0) {
 				matchRequestURI.remove(matchRequestURI.size() - 1);
+				if (matchRequestURI.isEmpty()) {
+					matchRequestURIString = "/";
+				}
+				else {
 				matchRequestURIString = String.join("/", matchRequestURI);
+				}
 			}
-			if (i == matchRequestURI.size()) {
-				matchRequestURIString = "/";
-			}
+
 
 			HttpMockRule matchedMockRule = mockRuleRepository.findByHostAndUri(hostName, matchRequestURIString);
 
