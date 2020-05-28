@@ -97,7 +97,6 @@ public class MockserviceImpl {
 
 		String host = hostName;
 		headers.get("Host");
-		log.info("host in headers: ", host);
 
 		// 如果Host是ip地址,则查找mock规则时,则hostName是未定义,只根据uri进行查找匹配规则.
 		if (__isIpv4(host)) {

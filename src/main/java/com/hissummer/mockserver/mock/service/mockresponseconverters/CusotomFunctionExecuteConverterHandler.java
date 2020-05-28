@@ -73,6 +73,9 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 					}
 
 				}
+				else {
+					log.warn("function {} not fount" ,m.group(1));
+				}
 				log.info(originalResponse);
 			} catch (NoSuchBeanDefinitionException e) {
 
