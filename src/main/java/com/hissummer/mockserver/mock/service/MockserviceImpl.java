@@ -3,6 +3,7 @@ package com.hissummer.mockserver.mock.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -103,35 +104,35 @@ public class MockserviceImpl {
 			host = "*";
 		}
 		// 第一次匹配规则
-		HttpMockRule matchedResult = __getMatchedMockRulesByHostnameAndUrl(host, requestUri);
+		HttpMockRule matchedMockRule = __getMatchedMockRulesByHostnameAndUrl(host, requestUri);
 
 		// 如果第一次查找时,Host是域名,且没有找到对应的规则,则会重新假设Host为null时,重新再查找一次.
-		if (matchedResult == null && host != null && !host.equals("*")) {
+		if (matchedMockRule == null && host != null && !host.equals("*")) {
 			host = "*";
 			// 如果第一次host不为null时没有查到匹配规则,则重新将host设置为null,重新查找一次规则.
-			matchedResult = __getMatchedMockRulesByHostnameAndUrl(host, requestUri);
+			matchedMockRule = __getMatchedMockRulesByHostnameAndUrl(host, requestUri);
 		}
 
-		if (matchedResult != null) {
+		if (matchedMockRule != null) {
 			// 获取到匹配的结果
 			String upstreamAddress = "mockserver.hissummer.com";
 			String protocol = "http";
 			String upstreamUri="/docs";
 			try {
-				if(matchedResult.getUpstreams().getNodes().get(0).getAddress() != null)
-					upstreamAddress = matchedResult.getUpstreams().getNodes().get(0).getAddress() ;		
+				if(matchedMockRule.getUpstreams().getNodes().get(0).getAddress() != null)
+					upstreamAddress = matchedMockRule.getUpstreams().getNodes().get(0).getAddress() ;		
 				
-				if(matchedResult.getUpstreams().getNodes().get(0).getProtocol() != null)
-					protocol = matchedResult.getUpstreams().getNodes().get(0).getProtocol();
+				if(matchedMockRule.getUpstreams().getNodes().get(0).getProtocol() != null)
+					protocol = matchedMockRule.getUpstreams().getNodes().get(0).getProtocol();
 					
-				if(matchedResult.getUpstreams().getNodes().get(0).getUri() != null)
-					upstreamUri = matchedResult.getUpstreams().getNodes().get(0).getUri();
+				if(matchedMockRule.getUpstreams().getNodes().get(0).getUri() != null)
+					upstreamUri = matchedMockRule.getUpstreams().getNodes().get(0).getUri();
 				
 			} catch (Exception e) {
-				log.info("{} mockrule : upstream data is not defined{}", matchedResult.getId(),
-						matchedResult.getUpstreams());
+				log.info("{} mockrule : upstream data is not defined{}", matchedMockRule.getId(),
+						matchedMockRule.getUpstreams());
 			}
-			HttpMockWorkMode workMode = matchedResult.getWorkMode();
+			HttpMockWorkMode workMode = matchedMockRule.getWorkMode();
 
 
 
@@ -143,8 +144,8 @@ public class MockserviceImpl {
 			} else {
 				// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
 				return MockResponse.builder()
-						.responseBody(__interpreterResponse(matchedResult.getMockResponse(), headers, requestBody))
-						.isMock(true).isUpstream(false).headers(matchedResult.getResponseHeaders()).build();
+						.responseBody(__interpreterResponse(matchedMockRule.getMockResponse(), headers, requestBody))
+						.isMock(true).isUpstream(false).headers(matchedMockRule.getResponseHeaders()).build();
 			}
 		} else
 		{
@@ -309,6 +310,24 @@ public class MockserviceImpl {
 				return matchedMockRule;
 		}
 		return null;
+	}
+
+	public String testRule(HttpMockRule mockRule) {
+		
+		HttpMockWorkMode workMode = mockRule.getWorkMode();
+		
+		if(workMode.equals(HttpMockWorkMode.MOCK))
+		{
+		
+			// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
+			return MockResponse.builder()
+					.responseBody(__interpreterResponse(mockRule.getMockResponse(), Collections.emptyMap(), null))
+					.isMock(true).isUpstream(false).headers(mockRule.getResponseHeaders()).build().getResponseBody();
+		}
+		else {
+			return "upstream mode not support test, please directly access the upstream address.";
+		}
+		
 	}
 
 }
