@@ -102,7 +102,7 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 
 		String returnValue = requestHeaders.get(extractPath);
 		if (returnValue == null)
-			returnValue = "null";
+			returnValue = "!NullValue!";
 		return returnValue;
 
 	}
@@ -113,7 +113,11 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 
 		if (contentTypeContains(requestHeaders,"application/x-www-form-urlencoded")) {
 
-			return wwwformtoMap(requestBody).get(extractPath.replace("$.", ""));
+			String extractValue = wwwformtoMap(requestBody).get(extractPath.replace("$.", ""));
+			
+			if(extractValue == null)
+				return "!NullValue!";
+			else return extractValue;
 
 		} else if (contentTypeContains(requestHeaders,"application/xml")) {
 			log.warn("content type : xml not support  to extract!");
@@ -124,7 +128,7 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 				// 因为JSON.toJSONString后非json format串会加上双引号，因为我们不需要双引号，此时我们需要处理下。
 				jsonValue = StringUtils.strip(jsonValue, "\"");
 				if (jsonValue == null)
-					jsonValue = "null";
+					jsonValue = "!NullValue!";
 				return jsonValue;
 
 			} catch (Exception e) {
@@ -134,13 +138,21 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 			log.warn(" {} not support  to extract!", requestHeaders.get("content-type"));
 		}
 
-		return null;
+		return "!NullValue!";
 	}
 	
 	private boolean contentTypeContains( Map<String, String> requestHeaders , String content)
 	{
 		
-		return requestHeaders.get("content-type").contains(content);
+		 if(!StringUtils.isBlank(requestHeaders.get("content-type")))
+				{
+			 
+			 return requestHeaders.get("content-type").contains(content);
+				
+				}
+		 else {
+			 return false;
+		 }
 		
 	}
 	
