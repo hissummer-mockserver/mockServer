@@ -32,5 +32,7 @@ public class HttpMockRule {
 
 	@Builder.Default
 	private Boolean enable = true;
+	
+	private String category;
 
 }

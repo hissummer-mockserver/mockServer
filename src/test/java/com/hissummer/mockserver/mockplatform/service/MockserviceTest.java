@@ -64,11 +64,13 @@ public class MockserviceTest extends SpringBootTestBase {
 	@Test
 	public void testAddMockRule2() {
 		
-		log.info(JSON.toJSONString(mockservice2.findByHost("*", PageRequest.of(0, 5))));
-		
-		log.info(JSON.toJSONString(mockservice2.findByUri("/newtest", PageRequest.of(0, 5))));
-		
-		log.info(JSON.toJSONString(mockservice2.findByHostAndUri("*","/test1/test2")));
+//		log.info(JSON.toJSONString(mockservice2.findByHost("*", PageRequest.of(0, 5))));
+//		
+//		log.info(JSON.toJSONString(mockservice2.findByUri("/newtest", PageRequest.of(0, 5))));
+//		
+//		log.info(JSON.toJSONString(mockservice2.findByHostAndUri("*","/test1/test2")));
+//		
+		log.info(JSON.toJSONString(mockservice2.findByHostRegexpAndUriRegexpAndCategory("", "", "test2", PageRequest.of(0, 5))));
 		
 	}
 	
