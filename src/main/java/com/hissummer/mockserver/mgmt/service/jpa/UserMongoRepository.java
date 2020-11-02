@@ -14,12 +14,11 @@ public interface UserMongoRepository extends MongoRepository<Loginpair, String> 
 	Page<Loginpair> findByEnable(Boolean enable, Pageable pageable);
 
 	List<Loginpair> findByEnable(Boolean enable);
-	
+
 	Loginpair findByUsernameAndPassword(String username, String password);
 
 	Loginpair findByUsername(String username);
-	
-	Optional<Loginpair> findById(String id);
 
+	Optional<Loginpair> findById(String id);
 
 }

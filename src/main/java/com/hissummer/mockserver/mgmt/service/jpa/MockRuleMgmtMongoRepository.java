@@ -21,8 +21,9 @@ public interface MockRuleMgmtMongoRepository extends MongoRepository<HttpMockRul
 	Page<HttpMockRule> findByHostRegexpAndUriRegexp(String host, String uri, Pageable pageable);
 
 	@Query("{host : {$regex : ?0}, uri:{$regex : ?1}, category: ?2}")
-	Page<HttpMockRule> findByHostRegexpAndUriRegexpAndCategory(String host, String uri, String category,Pageable pageable);	
-	
+	Page<HttpMockRule> findByHostRegexpAndUriRegexpAndCategory(String host, String uri, String category,
+			Pageable pageable);
+
 	@Query("{host : {$regex : ?0}}")
 	Page<HttpMockRule> findByHostWithRegex(String host, Pageable pageable);
 

@@ -8,15 +8,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.hissummer.mockserver.mgmt.service.CheckLoginInterceptor;
 
 @Component
-public class LoginCheckInterceptorAppConfig  implements WebMvcConfigurer{
+public class LoginCheckInterceptorAppConfig implements WebMvcConfigurer {
 
-	
-	   @Autowired
-	   CheckLoginInterceptor checkLoginInterceptor;
+	@Autowired
+	CheckLoginInterceptor checkLoginInterceptor;
 
-	   @Override
-	   public void addInterceptors(InterceptorRegistry registry) {
-		   
-	      registry.addInterceptor(checkLoginInterceptor).addPathPatterns("/api/mock/**").excludePathPatterns("/api/mock/2.0/login","/api/mock/2.0/logout");
-	   }
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+
+		registry.addInterceptor(checkLoginInterceptor).addPathPatterns("/api/mock/**")
+				.excludePathPatterns("/api/mock/2.0/login", "/api/mock/2.0/logout");
+	}
 }

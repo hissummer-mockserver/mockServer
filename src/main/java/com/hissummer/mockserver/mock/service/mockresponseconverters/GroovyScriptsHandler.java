@@ -10,6 +10,7 @@ import com.hissummer.mockserver.mock.service.mockresponseconverters.converterint
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+
 /**
  * 
  * @author lihao
@@ -21,7 +22,6 @@ public class GroovyScriptsHandler implements ScriptsConverterInterface {
 	@Override
 	public String converter(String originalResponse, Map<String, String> requestHeders, String requestBody) {
 
-		
 		ScriptEngineManager factory = new ScriptEngineManager();
 		ScriptEngine engine = factory.getEngineByName("groovy");
 		engine.put("response", originalResponse);
@@ -30,11 +30,10 @@ public class GroovyScriptsHandler implements ScriptsConverterInterface {
 		try {
 			engine.eval(originalResponse);
 		} catch (ScriptException e) {
-			engine.put("response", e.getMessage()+e.getStackTrace().toString());
+			engine.put("response", e.getMessage() + e.getStackTrace().toString());
 			e.printStackTrace();
 		}
-		
-		
+
 		return engine.get("response").toString();
 	}
 

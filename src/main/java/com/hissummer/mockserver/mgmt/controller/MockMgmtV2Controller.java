@@ -1,6 +1,7 @@
 package com.hissummer.mockserver.mgmt.controller;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,6 @@ import com.hissummer.mockserver.mgmt.service.EurekaMockRuleServiceImpl;
 import com.hissummer.mockserver.mgmt.service.UserService;
 import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.service.jpa.MockRuleMgmtMongoRepository;
-import com.hissummer.mockserver.mgmt.service.jpa.UserMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
 import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
 import com.hissummer.mockserver.mgmt.vo.Loginpair;
@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 
 @Slf4j
-@CrossOrigin(origins = "*" , allowCredentials= "true")
+@CrossOrigin(origins = "*", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/mock/2.0")
 public class MockMgmtV2Controller {
@@ -51,8 +51,8 @@ public class MockMgmtV2Controller {
 
 	@Autowired
 	EurekaMockRuleServiceImpl eurekaMockRuleServiceImpl;
-	
-	@Autowired 	
+
+	@Autowired
 	UserService userService;
 
 	@PostMapping(value = "/addRule")
@@ -148,7 +148,7 @@ public class MockMgmtV2Controller {
 		if (!StringUtils.isEmpty(requestBody.getString("host"))) {
 
 			if (requestBody.getString("host").equals("*")) {
-				// 因为做的是正则匹配查询，所以特殊的*字符转换为\*，即查询包含*字符的host值。 
+				// 因为做的是正则匹配查询，所以特殊的*字符转换为\*，即查询包含*字符的host值。
 				host = "\\*";
 			} else {
 				host = requestBody.getString("host");
@@ -156,11 +156,10 @@ public class MockMgmtV2Controller {
 
 		}
 		String category = requestBody.getString("category");
-		
-		if(StringUtils.isEmpty(category)){
-		rules = mockService.findByHostRegexpAndUriRegexp(host, uri, page);
-		}
-		else {
+
+		if (StringUtils.isEmpty(category)) {
+			rules = mockService.findByHostRegexpAndUriRegexp(host, uri, page);
+		} else {
 			rules = mockService.findByHostRegexpAndUriRegexpAndCategory(host, uri, category, page);
 		}
 
@@ -265,7 +264,7 @@ public class MockMgmtV2Controller {
 
 		return result;
 	}
-	
+
 	@PostMapping(value = "/login")
 	public MockRuleMgmtResponseVo login(@RequestBody JSONObject requestBody, HttpServletResponse response) {
 
@@ -274,40 +273,55 @@ public class MockMgmtV2Controller {
 
 		boolean loginStatus = userService.login(username, password);
 		Loginpair user = userService.finduserByuserName(username);
-		if(user!=null) {
-		Cookie mu = new Cookie("mu",user.getId());
-		 response.addCookie(mu);
+		if (user != null) {
+			Cookie mu = new Cookie("mu", user.getId());
+			response.addCookie(mu);
 		}
 		return MockRuleMgmtResponseVo.builder().status(0).success(loginStatus).build();
 	}
-	
+
 	@PostMapping(value = "/logout")
-	public MockRuleMgmtResponseVo logout(@RequestBody JSONObject requestBody) {
+	public MockRuleMgmtResponseVo logout(@RequestBody JSONObject requestBody, HttpServletRequest request) {
 
 		String username = requestBody.getString("username");
-		return MockRuleMgmtResponseVo.builder().status(0).success(userService.logout(username)).build();
+
+		return MockRuleMgmtResponseVo.builder().status(0).success(userService.logout(username, request.getCookies()))
+				.build();
 	}
-		
+
 	@PostMapping(value = "/createUser")
 	public MockRuleMgmtResponseVo createUser(@RequestBody JSONObject requestBody) {
 
 		String username = requestBody.getString("username");
 		String password = requestBody.getString("password");
 
-		return MockRuleMgmtResponseVo.builder().status(0).success(userService.createUser(username,password)).build();
+		return MockRuleMgmtResponseVo.builder().status(0).success(userService.createUser(username, password)).build();
 	}
-	
-	@PostMapping(value = "/delUser")
-	public MockRuleMgmtResponseVo delUser(@RequestBody JSONObject requestBody) {
+
+	@PostMapping(value = "/rePassword")
+	public MockRuleMgmtResponseVo rePasswordUser(@RequestBody JSONObject requestBody, HttpServletRequest request) {
 
 		String username = requestBody.getString("username");
+		String password = requestBody.getString("password");
+		String newpassword = requestBody.getString("newpassword");
 
-		return MockRuleMgmtResponseVo.builder().status(0).success(userService.delUser(username)).build();
-	}	
-	
+		return MockRuleMgmtResponseVo.builder().status(0)
+				.success(userService.rePasswordUser(username, password, newpassword, request.getCookies())).build();
+	}
+
+	@PostMapping(value = "/delUser")
+	public MockRuleMgmtResponseVo delUser(@RequestBody JSONObject requestBody, HttpServletRequest request) {
+
+		String username = requestBody.getString("username");
+		String password = requestBody.getString("password");
+
+		return MockRuleMgmtResponseVo.builder().status(0)
+				.success(userService.delUser(username, password, request.getCookies())).build();
+	}
+
 	@PostMapping(value = "/isLogin")
 	public MockRuleMgmtResponseVo isUserLogin() {
 		return MockRuleMgmtResponseVo.builder().status(0).success(true).build();
-	}	
-	
+	}
+
 }

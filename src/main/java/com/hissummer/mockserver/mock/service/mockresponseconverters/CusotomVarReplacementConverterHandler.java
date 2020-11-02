@@ -127,13 +127,12 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 	}
 
 	/**
-	 * 把x-www-form-urlencode的字符串转为Map
-	 * 例如 a=b 转为  Map<"a","b">
+	 * 把x-www-form-urlencode的字符串转为Map 例如 a=b 转为 Map<"a","b">
+	 * 
 	 * @param requestBody
-	 * @return 
+	 * @return
 	 */
 	private Map<String, String> wwwformtoMap(String requestBody) {
-
 
 		Map<String, String> requestBodyMap = new HashMap<>();
 
@@ -144,7 +143,7 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 			e.printStackTrace();
 			return requestBodyMap;
 		}
-		
+
 		String[] parameters = requestBody.split("&");
 
 		for (int i = 0; i < parameters.length; i++) {

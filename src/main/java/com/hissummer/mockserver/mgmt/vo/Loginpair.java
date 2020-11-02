@@ -19,5 +19,5 @@ public class Loginpair {
 	private Date loginExpiredDate;
 	private Date createDate;
 	private Boolean enable;
-//	private String version;
+	// private String version;
 }

@@ -100,7 +100,7 @@ public class MockForwardController implements ErrorController {
 
 					responseVo.getHeaders().keySet().forEach(header -> {
 
-							responseHeaders.add(header, responseVo.getHeaders().get(header));
+						responseHeaders.add(header, responseVo.getHeaders().get(header));
 
 					});
 				}
