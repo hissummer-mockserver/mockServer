@@ -110,7 +110,7 @@ public class UserService {
 			if (loginuser != null && loginuser.getId().equals(this.getCookieMu(cookies))) {
 
 				loginuser.setPassword(this.md5password(newpassword));
-
+				userMongoRepository.save(loginuser);
 				return true;
 			} else {
 
@@ -211,7 +211,7 @@ public class UserService {
 
 		for (Cookie cookie : cookies) {
 			if (cookie.getName().equals("mu"))
-				return cookie.getName();
+				return cookie.getValue();
 		}
 
 		return "muisnotdefined";
