@@ -7,9 +7,9 @@ import java.util.List;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.HttpMethod;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -28,7 +28,7 @@ public class CheckLoginInterceptor implements HandlerInterceptor {
 
 		log.info(request.getRequestURI());
 
-		if (request.getMethod().equals(HttpMethod.OPTIONS))
+		if (request.getMethod().equals(HttpMethod.OPTIONS.name()))
 			return true;
 
 		boolean loginCheck[] = { false };
