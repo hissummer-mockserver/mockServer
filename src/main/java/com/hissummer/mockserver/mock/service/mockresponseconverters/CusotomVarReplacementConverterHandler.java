@@ -7,12 +7,14 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.hissummer.mockserver.mock.service.mockresponseconverters.converterinterface.MockResponseSetUpConverterInterface;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
@@ -43,12 +45,19 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 		String replaceString = null;
 		int offposition = 0;
 
+		boolean logResponse = false;
 		while (m.find()) {
 			log.info("CusotomVarReplacementConverterHandler - Found need replacement vars: " + m.group(0));
 			log.info("CusotomVarReplacementConverterHandler - start{} end{}", m.start(), m.end());
 			log.info("CusotomVarReplacementConverterHandler - Found var expression: " + m.group(1));
 
 			log.info(originalResponse);
+
+			if(!logResponse)
+			{
+				logResponse = true;
+				log.info("headers: {} response: {}  to be extracted: ",requestHeaders,requestBody);
+			}
 
 			try {
 
@@ -93,7 +102,7 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 
 		String returnValue = requestHeaders.get(extractPath);
 		if (returnValue == null)
-			returnValue = "null";
+			returnValue = "!NullValue!";
 		return returnValue;
 
 	}
@@ -102,33 +111,54 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 			String requestBody) {
 		log.info("get from body:{} ", extractPath);
 
-		if (requestHeaders.containsValue("application/x-www-form-urlencoded")) {
+		if (contentTypeContains(requestHeaders,"application/x-www-form-urlencoded")) {
 
-			return wwwformtoMap(requestBody).get(extractPath.replace("$.", ""));
+			String extractValue = wwwformtoMap(requestBody).get(extractPath.replace("$.", ""));
 
-		} else if (requestHeaders.containsValue("application/xml")) {
+			if(extractValue == null)
+				return "!NullValue!";
+			else return extractValue;
+
+		} else if (contentTypeContains(requestHeaders,"application/xml")) {
 			log.warn("content type : xml not support  to extract!");
-		} else if (requestHeaders.containsValue("application/json")) {
+		} else if (contentTypeContains(requestHeaders,"application/json")) {
 			try {
 				ReadContext ctx = JsonPath.parse(requestBody);
 				String jsonValue = JSON.toJSONString(ctx.read(extractPath));
+				// 因为JSON.toJSONString后非json format串会加上双引号，因为我们不需要双引号，此时我们需要处理下。
+				jsonValue = StringUtils.strip(jsonValue, "\"");
 				if (jsonValue == null)
-					jsonValue = "null";
+					jsonValue = "!NullValue!";
 				return jsonValue;
 
 			} catch (Exception e) {
-				log.warn("read json path error: ", e);
+				log.warn("{} read json path error: ", requestBody,e);
 			}
 		} else {
 			log.warn(" {} not support  to extract!", requestHeaders.get("content-type"));
 		}
 
-		return null;
+		return "!NullValue!";
+	}
+	
+	private boolean contentTypeContains( Map<String, String> requestHeaders , String content)
+	{
+		
+		 if(!StringUtils.isBlank(requestHeaders.get("content-type")))
+				{
+			 
+			 return requestHeaders.get("content-type").contains(content);
+				
+				}
+		 else {
+			 return false;
+		 }
+		
 	}
 
 	/**
-	 * 把x-www-form-urlencode的字符串转为Map 例如 a=b 转为 Map<"a","b">
-	 * 
+	 * 把x-www-form-urlencode的字符串转为Map
+	 * 例如 a=b 转为  Map<"a","b">
 	 * @param requestBody
 	 * @return
 	 */
@@ -160,12 +190,12 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 		return requestBodyMap;
 	}
 
-	// public static void main(String args[]) {
-	//
-	// new CusotomFunctionExecuteConverterHandler()
-	// .converter("${__randomString(a,b)} sjdfksjkdfjskdjfkkke\r\nkekekff
-	// ${__randomString(c,d)}");
-	//
-	// }
+	 public static void main(String args[]) {
+	
+		  JSONObject a= new JSONObject();
+		  a.put("test", "value");
+		 System.out.println(JSON.toJSONString(a));
+	
+	 }
 
 }

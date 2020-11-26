@@ -12,5 +12,6 @@ public class MockResponse {
 	private Map<String, String> headers;
 	private String responseBody; // now only support string responseBody
 	private boolean isMock;
+	private boolean isUpstream;
 
 }

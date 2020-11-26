@@ -9,7 +9,7 @@ import lombok.Data;
 @Builder
 public class UpstreamGroup {
 
-	private List<Upstream> upstreams;
+	private List<UpstreamNode> nodes;
 
 	@Builder.Default
 	private int tryCount = 0;

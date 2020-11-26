@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.hissummer.mockserver.mgmt.vo.Upstream;
+import com.hissummer.mockserver.mgmt.vo.UpstreamNode;
 import com.hissummer.mockserver.mock.service.MongoDbRunCommandServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 
@@ -125,7 +125,7 @@ public class MockRuleManagerServiceImpl {
 
 	@Deprecated
 	public boolean updateMockRule(String id, String hostName, String requestUri, String mockResponse,
-			Map<String, String> mockHeaders, String workMode, Upstream upstreamGroup) {
+			Map<String, String> mockHeaders, String workMode, UpstreamNode upstreamGroup) {
 		// return addmatachedResult.toJson(documentBuilder.build());
 		try {
 			String requestUriFormat = requestUri;
