@@ -25,7 +25,7 @@ public class HttpMockRule {
 
 	private Map<String, String> responseHeaders;
 	private List<Plugin> plugins;
-	private UpstreamGroup upstreamGroup;
+	private UpstreamGroup upstreams;
 
 	@Builder.Default
 	private HttpMockWorkMode workMode = HttpMockWorkMode.MOCK;

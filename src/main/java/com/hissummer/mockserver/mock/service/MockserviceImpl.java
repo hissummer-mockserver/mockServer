@@ -128,10 +128,10 @@ public class MockserviceImpl {
 			// 获取到匹配的结果
 			String upstream = null;
 			try {
-				upstream = matchedResult.getUpstreamGroup().getUpstreams().get(0).getUpstreamAddress();
+				upstream = matchedResult.getUpstreams().getUpstreams().get(0).getUpstreamAddress();
 			} catch (Exception e) {
 				log.info("{} mockrule : upstream data is not defined{}", matchedResult.getId(),
-						matchedResult.getUpstreamGroup());
+						matchedResult.getUpstreams());
 			}
 			HttpMockWorkMode workMode = matchedResult.getWorkMode();
 

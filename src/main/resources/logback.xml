@@ -7,7 +7,7 @@
 	<!-- 日志文件输出目录（tomcat/logs） -->
 	<property name="LOG_HOME" value="${catalina.base}/logs" />
 	<!-- 日志文件名 -->
-	<property name="LOG_FILE" value="test-asist" />
+	<property name="LOG_FILE" value="hissummer-mockserver" />
 	<!-- 日志格式 -->
 	<property name="FILE_LOG_PATTERN1" value="%date{ISO8601}^|%level^|%t^|%c^|%M^|[%X{module}%X{traceKey}%X{input}%X{output}]=&gt;%msg%ex%n" />
 
