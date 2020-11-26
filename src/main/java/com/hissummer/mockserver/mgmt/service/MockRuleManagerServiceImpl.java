@@ -30,8 +30,8 @@ import lombok.extern.slf4j.Slf4j;
 public class MockRuleManagerServiceImpl {
 
 	@Autowired
-	MongoDbRunCommandServiceImpl dataplatformServiceImpl;	
-	
+	MongoDbRunCommandServiceImpl dataplatformServiceImpl;
+
 	@Deprecated
 	public JSONArray queryMockRules(String hostName, String uri, int pageNumber, int pageSize) {
 		// TODO Auto-generated method stub
@@ -59,8 +59,6 @@ public class MockRuleManagerServiceImpl {
 
 		return null;
 	}
-
-
 
 	/**
 	 * 添加mock 规则, 一个规则包含 hostname, uri, mock的报文. hostname可以为null.

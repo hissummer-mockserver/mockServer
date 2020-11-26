@@ -53,10 +53,9 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 
 			log.info(originalResponse);
 
-			if(!logResponse)
-			{
+			if (!logResponse) {
 				logResponse = true;
-				log.info("headers: {} response: {}  to be extracted: ",requestHeaders,requestBody);
+				log.info("headers: {} response: {}  to be extracted: ", requestHeaders, requestBody);
 			}
 
 			try {
@@ -111,17 +110,18 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 			String requestBody) {
 		log.info("get from body:{} ", extractPath);
 
-		if (contentTypeContains(requestHeaders,"application/x-www-form-urlencoded")) {
+		if (contentTypeContains(requestHeaders, "application/x-www-form-urlencoded")) {
 
 			String extractValue = wwwformtoMap(requestBody).get(extractPath.replace("$.", ""));
 
-			if(extractValue == null)
+			if (extractValue == null)
 				return "!NullValue!";
-			else return extractValue;
+			else
+				return extractValue;
 
-		} else if (contentTypeContains(requestHeaders,"application/xml")) {
+		} else if (contentTypeContains(requestHeaders, "application/xml")) {
 			log.warn("content type : xml not support  to extract!");
-		} else if (contentTypeContains(requestHeaders,"application/json")) {
+		} else if (contentTypeContains(requestHeaders, "application/json")) {
 			try {
 				ReadContext ctx = JsonPath.parse(requestBody);
 				String jsonValue = JSON.toJSONString(ctx.read(extractPath));
@@ -132,7 +132,7 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 				return jsonValue;
 
 			} catch (Exception e) {
-				log.warn("{} read json path error: ", requestBody,e);
+				log.warn("{} read json path error: ", requestBody, e);
 			}
 		} else {
 			log.warn(" {} not support  to extract!", requestHeaders.get("content-type"));
@@ -140,25 +140,22 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 
 		return "!NullValue!";
 	}
-	
-	private boolean contentTypeContains( Map<String, String> requestHeaders , String content)
-	{
-		
-		 if(!StringUtils.isBlank(requestHeaders.get("content-type")))
-				{
-			 
-			 return requestHeaders.get("content-type").contains(content);
-				
-				}
-		 else {
-			 return false;
-		 }
-		
+
+	private boolean contentTypeContains(Map<String, String> requestHeaders, String content) {
+
+		if (!StringUtils.isBlank(requestHeaders.get("content-type"))) {
+
+			return requestHeaders.get("content-type").contains(content);
+
+		} else {
+			return false;
+		}
+
 	}
 
 	/**
-	 * 把x-www-form-urlencode的字符串转为Map
-	 * 例如 a=b 转为  Map<"a","b">
+	 * 把x-www-form-urlencode的字符串转为Map 例如 a=b 转为 Map<"a","b">
+	 * 
 	 * @param requestBody
 	 * @return
 	 */
@@ -190,12 +187,12 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 		return requestBodyMap;
 	}
 
-	 public static void main(String args[]) {
-	
-		  JSONObject a= new JSONObject();
-		  a.put("test", "value");
-		 System.out.println(JSON.toJSONString(a));
-	
-	 }
+	public static void main(String args[]) {
+
+		JSONObject a = new JSONObject();
+		a.put("test", "value");
+		System.out.println(JSON.toJSONString(a));
+
+	}
 
 }

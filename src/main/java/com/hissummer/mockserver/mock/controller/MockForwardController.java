@@ -55,7 +55,8 @@ public class MockForwardController implements ErrorController {
 	 * @return
 	 */
 	@RequestMapping(value = "/forward")
-	// we don't specify method for this @RequestMapping , because we would like support all methods for mock service.
+	// we don't specify method for this @RequestMapping , because we would like
+	// support all methods for mock service.
 	public ResponseEntity<?> forward(HttpServletRequest request, @RequestHeader Map<String, String> headers,
 			@Nullable @RequestBody String requestBody, final HttpServletResponse response) {
 
@@ -73,8 +74,8 @@ public class MockForwardController implements ErrorController {
 			if (statusCode == HttpStatus.NOT_FOUND.value()) {
 				try {
 					/**
-					 * change http response code 404(notfound) to 200.  
-					 */					
+					 * change http response code 404(notfound) to 200.
+					 */
 					ResponseFacade responsefacade = (ResponseFacade) response;
 					Field innerResponse = getField(responsefacade.getClass(), "response");
 					innerResponse.setAccessible(true);

@@ -52,7 +52,7 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 
 			newStart = m.start() + offposition;
 			newEnd = m.end() + offposition;
-			
+
 			try {
 
 				// 获取到自定义方法
@@ -60,7 +60,6 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 						.getBean("CustomFunction" + m.group(1));
 
 				if (function != null) {
-
 
 					replaceString = function.execute(this.getCustomFunctionArguments(m.group(2)));
 
@@ -70,8 +69,8 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 						originalResponse = originalResponse.substring(0, newStart) + replaceString
 								+ originalResponse.substring(newEnd);
 					} else {
-						
-						replaceString = "!Function_"+m.group(1)+"_Exception!";
+
+						replaceString = "!Function_" + m.group(1) + "_Exception!";
 						offposition = offposition + replaceString.length() - m.group(0).length();
 
 						originalResponse = originalResponse.substring(0, newStart) + replaceString
@@ -79,10 +78,9 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 
 					}
 
-					}
-				else {
-					
-					replaceString = "!Function_"+m.group(1)+"_NotFound!";
+				} else {
+
+					replaceString = "!Function_" + m.group(1) + "_NotFound!";
 					offposition = offposition + replaceString.length() - m.group(0).length();
 
 					originalResponse = originalResponse.substring(0, newStart) + replaceString
@@ -91,7 +89,7 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 				log.info(originalResponse);
 			} catch (NoSuchBeanDefinitionException e) {
 
-				replaceString = "!Function_"+m.group(1)+"_NotFound!";
+				replaceString = "!Function_" + m.group(1) + "_NotFound!";
 				offposition = offposition + replaceString.length() - m.group(0).length();
 
 				originalResponse = originalResponse.substring(0, newStart) + replaceString
