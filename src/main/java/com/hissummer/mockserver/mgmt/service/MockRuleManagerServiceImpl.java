@@ -13,7 +13,8 @@ import org.springframework.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.hissummer.mockserver.mgmt.vo.Upstream;
+import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
+import com.hissummer.mockserver.mgmt.vo.UpstreamNode;
 import com.hissummer.mockserver.mock.service.MongoDbRunCommandServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +30,10 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class MockRuleManagerServiceImpl {
 
+	
+	@Autowired
+	MongoDbRunCommandServiceImpl dataplatformServiceImpl;
+	
 	@Deprecated
 	public JSONArray queryMockRules(String hostName, String uri, int pageNumber, int pageSize) {
 		// TODO Auto-generated method stub
@@ -57,8 +62,7 @@ public class MockRuleManagerServiceImpl {
 		return null;
 	}
 
-	@Autowired
-	MongoDbRunCommandServiceImpl dataplatformServiceImpl;
+
 
 	/**
 	 * 添加mock 规则, 一个规则包含 hostname, uri, mock的报文. hostname可以为null.
@@ -123,7 +127,7 @@ public class MockRuleManagerServiceImpl {
 
 	@Deprecated
 	public boolean updateMockRule(String id, String hostName, String requestUri, String mockResponse,
-			Map<String, String> mockHeaders, String workMode, Upstream upstreamGroup) {
+			Map<String, String> mockHeaders, String workMode, UpstreamNode upstreamGroup) {
 		// return addmatachedResult.toJson(documentBuilder.build());
 		try {
 			String requestUriFormat = requestUri;

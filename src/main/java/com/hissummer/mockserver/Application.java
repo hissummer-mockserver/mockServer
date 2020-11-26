@@ -25,7 +25,7 @@ public class Application extends SpringBootServletInitializer {
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(Application.class);
 	}
-
+	
 	public static void main(String[] args) throws Exception {
 		log.info("starting mock server ...");
 		SpringApplication.run(Application.class, args);

@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
 import com.hissummer.mockserver.mgmt.service.EurekaMockRuleServiceImpl;
+import com.hissummer.mockserver.mgmt.service.MockRuleManagerServiceImpl;
 import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.service.jpa.MockRuleMgmtMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
 import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
+import com.hissummer.mockserver.mock.service.MockserviceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,10 +37,16 @@ import lombok.extern.slf4j.Slf4j;
 public class MockMgmtV2Controller {
 
 	@Autowired
-	MockRuleMgmtMongoRepository mockService;
+	MockRuleMgmtMongoRepository mockRuleRepository;
 
 	@Autowired
-	EurekaMockRuleMongoRepository eurekaMockService;
+	EurekaMockRuleMongoRepository eurekaMockRuleRepository;
+
+	@Autowired
+	MockRuleManagerServiceImpl mockRuleManagerService;
+	
+	@Autowired
+	MockserviceImpl mockService;
 
 	@Autowired
 	MongoTemplate mongoTemplate;
@@ -53,23 +61,20 @@ public class MockMgmtV2Controller {
 
 		try {
 
-			if (mockService.findByHostAndUri(mockRule.getHost(), mockRule.getUri()) != null) {
+			if (mockRuleRepository.findByHostAndUri(mockRule.getHost(), mockRule.getUri()) != null) {
 				result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("mockrule already exist.")
 						.build();
 				return result;
 			}
 
-			HttpMockRule saveMockRule = mockService.insert(mockRule);
-			if (saveMockRule != null) {
-				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
-						.data(saveMockRule).build();
-			} else {
+			HttpMockRule saveMockRule = mockRuleRepository.insert(mockRule);
 
-				result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild.").build();
-			}
+			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
+					.data(saveMockRule).build();
+
 		} catch (Exception e) {
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save failed: "+e.getMessage()).build();
 		}
 
 		return result;
@@ -81,20 +86,20 @@ public class MockMgmtV2Controller {
 
 		MockRuleMgmtResponseVo result = null;
 		if (mockRule.getId() == null || mockRule.getId().equals("")) {
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
+			return  MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
 					.build();
 		}
 		try {
-			HttpMockRule saveMockRule = mockService.save(mockRule);
+			HttpMockRule saveMockRule = mockRuleRepository.save(mockRule);
 			if (saveMockRule != null) {
-				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
+				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("update success.")
 						.data(saveMockRule).build();
 			} else {
 				result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild.").build();
 			}
 		} catch (Exception e) {
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild:"+e.getMessage()).build();
 		}
 
 		return result;
@@ -109,9 +114,27 @@ public class MockMgmtV2Controller {
 					.build();
 		}
 		try {
-			mockService.deleteById(mockRule.getId());
+			mockRuleRepository.deleteById(mockRule.getId());
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Delete success.").build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("delete success.").build();
+		} catch (Exception e) {
+
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getMessage()).build();
+		}
+
+		return result;
+	}
+
+	@PostMapping(value = "/testRule")
+	public MockRuleMgmtResponseVo testRule(@RequestBody HttpMockRule mockRule) {
+
+		MockRuleMgmtResponseVo result = null;
+
+		try {
+
+			String testResponse = mockService.testRule(mockRule);
+
+			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message(testResponse).build();
 		} catch (Exception e) {
 
 			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getMessage()).build();
@@ -149,7 +172,7 @@ public class MockMgmtV2Controller {
 
 		}
 
-		rules = mockService.findByHostAndUriWithRegex(host, uri, page);
+		rules = mockRuleRepository.findByHostAndUriWithRegex(host, uri, page);
 
 		if (rules != null && rules.getContent().size() > 0)
 			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
@@ -174,7 +197,7 @@ public class MockMgmtV2Controller {
 		ruleExmple.setServiceName(StringUtils.isEmpty(requestBody.getString("serviceName")) ? null
 				: requestBody.getString("serviceName"));
 		Example<EurekaMockRule> example = Example.of(ruleExmple);
-		rules = eurekaMockService.findAll(example, page);
+		rules = eurekaMockRuleRepository.findAll(example, page);
 
 		if (rules != null && rules.getContent() != null && rules.getContent().size() > 0)
 			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
@@ -189,7 +212,7 @@ public class MockMgmtV2Controller {
 		MockRuleMgmtResponseVo result = null;
 
 		try {
-			EurekaMockRule saveMockRule = eurekaMockService.insert(mockRule);
+			EurekaMockRule saveMockRule = eurekaMockRuleRepository.insert(mockRule);
 			if (saveMockRule != null) {
 				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
 						.data(saveMockRule).build();
@@ -215,7 +238,7 @@ public class MockMgmtV2Controller {
 					.build();
 		}
 		try {
-			EurekaMockRule saveMockRule = eurekaMockService.save(mockRule);
+			EurekaMockRule saveMockRule = eurekaMockRuleRepository.save(mockRule);
 			if (saveMockRule != null) {
 
 				eurekaMockRuleServiceImpl.unRegisterApp(mockRule);
@@ -242,7 +265,7 @@ public class MockMgmtV2Controller {
 					.build();
 		}
 		try {
-			eurekaMockService.deleteById(mockRule.getId());
+			eurekaMockRuleRepository.deleteById(mockRule.getId());
 
 			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Delete success.").build();
 		} catch (Exception e) {

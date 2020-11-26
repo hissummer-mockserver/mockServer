@@ -47,19 +47,20 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 
 			log.info(originalResponse);
 
+			int newStart = m.start();
+			int newEnd = m.end();
+
+			newStart = m.start() + offposition;
+			newEnd = m.end() + offposition;
+			
 			try {
 
 				// 获取到自定义方法
 				CustomFunctionInterface function = (CustomFunctionInterface) context
 						.getBean("CustomFunction" + m.group(1));
-
+				
 				if (function != null) {
 
-					int newStart = m.start();
-					int newEnd = m.end();
-
-					newStart = m.start() + offposition;
-					newEnd = m.end() + offposition;
 
 					replaceString = function.execute(this.getCustomFunctionArguments(m.group(2)));
 
@@ -69,14 +70,32 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 						originalResponse = originalResponse.substring(0, newStart) + replaceString
 								+ originalResponse.substring(newEnd);
 					} else {
-						log.warn("replacement string is null");
+						
+						replaceString = "!Function_"+m.group(1)+"_Exception!";
+						offposition = offposition + replaceString.length() - m.group(0).length();
+
+						originalResponse = originalResponse.substring(0, newStart) + replaceString
+								+ originalResponse.substring(newEnd);
+
 					}
 
+				}
+				else {
+					
+					replaceString = "!Function_"+m.group(1)+"_NotFound!";
+					offposition = offposition + replaceString.length() - m.group(0).length();
+
+					originalResponse = originalResponse.substring(0, newStart) + replaceString
+							+ originalResponse.substring(newEnd);
 				}
 				log.info(originalResponse);
 			} catch (NoSuchBeanDefinitionException e) {
 
-				log.warn("bean customfunction '{}' is not found", "CustomFunction" + m.group(1));
+				replaceString = "!Function_"+m.group(1)+"_NotFound!";
+				offposition = offposition + replaceString.length() - m.group(0).length();
+
+				originalResponse = originalResponse.substring(0, newStart) + replaceString
+						+ originalResponse.substring(newEnd);
 			}
 
 		}
