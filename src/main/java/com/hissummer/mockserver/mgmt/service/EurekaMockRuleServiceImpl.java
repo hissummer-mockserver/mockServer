@@ -72,12 +72,9 @@ public class EurekaMockRuleServiceImpl {
 				"http://" + rule.getHostName() + ":" + rule.getPort() + "/status", rule.getServiceName(),
 				rule.getServiceName(), rule.getHostName(), rule.getPort(), rule.getPort());
 
-
 		RequestBody okHttpRequestBody = null;
 
-
 		Response response = null;
-
 
 		okHttpRequestBody = RequestBody.create(jsonstr, MediaType.parse("application/json"));
 		log.info("requestBody: {}", jsonstr);
@@ -190,9 +187,9 @@ public class EurekaMockRuleServiceImpl {
 
 						log.info("{} heart beat to {} ", rule.getServiceName(), rule.getEurekaServer());
 
-							if (!heartBeat(rule)) {
-								register(rule);
-							}
+						if (!heartBeat(rule)) {
+							register(rule);
+						}
 
 					});
 				}

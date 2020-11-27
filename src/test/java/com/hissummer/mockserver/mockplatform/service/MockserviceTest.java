@@ -19,21 +19,19 @@ import com.hissummer.mockserver.mock.service.MongoDbRunCommandServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
-
-
 @Slf4j
 @Ignore
 public class MockserviceTest extends SpringBootTestBase {
 
 	@Autowired
 	MongoDbRunCommandServiceImpl dataplatformServiceImpl;
-	
+
 	@Autowired
 	MockRuleManagerServiceImpl mockservice;
 
 	@Autowired
 	MockRuleMgmtMongoRepository mockservice2;
-	
+
 	@Test
 	public void test() {
 		fail("Not yet implemented");
@@ -45,32 +43,33 @@ public class MockserviceTest extends SpringBootTestBase {
 
 		String url = "/mockbaidu/baidutest/abcdefg/";
 		String hostName = null;
-		Method method = mockservice.getClass().getDeclaredMethod("__getMatchedMockRulesByHostnameAndUrl", String.class,url.getClass());
+		Method method = mockservice.getClass().getDeclaredMethod("__getMatchedMockRulesByHostnameAndUrl", String.class,
+				url.getClass());
 		method.setAccessible(true);
-		JSONObject result =  (JSONObject) method.invoke(mockservice,hostName, url);
-		if(result != null)
-		log.info(result.toJSONString());
-		else log.info("not found the matched rules");
+		JSONObject result = (JSONObject) method.invoke(mockservice, hostName, url);
+		if (result != null)
+			log.info(result.toJSONString());
+		else
+			log.info("not found the matched rules");
 
 	}
-	
+
 	@Test
 	public void testAddMockRule() {
-		
-		mockservice.addMockRule(null, "/haha", "{\"mockResponse\":\"this is the haha mock Response!\"}", null,null);
-		
+
+		mockservice.addMockRule(null, "/haha", "{\"mockResponse\":\"this is the haha mock Response!\"}", null, null);
+
 	}
-	
+
 	@Test
 	public void testAddMockRule2() {
-		
+
 		log.info(JSON.toJSONString(mockservice2.findByHost("*", PageRequest.of(0, 5))));
-		
+
 		log.info(JSON.toJSONString(mockservice2.findByUri("/newtest", PageRequest.of(0, 5))));
-		
-		log.info(JSON.toJSONString(mockservice2.findByHostAndUri("*","/test1/test2")));
-		
+
+		log.info(JSON.toJSONString(mockservice2.findByHostAndUri("*", "/test1/test2")));
+
 	}
-	
 
 }

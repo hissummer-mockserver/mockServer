@@ -78,8 +78,8 @@ public class MockMgmtController {
 	public MockRuleMgmtResponseVo deleteRule(@RequestBody JSONObject requestBody) {
 
 		try {
-			// MockRuleMgmtResponseVo result = 
-			return   MockRuleMgmtResponseVo.builder().status(0)
+			// MockRuleMgmtResponseVo result =
+			return MockRuleMgmtResponseVo.builder().status(0)
 					.success(mockRuleservice.deleteMockRule(requestBody.getString("id"))).build();
 		} catch (Exception e) {
 

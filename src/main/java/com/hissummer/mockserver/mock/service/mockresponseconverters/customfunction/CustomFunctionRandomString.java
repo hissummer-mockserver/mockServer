@@ -55,7 +55,7 @@ public class CustomFunctionRandomString implements CustomFunctionInterface {
 
 		}
 
-		String  SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+		String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 		StringBuilder salt = new StringBuilder();
 		Random rnd = new Random();
 		while (salt.length() < length) { // length of the random string.

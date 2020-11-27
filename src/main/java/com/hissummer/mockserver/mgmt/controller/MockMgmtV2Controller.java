@@ -44,7 +44,7 @@ public class MockMgmtV2Controller {
 
 	@Autowired
 	MockRuleManagerServiceImpl mockRuleManagerService;
-	
+
 	@Autowired
 	MockserviceImpl mockService;
 
@@ -74,7 +74,8 @@ public class MockMgmtV2Controller {
 
 		} catch (Exception e) {
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save failed: "+e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save failed: " + e.getMessage())
+					.build();
 		}
 
 		return result;
@@ -86,7 +87,7 @@ public class MockMgmtV2Controller {
 
 		MockRuleMgmtResponseVo result = null;
 		if (mockRule.getId() == null || mockRule.getId().equals("")) {
-			return  MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
+			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
 					.build();
 		}
 		try {
@@ -99,7 +100,8 @@ public class MockMgmtV2Controller {
 			}
 		} catch (Exception e) {
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild:"+e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild:" + e.getMessage())
+					.build();
 		}
 
 		return result;

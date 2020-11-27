@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/help")
 @RestController
 public class HelperController {
-	
+
 	@Autowired
 	private ApplicationContext appContext;
 

@@ -21,8 +21,8 @@ public class HttpMockRule {
 	private String uri;
 
 	private String mockResponse;
-	
-	private Map<String,String> responseHeaders;
+
+	private Map<String, String> responseHeaders;
 	private List<Plugin> plugins;
 	private UpstreamGroup upstreams;
 
