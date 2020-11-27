@@ -120,9 +120,6 @@ public class MockForwardController implements ErrorController {
 
 					responseHeaders.setContentType(new MediaType("application", "json"));
 				}
-
-				log.info("-------------------{}", JSON.toJSONString(responseHeaders));
-
 				return new ResponseEntity<>(responseVo.getResponseBody(), responseHeaders, HttpStatus.OK);
 
 			} else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
