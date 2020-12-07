@@ -190,7 +190,7 @@ public class EurekaMockRuleServiceImpl {
 			}
 
 			try {
-				TimeUnit.SECONDS.sleep(20);
+				TimeUnit.SECONDS.sleep(30);
 			} catch (InterruptedException e) {
 				log.warn("heartbeat sleep interrupted: {}", e);
 				shutdownAndAwaitTermination(threadPool);
@@ -221,14 +221,6 @@ public class EurekaMockRuleServiceImpl {
 			pool.shutdownNow();
 			// Preserve interrupt status
 			Thread.currentThread().interrupt();
-		}
-	}
-
-	private class Myown implements DataCenterInfo {
-
-		@Override
-		public Name getName() {
-			return DataCenterInfo.Name.MyOwn;
 		}
 	}
 
