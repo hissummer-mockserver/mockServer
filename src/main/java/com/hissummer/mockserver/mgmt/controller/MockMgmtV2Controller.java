@@ -1,5 +1,9 @@
 package com.hissummer.mockserver.mgmt.controller;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -15,10 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSONObject;
 import com.hissummer.mockserver.mgmt.service.EurekaMockRuleServiceImpl;
 import com.hissummer.mockserver.mgmt.service.MockRuleManagerServiceImpl;
+import com.hissummer.mockserver.mgmt.service.UserService;
 import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.service.jpa.MockRuleMgmtMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
 import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
+import com.hissummer.mockserver.mgmt.vo.Loginpair;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mock.service.MockserviceImpl;
 
@@ -31,28 +37,35 @@ import lombok.extern.slf4j.Slf4j;
  */
 
 @Slf4j
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/mock/2.0")
 public class MockMgmtV2Controller {
 
+	private static final String USERNAME = "username";
+	private static final String PASSWORD = "password";
+
 	@Autowired
-	MockRuleMgmtMongoRepository mockRuleRepository;
+
+	MockRuleMgmtMongoRepository mockRuleMgmtMongoRepository;
 
 	@Autowired
 	EurekaMockRuleMongoRepository eurekaMockRuleRepository;
 
 	@Autowired
-	MockRuleManagerServiceImpl mockRuleManagerService;
-	
+	MockserviceImpl mockservice;
+
 	@Autowired
-	MockserviceImpl mockService;
+	MockRuleManagerServiceImpl mockRuleManagerService;
 
 	@Autowired
 	MongoTemplate mongoTemplate;
 
 	@Autowired
 	EurekaMockRuleServiceImpl eurekaMockRuleServiceImpl;
+
+	@Autowired
+	UserService userService;
 
 	@PostMapping(value = "/addRule")
 	public MockRuleMgmtResponseVo addRule(@RequestBody HttpMockRule mockRule) {
@@ -61,20 +74,21 @@ public class MockMgmtV2Controller {
 
 		try {
 
-			if (mockRuleRepository.findByHostAndUri(mockRule.getHost(), mockRule.getUri()) != null) {
+			if (mockRuleMgmtMongoRepository.findByHostAndUri(mockRule.getHost(), mockRule.getUri()) != null) {
 				result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("mockrule already exist.")
 						.build();
 				return result;
 			}
 
-			HttpMockRule saveMockRule = mockRuleRepository.insert(mockRule);
+			HttpMockRule saveMockRule = mockRuleMgmtMongoRepository.insert(mockRule);
 
 			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
 					.data(saveMockRule).build();
 
 		} catch (Exception e) {
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save failed: "+e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save failed: " + e.getMessage())
+					.build();
 		}
 
 		return result;
@@ -86,20 +100,20 @@ public class MockMgmtV2Controller {
 
 		MockRuleMgmtResponseVo result = null;
 		if (mockRule.getId() == null || mockRule.getId().equals("")) {
-			return  MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
+			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
 					.build();
 		}
 		try {
-			HttpMockRule saveMockRule = mockRuleRepository.save(mockRule);
-			if (saveMockRule != null) {
-				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("update success.")
-						.data(saveMockRule).build();
-			} else {
-				result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild.").build();
-			}
+
+			HttpMockRule saveMockRule = mockRuleMgmtMongoRepository.save(mockRule);
+
+			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Update success.")
+					.data(saveMockRule).build();
+
 		} catch (Exception e) {
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild:"+e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild:" + e.getMessage())
+					.build();
 		}
 
 		return result;
@@ -110,11 +124,12 @@ public class MockMgmtV2Controller {
 
 		MockRuleMgmtResponseVo result = null;
 		if (mockRule.getId() == null || mockRule.getId().equals("")) {
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
+			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
 					.build();
 		}
 		try {
-			mockRuleRepository.deleteById(mockRule.getId());
+
+			mockRuleMgmtMongoRepository.deleteById(mockRule.getId());
 
 			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("delete success.").build();
 		} catch (Exception e) {
@@ -132,7 +147,7 @@ public class MockMgmtV2Controller {
 
 		try {
 
-			String testResponse = mockService.testRule(mockRule);
+			String testResponse = mockservice.testRule(mockRule);
 
 			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message(testResponse).build();
 		} catch (Exception e) {
@@ -157,24 +172,27 @@ public class MockMgmtV2Controller {
 		String host = ".*";
 
 		if (!StringUtils.isEmpty(requestBody.getString("uri"))) {
-
 			uri = requestBody.getString("uri");
-
 		}
 		if (!StringUtils.isEmpty(requestBody.getString("host"))) {
 
 			if (requestBody.getString("host").equals("*")) {
-				// 因为做的是正则匹配查询，所以特殊的*字符转换为\*，即查询包含*字符的host值。 而不是将*认为是正则表达式。
+				// 因为做的是正则匹配查询，所以特殊的*字符转换为\*，即查询包含*字符的host值。
 				host = "\\*";
 			} else {
 				host = requestBody.getString("host");
 			}
 
 		}
+		String category = requestBody.getString("category");
 
-		rules = mockRuleRepository.findByHostAndUriWithRegex(host, uri, page);
+		if (StringUtils.isEmpty(category)) {
+			rules = mockRuleMgmtMongoRepository.findByHostRegexpAndUriRegexp(host, uri, page);
+		} else {
+			rules = mockRuleMgmtMongoRepository.findByHostRegexpAndUriRegexpAndCategory(host, uri, category, page);
+		}
 
-		if (rules != null && rules.getContent().size() > 0)
+		if (rules != null && !rules.getContent().isEmpty())
 			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
 		else
 			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("No Rules found.").build();
@@ -199,7 +217,7 @@ public class MockMgmtV2Controller {
 		Example<EurekaMockRule> example = Example.of(ruleExmple);
 		rules = eurekaMockRuleRepository.findAll(example, page);
 
-		if (rules != null && rules.getContent() != null && rules.getContent().size() > 0)
+		if (rules != null && !rules.getContent().isEmpty())
 			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
 		else
 			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("No Rules found.").build();
@@ -213,13 +231,10 @@ public class MockMgmtV2Controller {
 
 		try {
 			EurekaMockRule saveMockRule = eurekaMockRuleRepository.insert(mockRule);
-			if (saveMockRule != null) {
-				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
-						.data(saveMockRule).build();
-			} else {
 
-				result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild.").build();
-			}
+			return MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.").data(saveMockRule)
+					.build();
+
 		} catch (Exception e) {
 
 			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getMessage()).build();
@@ -234,20 +249,17 @@ public class MockMgmtV2Controller {
 
 		MockRuleMgmtResponseVo result = null;
 		if (mockRule.getId() == null || mockRule.getId().equals("")) {
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
+			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
 					.build();
 		}
 		try {
 			EurekaMockRule saveMockRule = eurekaMockRuleRepository.save(mockRule);
-			if (saveMockRule != null) {
 
-				eurekaMockRuleServiceImpl.unRegisterApp(mockRule);
+			eurekaMockRuleServiceImpl.unRegisterApp(mockRule);
 
-				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
-						.data(saveMockRule).build();
-			} else {
-				result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild.").build();
-			}
+			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
+					.data(saveMockRule).build();
+
 		} catch (Exception e) {
 
 			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getMessage()).build();
@@ -261,7 +273,7 @@ public class MockMgmtV2Controller {
 
 		MockRuleMgmtResponseVo result = null;
 		if (mockRule.getId() == null || mockRule.getId().equals("")) {
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
+			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
 					.build();
 		}
 		try {
@@ -274,6 +286,66 @@ public class MockMgmtV2Controller {
 		}
 
 		return result;
+	}
+
+	@PostMapping(value = "/login")
+	public MockRuleMgmtResponseVo login(@RequestBody JSONObject requestBody, HttpServletResponse response) {
+
+		String username = requestBody.getString(USERNAME);
+		String password = requestBody.getString(PASSWORD);
+
+		boolean loginStatus = userService.login(username, password);
+		Loginpair user = userService.finduserByuserName(username);
+		if (user != null) {
+			Cookie mu = new Cookie("mu", user.getId());
+			mu.setHttpOnly(true);
+			response.addCookie(mu);
+		}
+		return MockRuleMgmtResponseVo.builder().status(0).success(loginStatus).build();
+	}
+
+	@PostMapping(value = "/logout")
+	public MockRuleMgmtResponseVo logout(@RequestBody JSONObject requestBody, HttpServletRequest request) {
+
+		String username = requestBody.getString(USERNAME);
+
+		return MockRuleMgmtResponseVo.builder().status(0).success(userService.logout(username, request.getCookies()))
+				.build();
+	}
+
+	@PostMapping(value = "/createUser")
+	public MockRuleMgmtResponseVo createUser(@RequestBody JSONObject requestBody) {
+
+		String username = requestBody.getString(USERNAME);
+		String password = requestBody.getString(PASSWORD);
+
+		return MockRuleMgmtResponseVo.builder().status(0).success(userService.createUser(username, password)).build();
+	}
+
+	@PostMapping(value = "/rePassword")
+	public MockRuleMgmtResponseVo rePasswordUser(@RequestBody JSONObject requestBody, HttpServletRequest request) {
+
+		String username = requestBody.getString(USERNAME);
+		String password = requestBody.getString(PASSWORD);
+		String newpassword = requestBody.getString("newpassword");
+
+		return MockRuleMgmtResponseVo.builder().status(0)
+				.success(userService.rePasswordUser(username, password, newpassword, request.getCookies())).build();
+	}
+
+	@PostMapping(value = "/delUser")
+	public MockRuleMgmtResponseVo delUser(@RequestBody JSONObject requestBody, HttpServletRequest request) {
+
+		String username = requestBody.getString(USERNAME);
+		String password = requestBody.getString(PASSWORD);
+
+		return MockRuleMgmtResponseVo.builder().status(0)
+				.success(userService.delUser(username, password, request.getCookies())).build();
+	}
+
+	@PostMapping(value = "/isLogin")
+	public MockRuleMgmtResponseVo isUserLogin() {
+		return MockRuleMgmtResponseVo.builder().status(0).success(true).build();
 	}
 
 }

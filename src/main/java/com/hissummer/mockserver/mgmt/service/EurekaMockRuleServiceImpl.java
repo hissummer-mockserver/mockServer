@@ -1,9 +1,7 @@
 package com.hissummer.mockserver.mgmt.service;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -14,15 +12,10 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
+import com.hissummer.mockserver.mgmt.vo.Constants;
 import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
 import com.netflix.appinfo.DataCenterInfo;
-import com.netflix.appinfo.InstanceInfo;
-import com.netflix.appinfo.InstanceInfo.ActionType;
-import com.netflix.appinfo.InstanceInfo.InstanceStatus;
-import com.netflix.appinfo.LeaseInfo;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
@@ -69,15 +62,12 @@ public class EurekaMockRuleServiceImpl {
 				+ "			\"@class\": \"java.util.Collections$EmptyMap\"" + "		}" + "	}" + "}" + "";
 		String jsonstr = String.format(registerInfoStringFormatter, rule.getHostName() + ":" + rule.getPort(),
 				rule.getServiceName(), rule.getHostName(),
-				"http://" + rule.getHostName() + ":" + rule.getPort() + "/status", rule.getServiceName(),
+				Constants.HTTP + rule.getHostName() + ":" + rule.getPort() + "/status", rule.getServiceName(),
 				rule.getServiceName(), rule.getHostName(), rule.getPort(), rule.getPort());
-
 
 		RequestBody okHttpRequestBody = null;
 
-
 		Response response = null;
-
 
 		okHttpRequestBody = RequestBody.create(jsonstr, MediaType.parse("application/json"));
 		log.info("requestBody: {}", jsonstr);
@@ -85,7 +75,7 @@ public class EurekaMockRuleServiceImpl {
 		final OkHttpClient client = new OkHttpClient();
 
 		Request request = new Request.Builder()
-				.url("http://" + rule.getEurekaServer() + "/eureka/apps/" + rule.getServiceName())
+				.url(Constants.HTTP + rule.getEurekaServer() + Constants.EUREKA_URI_BASE_PATH + rule.getServiceName())
 				.method("POST", okHttpRequestBody).header(HttpHeaders.AUTHORIZATION, credentials)
 				.header("Content-Type", "application/json").build();
 
@@ -121,8 +111,8 @@ public class EurekaMockRuleServiceImpl {
 		Response response = null;
 
 		Request request = new Request.Builder()
-				.url("http://" + rule.getEurekaServer() + "/eureka/apps/" + rule.getServiceName() + "/"
-						+ rule.getHostName() + ":" + rule.getPort())
+				.url(Constants.HTTP + rule.getEurekaServer() + Constants.EUREKA_URI_BASE_PATH + rule.getServiceName()
+						+ "/" + rule.getHostName() + ":" + rule.getPort())
 				.header(HttpHeaders.AUTHORIZATION, credentials)
 				.method("PUT", RequestBody.create("", MediaType.parse("application/json"))).build();
 
@@ -150,7 +140,7 @@ public class EurekaMockRuleServiceImpl {
 		Response response = null;
 
 		Request request = new Request.Builder()
-				.url("http://" + rule.getEurekaServer() + "/eureka/apps/" + rule.getServiceName() + "/"
+				.url("http://" + rule.getEurekaServer() + Constants.EUREKA_URI_BASE_PATH + rule.getServiceName() + "/"
 						+ rule.getHostName() + ":" + rule.getPort())
 				.header(HttpHeaders.AUTHORIZATION, credentials)
 				.method("DELETE", RequestBody.create("", MediaType.parse("application/json"))).build();
@@ -190,9 +180,9 @@ public class EurekaMockRuleServiceImpl {
 
 						log.info("{} heart beat to {} ", rule.getServiceName(), rule.getEurekaServer());
 
-							if (!heartBeat(rule)) {
-								register(rule);
-							}
+						if (!heartBeat(rule)) {
+							register(rule);
+						}
 
 					});
 				}
@@ -200,7 +190,7 @@ public class EurekaMockRuleServiceImpl {
 			}
 
 			try {
-				TimeUnit.SECONDS.sleep(20);
+				TimeUnit.SECONDS.sleep(30);
 			} catch (InterruptedException e) {
 				log.warn("heartbeat sleep interrupted: {}", e);
 				shutdownAndAwaitTermination(threadPool);
@@ -234,38 +224,40 @@ public class EurekaMockRuleServiceImpl {
 		}
 	}
 
-	private class Myown implements DataCenterInfo {
-
-		@Override
-		public Name getName() {
-			return DataCenterInfo.Name.MyOwn;
-		}
-	}
-
 	public static void main(String[] args) throws JsonProcessingException {
-		LeaseInfo lease = LeaseInfo.Builder.newBuilder().setRegistrationTimestamp(System.currentTimeMillis()).build();
 
-		InstanceInfo registerInfo = InstanceInfo.Builder.newBuilder().setAppName("11080").setHostName("aaa")
-				.setStatusPageUrl("/status", "http://" + "abcd.com" + ":" + "11080" + "/status").setSecureVIPAddress("")
-				.setIPAddr("").setVIPAddress("").setPort(Integer.valueOf("11080"))
-				.setSecurePort(Integer.valueOf("11080")).enablePort(InstanceInfo.PortType.UNSECURE, true)
-				.setActionType(ActionType.ADDED).setOverriddenStatus(InstanceStatus.UNKNOWN).setCountryId(1)
-				.enablePort(InstanceInfo.PortType.SECURE, false).setHostName("11080")
-				.setInstanceId("11080" + ":" + "11080").setStatus(InstanceStatus.UP).setLeaseInfo(lease).build();
-
-		log.info("port is {}", registerInfo.getPort());
-
-		ObjectMapper mapperObj = new ObjectMapper();
-
-		Map<String, Object> instanceInfoRequest = new HashMap<String, Object>();
-
-		instanceInfoRequest.put("instance", registerInfo);
-
-		log.info("requestBody: {}", mapperObj.writeValueAsString(instanceInfoRequest));
-
-		mapperObj.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
-		log.info("requestBody: {}", mapperObj.writeValueAsString(registerInfo));
-
+		/*
+		 * LeaseInfo lease =
+		 * LeaseInfo.Builder.newBuilder().setRegistrationTimestamp(System.
+		 * currentTimeMillis()).build();
+		 * 
+		 * 
+		 * InstanceInfo registerInfo =
+		 * InstanceInfo.Builder.newBuilder().setAppName("11080").setHostName("aaa")
+		 * .setStatusPageUrl("/status", Constants.HTTP + "abcd.com" + ":" + "11080" +
+		 * "/status").setSecureVIPAddress("")
+		 * .setIPAddr("").setVIPAddress("").setPort(Integer.valueOf("11080"))
+		 * .setSecurePort(Integer.valueOf("11080")).enablePort(InstanceInfo.PortType.
+		 * UNSECURE, true)
+		 * .setActionType(ActionType.ADDED).setOverriddenStatus(InstanceStatus.UNKNOWN).
+		 * setCountryId(1) .enablePort(InstanceInfo.PortType.SECURE,
+		 * false).setHostName("11080") .setInstanceId("11080" + ":" +
+		 * "11080").setStatus(InstanceStatus.UP).setLeaseInfo(lease).build();
+		 * 
+		 * log.info("port is {}", registerInfo.getPort());
+		 * 
+		 * ObjectMapper mapperObj = new ObjectMapper();
+		 * 
+		 * Map<String, Object> instanceInfoRequest = new HashMap<String, Object>();
+		 * 
+		 * instanceInfoRequest.put("instance", registerInfo);
+		 * 
+		 * log.info("requestBody: {}",
+		 * mapperObj.writeValueAsString(instanceInfoRequest));
+		 * 
+		 * mapperObj.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
+		 * log.info("requestBody: {}", mapperObj.writeValueAsString(registerInfo));
+		 */
 	}
 
 }

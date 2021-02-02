@@ -77,14 +77,14 @@ public class MockserviceImpl {
 
 		if (response != null) {
 			return response;
-		}  else {
+
+		} else {
 			return MockResponse.builder()
 					.responseBody(JSON.toJSONString(
 							MockRuleMgmtResponseVo.builder().status(0).success(true).message(NOMATCHED).build()))
 					.build();
 		}
 	}
-
 
 	/**
 	 * 根据hostName和请求Url地址，获取到Mock报文的具体实现
@@ -117,38 +117,38 @@ public class MockserviceImpl {
 			// 获取到匹配的结果
 			String upstreamAddress = "mockserver.hissummer.com";
 			String protocol = "http";
-			String upstreamUri="/docs";
+			String upstreamUri = "/docs";
 			try {
-				if(matchedMockRule.getUpstreams().getNodes().get(0).getAddress() != null)
-					upstreamAddress = matchedMockRule.getUpstreams().getNodes().get(0).getAddress() ;		
-				
-				if(matchedMockRule.getUpstreams().getNodes().get(0).getProtocol() != null)
+
+				if (matchedMockRule.getUpstreams().getNodes().get(0).getAddress() != null)
+					upstreamAddress = matchedMockRule.getUpstreams().getNodes().get(0).getAddress();
+
+				if (matchedMockRule.getUpstreams().getNodes().get(0).getProtocol() != null)
 					protocol = matchedMockRule.getUpstreams().getNodes().get(0).getProtocol();
-					
-				if(matchedMockRule.getUpstreams().getNodes().get(0).getUri() != null)
+
+				if (matchedMockRule.getUpstreams().getNodes().get(0).getUri() != null)
 					upstreamUri = matchedMockRule.getUpstreams().getNodes().get(0).getUri();
-				
+
 			} catch (Exception e) {
 				log.info("{} mockrule : upstream data is not defined{}", matchedMockRule.getId(),
 						matchedMockRule.getUpstreams());
 			}
 			HttpMockWorkMode workMode = matchedMockRule.getWorkMode();
 
-
-
 			if (workMode != null && workMode.equals(HttpMockWorkMode.UPSTREAM)) {
 
 				// mock rule 的工作模式为upstream模式. 后期将upstream作为hostname的rule单独管理，这里的代码将会移除！
-				return   __getUpstreamResponse(protocol, headers, upstreamAddress, method, upstreamUri, requestBody);
-				 
+
+				return __getUpstreamResponse(protocol, headers, upstreamAddress, method, upstreamUri, requestBody);
+
 			} else {
 				// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
 				return MockResponse.builder()
 						.responseBody(__interpreterResponse(matchedMockRule.getMockResponse(), headers, requestBody))
 						.isMock(true).isUpstream(false).headers(matchedMockRule.getResponseHeaders()).build();
 			}
-		} else
-		{
+
+		} else {
 			return null;
 		}
 	}
@@ -177,8 +177,8 @@ public class MockserviceImpl {
 		return mockResponse;
 	}
 
-	private MockResponse __getUpstreamResponse(String protocol, Map<String, String> headers, String upstream, String method,
-			String requestUri, String requestBody) {
+	private MockResponse __getUpstreamResponse(String protocol, Map<String, String> headers, String upstream,
+			String method, String requestUri, String requestBody) {
 		// TODO Auto-generated method stub
 
 		final OkHttpClient client = new OkHttpClient();
@@ -186,11 +186,10 @@ public class MockserviceImpl {
 		Headers.Builder headerBuilder = new Headers.Builder();
 
 		for (Entry<String, String> header : headers.entrySet()) {
-			if(header.getKey().equalsIgnoreCase("host")) {
+
+			if (header.getKey().equalsIgnoreCase("host")) {
 				headerBuilder.add(header.getKey(), getHost(upstream));
-			}
-			else
-			{
+			} else {
 				headerBuilder.add(header.getKey(), header.getValue());
 			}
 		}
@@ -203,37 +202,40 @@ public class MockserviceImpl {
 		}
 		Request request = new Request.Builder().url(protocol + "://" + upstream + requestUri)
 				.method(method, okHttpRequestBody).headers(requestHeaders).build();
-		log.info("upstream request: {} | {}",JSON.toJSONString(request.headers()) ,JSON.toJSONString(request.body()) );
+
+		log.info("upstream request: {} | {}", JSON.toJSONString(request.headers()), JSON.toJSONString(request.body()));
 		Call call = client.newCall(request);
 		try {
 			Response response = call.execute();
-			log.info("upstream response:{} | {} | {}",JSON.toJSONString(response.code()),JSON.toJSONString(response.headers()),response.body().toString());
 
-				JSONObject responseJson = new JSONObject();
-				
-				if(response.isSuccessful())
-				{
+			log.info("upstream response:{} | {} | {}", JSON.toJSONString(response.code()),
+					JSON.toJSONString(response.headers()), response.body().toString());
+
+			JSONObject responseJson = new JSONObject();
+
+			if (response.isSuccessful()) {
 				response.headers().iterator();
-					while(response.headers().iterator().hasNext()) {
-						Pair<String, String> responseHeader = response.headers().iterator().next();
-						headers.put(responseHeader.getFirst(), responseHeader.getSecond());
-					}
-					
-					return MockResponse.builder().headers(headers).responseBody(response.body().string()).isUpstream(true).isMock(false).build();
+				while (response.headers().iterator().hasNext()) {
+					Pair<String, String> responseHeader = response.headers().iterator().next();
+					headers.put(responseHeader.getFirst(), responseHeader.getSecond());
 				}
-				else {
-					
-					Map<String, List<String>> readableHeaders = response.headers().toMultimap();
-					
-					responseJson.put("code", response.code());
-					responseJson.put("message", response.message());
-					responseJson.put("networkResponse", response.networkResponse());					
-					responseJson.put("headers",readableHeaders);
-					responseJson.put("body", response.body().string());
-	
-					return MockResponse.builder().responseBody(responseJson.toJSONString()).isUpstream(true).isMock(false).build();
 
-				}
+				return MockResponse.builder().headers(headers).responseBody(response.body().string()).isUpstream(true)
+						.isMock(false).build();
+			} else {
+
+				Map<String, List<String>> readableHeaders = response.headers().toMultimap();
+
+				responseJson.put("code", response.code());
+				responseJson.put("message", response.message());
+				responseJson.put("networkResponse", response.networkResponse());
+				responseJson.put("headers", readableHeaders);
+				responseJson.put("body", response.body().string());
+
+				return MockResponse.builder().responseBody(responseJson.toJSONString()).isUpstream(true).isMock(false)
+						.build();
+
+			}
 
 		} catch (IOException e) {
 			return MockResponse.builder().responseBody(e.toString()).isUpstream(true).isMock(false).build();
@@ -290,19 +292,19 @@ public class MockserviceImpl {
 		String[] requestURIArray = requestUriFormat.split("/");
 		List<String> matchRequestURI = new ArrayList<String>(Arrays.asList(requestURIArray));
 		String matchRequestURIString = requestUriFormat;
-		int loops = matchRequestURI.size(); 
+
+		int loops = matchRequestURI.size();
 		for (int i = 0; i <= loops; i++) {
 
 			if (i != 0) {
 				matchRequestURI.remove(matchRequestURI.size() - 1);
 				if (matchRequestURI.isEmpty()) {
 					matchRequestURIString = "/";
-				}
-				else {
-				matchRequestURIString = String.join("/", matchRequestURI);
+
+				} else {
+					matchRequestURIString = String.join("/", matchRequestURI);
 				}
 			}
-
 
 			HttpMockRule matchedMockRule = mockRuleRepository.findByHostAndUri(hostName, matchRequestURIString);
 
@@ -313,21 +315,19 @@ public class MockserviceImpl {
 	}
 
 	public String testRule(HttpMockRule mockRule) {
-		
+
 		HttpMockWorkMode workMode = mockRule.getWorkMode();
-		
-		if(workMode.equals(HttpMockWorkMode.MOCK))
-		{
-		
+
+		if (workMode.equals(HttpMockWorkMode.MOCK)) {
+
 			// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
 			return MockResponse.builder()
 					.responseBody(__interpreterResponse(mockRule.getMockResponse(), Collections.emptyMap(), null))
 					.isMock(true).isUpstream(false).headers(mockRule.getResponseHeaders()).build().getResponseBody();
-		}
-		else {
+		} else {
 			return "upstream mode not support test, please directly access the upstream address.";
 		}
-		
+
 	}
 
 }
