@@ -75,7 +75,7 @@ public class EurekaMockRuleServiceImpl {
 		final OkHttpClient client = new OkHttpClient();
 
 		Request request = new Request.Builder()
-				.url(Constants.HTTP+ rule.getEurekaServer() + Constants.EUREKA_URI_BASE_PATH + rule.getServiceName())
+				.url(Constants.HTTP + rule.getEurekaServer() + Constants.EUREKA_URI_BASE_PATH + rule.getServiceName())
 				.method("POST", okHttpRequestBody).header(HttpHeaders.AUTHORIZATION, credentials)
 				.header("Content-Type", "application/json").build();
 
@@ -111,8 +111,8 @@ public class EurekaMockRuleServiceImpl {
 		Response response = null;
 
 		Request request = new Request.Builder()
-				.url(Constants.HTTP + rule.getEurekaServer() + Constants.EUREKA_URI_BASE_PATH + rule.getServiceName() + "/"
-						+ rule.getHostName() + ":" + rule.getPort())
+				.url(Constants.HTTP + rule.getEurekaServer() + Constants.EUREKA_URI_BASE_PATH + rule.getServiceName()
+						+ "/" + rule.getHostName() + ":" + rule.getPort())
 				.header(HttpHeaders.AUTHORIZATION, credentials)
 				.method("PUT", RequestBody.create("", MediaType.parse("application/json"))).build();
 
@@ -227,30 +227,37 @@ public class EurekaMockRuleServiceImpl {
 	public static void main(String[] args) throws JsonProcessingException {
 
 		/*
-		  LeaseInfo lease = LeaseInfo.Builder.newBuilder().setRegistrationTimestamp(System.currentTimeMillis()).build();
-		
-
-		InstanceInfo registerInfo = InstanceInfo.Builder.newBuilder().setAppName("11080").setHostName("aaa")
-				.setStatusPageUrl("/status", Constants.HTTP + "abcd.com" + ":" + "11080" + "/status").setSecureVIPAddress("")
-				.setIPAddr("").setVIPAddress("").setPort(Integer.valueOf("11080"))
-				.setSecurePort(Integer.valueOf("11080")).enablePort(InstanceInfo.PortType.UNSECURE, true)
-				.setActionType(ActionType.ADDED).setOverriddenStatus(InstanceStatus.UNKNOWN).setCountryId(1)
-				.enablePort(InstanceInfo.PortType.SECURE, false).setHostName("11080")
-				.setInstanceId("11080" + ":" + "11080").setStatus(InstanceStatus.UP).setLeaseInfo(lease).build();
-
-		log.info("port is {}", registerInfo.getPort());
-
-		ObjectMapper mapperObj = new ObjectMapper();
-
-		Map<String, Object> instanceInfoRequest = new HashMap<String, Object>();
-
-		instanceInfoRequest.put("instance", registerInfo);
-
-		log.info("requestBody: {}", mapperObj.writeValueAsString(instanceInfoRequest));
-
-		mapperObj.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
-		log.info("requestBody: {}", mapperObj.writeValueAsString(registerInfo));
- */
+		 * LeaseInfo lease =
+		 * LeaseInfo.Builder.newBuilder().setRegistrationTimestamp(System.
+		 * currentTimeMillis()).build();
+		 * 
+		 * 
+		 * InstanceInfo registerInfo =
+		 * InstanceInfo.Builder.newBuilder().setAppName("11080").setHostName("aaa")
+		 * .setStatusPageUrl("/status", Constants.HTTP + "abcd.com" + ":" + "11080" +
+		 * "/status").setSecureVIPAddress("")
+		 * .setIPAddr("").setVIPAddress("").setPort(Integer.valueOf("11080"))
+		 * .setSecurePort(Integer.valueOf("11080")).enablePort(InstanceInfo.PortType.
+		 * UNSECURE, true)
+		 * .setActionType(ActionType.ADDED).setOverriddenStatus(InstanceStatus.UNKNOWN).
+		 * setCountryId(1) .enablePort(InstanceInfo.PortType.SECURE,
+		 * false).setHostName("11080") .setInstanceId("11080" + ":" +
+		 * "11080").setStatus(InstanceStatus.UP).setLeaseInfo(lease).build();
+		 * 
+		 * log.info("port is {}", registerInfo.getPort());
+		 * 
+		 * ObjectMapper mapperObj = new ObjectMapper();
+		 * 
+		 * Map<String, Object> instanceInfoRequest = new HashMap<String, Object>();
+		 * 
+		 * instanceInfoRequest.put("instance", registerInfo);
+		 * 
+		 * log.info("requestBody: {}",
+		 * mapperObj.writeValueAsString(instanceInfoRequest));
+		 * 
+		 * mapperObj.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
+		 * log.info("requestBody: {}", mapperObj.writeValueAsString(registerInfo));
+		 */
 	}
 
 }

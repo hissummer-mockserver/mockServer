@@ -41,9 +41,9 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/api/mock/2.0")
 public class MockMgmtV2Controller {
-	
-	private static final String USERNAME = "username";  
-	private static final String PASSWORD="password";
+
+	private static final String USERNAME = "username";
+	private static final String PASSWORD = "password";
 
 	@Autowired
 	MockRuleMgmtMongoRepository mockRuleMgmtMongoRepository;
@@ -104,8 +104,8 @@ public class MockMgmtV2Controller {
 		try {
 			HttpMockRule saveMockRule = mockRuleMgmtMongoRepository.save(mockRule);
 
-				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Update success.")
-						.data(saveMockRule).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Update success.")
+					.data(saveMockRule).build();
 
 		} catch (Exception e) {
 
@@ -227,8 +227,8 @@ public class MockMgmtV2Controller {
 		try {
 			EurekaMockRule saveMockRule = eurekaMockRuleRepository.insert(mockRule);
 
-				return MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
-						.data(saveMockRule).build();
+			return MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.").data(saveMockRule)
+					.build();
 
 		} catch (Exception e) {
 
@@ -250,11 +250,10 @@ public class MockMgmtV2Controller {
 		try {
 			EurekaMockRule saveMockRule = eurekaMockRuleRepository.save(mockRule);
 
+			eurekaMockRuleServiceImpl.unRegisterApp(mockRule);
 
-				eurekaMockRuleServiceImpl.unRegisterApp(mockRule);
-
-				result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
-						.data(saveMockRule).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
+					.data(saveMockRule).build();
 
 		} catch (Exception e) {
 
