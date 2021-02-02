@@ -81,8 +81,8 @@ public class MockMgmtV2Controller {
 
 			HttpMockRule saveMockRule = mockRuleMgmtMongoRepository.insert(mockRule);
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Add success.")
-					.data(saveMockRule).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Add success.").data(saveMockRule)
+					.build();
 
 		} catch (Exception e) {
 
@@ -133,7 +133,8 @@ public class MockMgmtV2Controller {
 			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Delete success.").build();
 		} catch (Exception e) {
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("Delete failed: "+e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false)
+					.message("Delete failed: " + e.getMessage()).build();
 		}
 
 		return result;

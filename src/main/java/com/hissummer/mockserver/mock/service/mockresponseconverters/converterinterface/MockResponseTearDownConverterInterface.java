@@ -4,6 +4,6 @@ import java.util.Map;
 
 public interface MockResponseTearDownConverterInterface {
 
-	public String converter(String originalResponse, Map<String, String> requestHeders, String requestBody);
+	public String converter(String originalResponse, Map<String, String> requestHeders, byte[] requestBody);
 
 }

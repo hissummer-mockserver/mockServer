@@ -2,6 +2,7 @@ package com.hissummer.mockserver.mock.service.mockresponseconverters;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -22,7 +23,7 @@ import com.jayway.jsonpath.ReadContext;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
-@Order(value = 1)
+@Order(value = 2)
 @Slf4j
 public class CusotomVarReplacementConverterHandler implements MockResponseSetUpConverterInterface {
 
@@ -30,9 +31,9 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 	ApplicationContext context;
 
 	@Override
-	public String converter(String originalResponse, Map<String, String> requestHeaders, String requestBody) {
+	public String converter(String originalResponse, Map<String, String> requestHeaders, byte[] requestBody) {
 
-		String pattern = "\\$\\{([^_]+?)\\}";
+		String pattern = "\\$\\{(.+?)\\}";
 
 		// Create a Pattern object
 		Pattern r = Pattern.compile(pattern);
@@ -107,12 +108,13 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 	}
 
 	private String getReplaceStringFromBody(String extractPath, Map<String, String> requestHeaders,
-			String requestBody) {
+			byte[] requestBody) {
 		log.info("get from body:{} ", extractPath);
 
 		if (contentTypeContains(requestHeaders, "application/x-www-form-urlencoded")) {
 
-			String extractValue = wwwformtoMap(requestBody).get(extractPath.replace("$.", ""));
+			String extractValue = wwwformtoMap(new String(requestBody, Charset.defaultCharset()))
+					.get(extractPath.replace("$.", ""));
 
 			if (extractValue == null)
 				return "!NullValue!";
@@ -123,7 +125,7 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 			log.warn("content type : xml not support  to extract!");
 		} else if (contentTypeContains(requestHeaders, "application/json")) {
 			try {
-				ReadContext ctx = JsonPath.parse(requestBody);
+				ReadContext ctx = JsonPath.parse(new String(requestBody, Charset.defaultCharset()));
 				String jsonValue = JSON.toJSONString(ctx.read(extractPath));
 				// 因为JSON.toJSONString后非json format串会加上双引号，因为我们不需要双引号，此时我们需要处理下。
 				jsonValue = StringUtils.strip(jsonValue, "\"");

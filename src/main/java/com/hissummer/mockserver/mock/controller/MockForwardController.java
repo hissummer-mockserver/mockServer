@@ -43,7 +43,7 @@ public class MockForwardController implements ErrorController {
 	 * 
 	 * @param request
 	 *            : HttpServletRequest
-	 * @param headers
+	 * @param requestHeaders
 	 *            : request headers
 	 * @param requestBody
 	 *            : nullAble ( requestBody is null when request with HTTP get
@@ -54,16 +54,16 @@ public class MockForwardController implements ErrorController {
 	@RequestMapping(value = "/forward")
 	// we don't specify method for this @RequestMapping , because we would like
 	// support all methods for mock service.
-	public ResponseEntity<?> forward(HttpServletRequest request, @RequestHeader Map<String, String> headers,
-			@Nullable @RequestBody String requestBody, final HttpServletResponse response) {
+	public ResponseEntity<?> forward(HttpServletRequest request, @RequestHeader Map<String, String> requestHeaders,
+			@Nullable @RequestBody byte[] requestBody, final HttpServletResponse response) {
 
-		log.info("headers: {}", JSON.toJSONString(headers));
+		log.info("headers: {}", JSON.toJSONString(requestHeaders));
 
 		Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
 		String errorMessage = (String) request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
-		String host = request.getServerName();
+		String requestHost = request.getServerName();
 
-		log.info("{},{},{}", status, errorMessage, host);
+		log.info("{},{},{}", status, errorMessage, requestHost);
 
 		if (status != null) {
 			Integer statusCode = Integer.valueOf(status.toString());
@@ -95,7 +95,7 @@ public class MockForwardController implements ErrorController {
 
 				// 404 not found
 				HttpHeaders responseHeaders = new HttpHeaders();
-				MockResponse responseVo = mockservice.getResponse(headers, host, request.getMethod(),
+				MockResponse responseVo = mockservice.getResponse(requestHeaders, requestHost, request.getMethod(),
 						(String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI), requestBody);
 
 				if (responseVo.getHeaders() != null) {

@@ -16,7 +16,7 @@ import com.hissummer.mockserver.mock.service.mockresponseconverters.customfuncti
 import lombok.extern.slf4j.Slf4j;
 
 @Component
-@Order(value = 2)
+@Order(value = 1)
 @Slf4j
 public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUpConverterInterface {
 
@@ -24,7 +24,7 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 	ApplicationContext context;
 
 	@Override
-	public String converter(String originalResponse, Map<String, String> requestHeders, String requestBody) {
+	public String converter(String originalResponse, Map<String, String> requestHeders, byte[] requestBody) {
 
 		String pattern = "\\$\\{__([a-zA-Z0-9]*)\\((.*?)\\)\\}";
 

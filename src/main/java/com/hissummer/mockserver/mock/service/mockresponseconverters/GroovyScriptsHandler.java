@@ -26,7 +26,7 @@ public class GroovyScriptsHandler implements ScriptsConverterInterface {
 
 	@Override
 	@CompileStatic
-	public String converter(String originalResponse, Map<String, String> requestHeders, String requestBody) {
+	public String converter(String originalResponse, Map<String, String> requestHeders, byte[] requestBody) {
 
 		engine.put("response", originalResponse);
 		engine.put("requestBody", requestBody);
