@@ -19,7 +19,8 @@ public class HttpMockRule {
 	private String host = "*"; // if we do not specify hostName , host will be "*" , that mean will match all
 								// hostName.
 	private String uri;
-
+	@Builder.Default
+	private String protocol = "http";
 	private String mockResponse;
 
 	private Map<String, String> responseHeaders;

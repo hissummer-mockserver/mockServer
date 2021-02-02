@@ -58,11 +58,6 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 				log.info("headers: {} response: {}  to be extracted: ", requestHeaders, requestBody);
 			}
 
-			if (!logResponse) {
-				logResponse = true;
-				log.info("headers: {} response: {}  to be extracted: ", requestHeaders, requestBody);
-			}
-
 			try {
 
 				int newStart = m.start();
@@ -116,7 +111,9 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 		log.info("get from body:{} ", extractPath);
 
 		if (contentTypeContains(requestHeaders, "application/x-www-form-urlencoded")) {
+
 			String extractValue = wwwformtoMap(requestBody).get(extractPath.replace("$.", ""));
+
 			if (extractValue == null)
 				return "!NullValue!";
 			else
@@ -142,7 +139,6 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 		}
 
 		return "!NullValue!";
-
 	}
 
 	private boolean contentTypeContains(Map<String, String> requestHeaders, String content) {

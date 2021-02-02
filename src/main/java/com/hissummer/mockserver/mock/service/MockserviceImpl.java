@@ -77,7 +77,6 @@ public class MockserviceImpl {
 
 		if (response != null) {
 			return response;
-
 		} else {
 			return MockResponse.builder()
 					.responseBody(JSON.toJSONString(
@@ -119,7 +118,6 @@ public class MockserviceImpl {
 			String protocol = "http";
 			String upstreamUri = "/docs";
 			try {
-
 				if (matchedMockRule.getUpstreams().getNodes().get(0).getAddress() != null)
 					upstreamAddress = matchedMockRule.getUpstreams().getNodes().get(0).getAddress();
 
@@ -138,7 +136,6 @@ public class MockserviceImpl {
 			if (workMode != null && workMode.equals(HttpMockWorkMode.UPSTREAM)) {
 
 				// mock rule 的工作模式为upstream模式. 后期将upstream作为hostname的rule单独管理，这里的代码将会移除！
-
 				return __getUpstreamResponse(protocol, headers, upstreamAddress, method, upstreamUri, requestBody);
 
 			} else {
@@ -147,7 +144,6 @@ public class MockserviceImpl {
 						.responseBody(__interpreterResponse(matchedMockRule.getMockResponse(), headers, requestBody))
 						.isMock(true).isUpstream(false).headers(matchedMockRule.getResponseHeaders()).build();
 			}
-
 		} else {
 			return null;
 		}
@@ -186,7 +182,6 @@ public class MockserviceImpl {
 		Headers.Builder headerBuilder = new Headers.Builder();
 
 		for (Entry<String, String> header : headers.entrySet()) {
-
 			if (header.getKey().equalsIgnoreCase("host")) {
 				headerBuilder.add(header.getKey(), getHost(upstream));
 			} else {
@@ -202,12 +197,10 @@ public class MockserviceImpl {
 		}
 		Request request = new Request.Builder().url(protocol + "://" + upstream + requestUri)
 				.method(method, okHttpRequestBody).headers(requestHeaders).build();
-
 		log.info("upstream request: {} | {}", JSON.toJSONString(request.headers()), JSON.toJSONString(request.body()));
 		Call call = client.newCall(request);
 		try {
 			Response response = call.execute();
-
 			log.info("upstream response:{} | {} | {}", JSON.toJSONString(response.code()),
 					JSON.toJSONString(response.headers()), response.body().toString());
 
@@ -292,7 +285,6 @@ public class MockserviceImpl {
 		String[] requestURIArray = requestUriFormat.split("/");
 		List<String> matchRequestURI = new ArrayList<String>(Arrays.asList(requestURIArray));
 		String matchRequestURIString = requestUriFormat;
-
 		int loops = matchRequestURI.size();
 		for (int i = 0; i <= loops; i++) {
 
@@ -300,7 +292,6 @@ public class MockserviceImpl {
 				matchRequestURI.remove(matchRequestURI.size() - 1);
 				if (matchRequestURI.isEmpty()) {
 					matchRequestURIString = "/";
-
 				} else {
 					matchRequestURIString = String.join("/", matchRequestURI);
 				}

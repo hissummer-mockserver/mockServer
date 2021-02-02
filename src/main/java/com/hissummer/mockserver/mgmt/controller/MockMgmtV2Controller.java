@@ -46,7 +46,6 @@ public class MockMgmtV2Controller {
 	private static final String PASSWORD = "password";
 
 	@Autowired
-
 	MockRuleMgmtMongoRepository mockRuleMgmtMongoRepository;
 
 	@Autowired
@@ -82,12 +81,12 @@ public class MockMgmtV2Controller {
 
 			HttpMockRule saveMockRule = mockRuleMgmtMongoRepository.insert(mockRule);
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("save success.")
+			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Add success.")
 					.data(saveMockRule).build();
 
 		} catch (Exception e) {
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save failed: " + e.getMessage())
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("Add failed: " + e.getMessage())
 					.build();
 		}
 
@@ -112,7 +111,7 @@ public class MockMgmtV2Controller {
 
 		} catch (Exception e) {
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("save faild:" + e.getMessage())
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("Update faild:" + e.getMessage())
 					.build();
 		}
 
@@ -131,10 +130,10 @@ public class MockMgmtV2Controller {
 
 			mockRuleMgmtMongoRepository.deleteById(mockRule.getId());
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("delete success.").build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Delete success.").build();
 		} catch (Exception e) {
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("Delete failed: "+e.getMessage()).build();
 		}
 
 		return result;

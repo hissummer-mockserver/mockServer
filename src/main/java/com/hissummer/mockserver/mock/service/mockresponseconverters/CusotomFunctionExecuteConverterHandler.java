@@ -52,6 +52,7 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 
 			newStart = m.start() + offposition;
 			newEnd = m.end() + offposition;
+
 			try {
 
 				// 获取到自定义方法
@@ -85,7 +86,6 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 					originalResponse = originalResponse.substring(0, newStart) + replaceString
 							+ originalResponse.substring(newEnd);
 				}
-
 				log.info(originalResponse);
 			} catch (NoSuchBeanDefinitionException e) {
 
