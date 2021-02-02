@@ -31,7 +31,8 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 	ApplicationContext context;
 
 	@Override
-	public String converter(String originalResponse, Map<String, String> requestHeaders, byte[] requestBody) {
+	public String converter(String originalResponse, Map<String, String> requestHeaders,
+			Map<String, String> requestQueryString, byte[] requestBody) {
 
 		String pattern = "\\$\\{(.+?)\\}";
 

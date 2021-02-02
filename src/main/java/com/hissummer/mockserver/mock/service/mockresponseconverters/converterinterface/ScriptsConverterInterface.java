@@ -4,6 +4,7 @@ import java.util.Map;
 
 public interface ScriptsConverterInterface {
 
-	public String converter(String originalResponse, Map<String, String> requestHeders, byte[] requestBody);
+	public String converter(String originalResponse, Map<String, String> requestHeders,
+			Map<String, String> requestQueryString, byte[] requestBody);
 
 }

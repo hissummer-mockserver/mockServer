@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.alibaba.fastjson.JSON;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mock.service.MockserviceImpl;
 import com.hissummer.mockserver.mock.vo.MockResponse;
@@ -52,87 +50,55 @@ public class MockForwardController implements ErrorController {
 	 * @return
 	 */
 	@RequestMapping(value = "/forward")
-	// we don't specify method for this @RequestMapping , because we would like
-	// support all methods for mock service.
-	public ResponseEntity<?> forward(HttpServletRequest request, @RequestHeader Map<String, String> requestHeaders,
+	public ResponseEntity<Object> forward(HttpServletRequest request, @RequestHeader Map<String, String> requestHeaders,
 			@Nullable @RequestBody byte[] requestBody, final HttpServletResponse response) {
 
-		log.info("headers: {}", JSON.toJSONString(requestHeaders));
-
+		String requestQueryString = request.getQueryString();
 		Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
 		String errorMessage = (String) request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
 		String requestHost = request.getServerName();
-
-		log.info("{},{},{}", status, errorMessage, requestHost);
-
-		if (status != null) {
-			Integer statusCode = Integer.valueOf(status.toString());
-
-			if (statusCode == HttpStatus.NOT_FOUND.value()) {
-				try {
-					/**
-					 * change http response code 404(notfound) to 200.
-					 */
-					ResponseFacade responsefacade = (ResponseFacade) response;
-					Field innerResponse = getField(responsefacade.getClass(), "response");
-					innerResponse.setAccessible(true);
-					Response innterResponseObject = (Response) innerResponse.get(responsefacade);
-					org.apache.coyote.Response coyoteResponse = innterResponseObject.getCoyoteResponse();
-					Field httpstatus = getField(coyoteResponse.getClass(), "status");
-					httpstatus.setAccessible(true);
-					httpstatus.set(coyoteResponse, 200);
-				}
-
-				catch (NoSuchFieldException e) {
-					log.info(e.getMessage());
-				} catch (IllegalArgumentException e) {
-					log.info(e.getMessage());
-				} catch (IllegalAccessException e) {
-					log.info(e.getMessage());
-				} catch (Exception e) {
-					log.info(e.getMessage());
-				}
-
-				// 404 not found
-				HttpHeaders responseHeaders = new HttpHeaders();
-				MockResponse responseVo = mockservice.getResponse(requestHeaders, requestHost, request.getMethod(),
-						(String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI), requestBody);
-
-				if (responseVo.getHeaders() != null) {
-
-					responseVo.getHeaders().keySet().forEach(header -> {
-
-						responseHeaders.add(header, responseVo.getHeaders().get(header));
-
-					});
-				}
-
-				try {
-					if (responseHeaders.getContentType() == null) {
-
-						responseHeaders.setContentType(new MediaType("application", "json"));
-
-					}
-				} catch (Exception e) {
-
-					responseHeaders.setContentType(new MediaType("application", "json"));
-				}
-				return new ResponseEntity<>(responseVo.getResponseBody(), responseHeaders, HttpStatus.OK);
-
-			} else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
-
-				HttpHeaders responseHeaders = new HttpHeaders();
-				responseHeaders.setContentType(new MediaType("application", "json"));
-				// 5xx errors
-				return new ResponseEntity<>(MockRuleMgmtResponseVo.builder().status(0).success(false)
-						.message(errorMessage).build().toString(), responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		}
-
 		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setContentType(new MediaType("application", "json"));
 
-		// if statusCode is not 404 or 500 errors , will return default response.
+		if (status != null && Integer.valueOf(status.toString()) == HttpStatus.NOT_FOUND.value()) {
+
+			try {
+				/**
+				 * change HTTP response code 404(NOT_FOUND) to 200.
+				 */
+				ResponseFacade responsefacade = (ResponseFacade) response;
+				Field innerResponse = getField(responsefacade.getClass(), "response");
+				// 强制修改inneResponse的可见
+				innerResponse.setAccessible(true);
+				Response innterResponseObject = (Response) innerResponse.get(responsefacade);
+				org.apache.coyote.Response coyoteResponse = innterResponseObject.getCoyoteResponse();
+				Field httpstatus = getField(coyoteResponse.getClass(), "status");
+				// 强制修改httpStatus的可见，并将httpStatus改为200错误，而不是404。
+				httpstatus.setAccessible(true);
+				httpstatus.set(coyoteResponse, 200);
+			}
+
+			catch (Exception e) {
+
+				log.info(e.getMessage());
+			}
+
+			// 404 not found
+			MockResponse responseVo = mockservice.getResponse(requestHeaders, requestHost, request.getMethod(),
+					(String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI), requestQueryString,
+					requestBody);
+
+			if (responseVo.getHeaders() != null) {
+				responseVo.getHeaders().keySet()
+						.forEach(header -> responseHeaders.add(header, responseVo.getHeaders().get(header)));
+			}
+
+			if (responseHeaders.getContentType() == null) {
+				responseHeaders.setContentType(new MediaType("application", "json"));
+			}
+			return new ResponseEntity<>(responseVo.getResponseBody(), responseHeaders, HttpStatus.OK);
+
+		}
+		responseHeaders.setContentType(new MediaType("application", "json"));
 		return new ResponseEntity<>(
 				MockRuleMgmtResponseVo.builder().status(0).success(false).message(errorMessage).build().toString(),
 				responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);

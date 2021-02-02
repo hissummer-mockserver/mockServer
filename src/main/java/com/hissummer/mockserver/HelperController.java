@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @CrossOrigin(origins = "*")
 @RequestMapping("/help")
 @RestController
+@Deprecated
 public class HelperController {
 
 	@Autowired

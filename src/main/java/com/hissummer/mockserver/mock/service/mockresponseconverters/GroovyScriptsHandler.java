@@ -26,11 +26,12 @@ public class GroovyScriptsHandler implements ScriptsConverterInterface {
 
 	@Override
 	@CompileStatic
-	public String converter(String originalResponse, Map<String, String> requestHeders, byte[] requestBody) {
+	public String converter(String originalResponse, Map<String, String> requestHeders,
+			Map<String, String> requestQueryString, byte[] requestBody) {
 
 		engine.put("response", originalResponse);
 		engine.put("requestBody", requestBody);
-		engine.put("requestHeaders", JSON.toJSONString(requestHeders));
+		engine.put("requestHeaders", requestHeders);
 		try {
 			engine.eval(originalResponse);
 		} catch (ScriptException e) {

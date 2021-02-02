@@ -24,7 +24,8 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 	ApplicationContext context;
 
 	@Override
-	public String converter(String originalResponse, Map<String, String> requestHeders, byte[] requestBody) {
+	public String converter(String originalResponse, Map<String, String> requestHeders,
+			Map<String, String> requestQueryString, byte[] requestBody) {
 
 		String pattern = "\\$\\{__([a-zA-Z0-9]*)\\((.*?)\\)\\}";
 

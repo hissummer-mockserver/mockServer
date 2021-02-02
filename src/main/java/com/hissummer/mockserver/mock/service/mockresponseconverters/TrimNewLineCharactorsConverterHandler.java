@@ -17,7 +17,8 @@ import com.hissummer.mockserver.mock.service.mockresponseconverters.converterint
 public class TrimNewLineCharactorsConverterHandler implements MockResponseTearDownConverterInterface {
 
 	@Override
-	public String converter(String originalResponse, Map<String, String> requestHeders, byte[] requestBody) {
+	public String converter(String originalResponse, Map<String, String> requestHeders,
+			Map<String, String> requestQueryString, byte[] requestBody) {
 
 		return originalResponse.replaceAll("\r\n", "").replaceAll("\n", "");
 	}
