@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.Constants;
 import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
+import com.hissummer.mockserver.mock.service.HttpClientUtil;
 import com.netflix.appinfo.DataCenterInfo;
 
 import lombok.extern.slf4j.Slf4j;
@@ -106,7 +107,7 @@ public class EurekaMockRuleServiceImpl {
 		 * 
 		 */
 
-		final OkHttpClient client = new OkHttpClient();
+		final OkHttpClient client = HttpClientUtil.client;
 
 		Response response = null;
 
@@ -135,7 +136,7 @@ public class EurekaMockRuleServiceImpl {
 
 	public boolean unRegisterApp(EurekaMockRule rule) {
 
-		final OkHttpClient client = new OkHttpClient();
+		final OkHttpClient client = HttpClientUtil.client;
 
 		Response response = null;
 

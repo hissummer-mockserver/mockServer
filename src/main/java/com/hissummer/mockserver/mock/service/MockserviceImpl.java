@@ -1,7 +1,6 @@
 package com.hissummer.mockserver.mock.service;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,10 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.hissummer.mockserver.mgmt.service.jpa.RequestLogMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
-import com.hissummer.mockserver.mgmt.vo.RequestLog;
 import com.hissummer.mockserver.mgmt.vo.HttpMockWorkMode;
 import com.hissummer.mockserver.mock.service.jpa.MockRuleMongoRepository;
 import com.hissummer.mockserver.mock.service.mockresponseconverters.GroovyScriptsHandler;
@@ -90,7 +87,7 @@ public class MockserviceImpl {
 
 			String nomatchresponse = JSON
 					.toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(true).message(NOMATCHED).build());
-			
+
 			return MockResponse.builder().responseBody(nomatchresponse).build();
 		}
 	}
@@ -153,7 +150,7 @@ public class MockserviceImpl {
 		}
 		Map<String, String> requestQueryStringMap = new HashMap<>();
 
-		if (requestQueryString != null) {
+		if (requestQueryString != null && !requestQueryString.equals("null")) {
 			String[] queryStrings = requestQueryString.split("&");
 
 			for (String queryString : queryStrings) {
@@ -257,9 +254,7 @@ public class MockserviceImpl {
 	private MockResponse __getUpstreamResponse(String protocol, Map<String, String> requestHeaders,
 			String upstreamAddress, String requestMethod, String requestUri, byte[] requestBody) {
 
-		OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
-		final OkHttpClient client = httpClientBuilder.connectTimeout(Duration.ofSeconds(10))
-				.readTimeout(Duration.ofSeconds(60)).build();
+		
 		Headers.Builder headerBuilder = new Headers.Builder();
 
 		for (Entry<String, String> header : requestHeaders.entrySet()) {
@@ -279,7 +274,7 @@ public class MockserviceImpl {
 		Request request = new Request.Builder().url(protocol + "://" + upstreamAddress + requestUri)
 				.method(requestMethod, okHttpRequestBody).headers(requestUpstreamHeaders).build();
 		log.debug("upstream request: {} | {}", JSON.toJSONString(request.headers()), JSON.toJSONString(request.body()));
-		Call call = client.newCall(request);
+		Call call = HttpClientUtil.client.newCall(request);
 		try {
 			Response response = call.execute();
 			log.debug("upstream response:{} | {} | {}", JSON.toJSONString(response.code()),
@@ -293,8 +288,13 @@ public class MockserviceImpl {
 					Pair<String, String> responseHeader = headerIterator.next();
 					upstreamResponseHeaders.put(responseHeader.getFirst(), responseHeader.getSecond());
 				}
-				
-				upstreamResponseHeaders.put("X-Forwarded-For:", value);
+
+				if (upstreamResponseHeaders.containsKey("X-Forwarded-For")) {
+					upstreamResponseHeaders.put("X-Forwarded-For",
+							"hissummer-mockserver," + upstreamResponseHeaders.get("X-Forwarded-For"));
+				} else {
+					upstreamResponseHeaders.put("X-Forwarded-For", "hissummer-mockserver");
+				}
 
 				return MockResponse.builder().headers(upstreamResponseHeaders).responseBody(response.body().string())
 						.isUpstream(true).isMock(false).build();

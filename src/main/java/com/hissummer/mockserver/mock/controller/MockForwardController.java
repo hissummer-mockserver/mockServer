@@ -3,7 +3,6 @@ package com.hissummer.mockserver.mock.controller;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -89,30 +88,40 @@ public class MockForwardController implements ErrorController {
 			}
 
 			catch (Exception e) {
-
 				log.info(e.getMessage());
 			}
 
 			String requestUri = (String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
 			// 404 not found
-			MockResponse responseVo = mockservice.getResponse(requestHeaders, requestHost, request.getMethod(),
-					requestUri, requestQueryString, requestBody);
+			MockResponse mockOrUpstreamReturnedResponse = mockservice.getResponse(requestHeaders, requestHost,
+					request.getMethod(), requestUri, requestQueryString, requestBody);
 
-			if (responseVo.getHeaders() != null) {
-				responseVo.getHeaders().keySet()
-						.forEach(header -> responseHeaders.add(header, responseVo.getHeaders().get(header)));
+			if (mockOrUpstreamReturnedResponse.getHeaders() != null
+					&& mockOrUpstreamReturnedResponse.getHeaders().containsKey("X-Forwarded-For")) {
+
+				mockOrUpstreamReturnedResponse.getHeaders().put("X-Forwarded-For", request.getRemoteAddr() + ","
+						+ mockOrUpstreamReturnedResponse.getHeaders().get("X-Forwarded-For"));
 			}
+
+			if (mockOrUpstreamReturnedResponse.getHeaders() != null) {
+				mockOrUpstreamReturnedResponse.getHeaders().keySet().forEach(
+						header -> responseHeaders.add(header, mockOrUpstreamReturnedResponse.getHeaders().get(header)));
+			}
+			responseHeaders.remove("ClientAddress");
+			responseHeaders.add("ClientAddress", request.getRemoteAddr() + ":" + request.getRemotePort());
 
 			if (responseHeaders.getContentType() == null) {
 				try {
-					JSON.parse(responseVo.getResponseBody());
+					JSON.parse(mockOrUpstreamReturnedResponse.getResponseBody());
 					responseHeaders.setContentType(new MediaType("application", "json"));
 				} catch (Exception e) {
 					responseHeaders.setContentType(new MediaType("text", "plain"));
 				}
 			}
+
 			RequestLog requestLog = RequestLog.builder().requestHeaders(requestHeaders)
-					.uri(requestUri + "?" + requestQueryString).isMock(responseVo.isMock()).createTime(new Date()).build();
+					.uri(requestUri + "?" + requestQueryString).isMock(mockOrUpstreamReturnedResponse.isMock())
+					.createTime(new Date()).build();
 			String contentType = requestHeaders.get("content-type");
 
 			if (contentType != null && (contentType.equalsIgnoreCase("application/json")
@@ -122,24 +131,24 @@ public class MockForwardController implements ErrorController {
 				requestLog.setRequestBody(new String(requestBody, StandardCharsets.UTF_8));
 			}
 
-			Map<String, String> responseHeaderMap =
-					responseHeaders.entrySet().stream()
-				   .collect(Collectors.toMap(Map.Entry::getKey,
-				        e -> e.getValue().get(0)));
-			
+			Map<String, String> responseHeaderMap = responseHeaders.entrySet().stream()
+					.collect(Collectors.toMap(Map.Entry::getKey, e -> String.join(",", e.getValue())));
+
 			requestLog.setResponseHeaders(responseHeaderMap);
 
-				contentType = responseHeaders.getContentType().getType()+"/"+responseHeaders.getContentType().getSubtype();
+			contentType = responseHeaders.getContentType().getType() + "/"
+					+ responseHeaders.getContentType().getSubtype();
 
-				if (contentType != null && (contentType.equalsIgnoreCase("application/json")
-						|| contentType.equalsIgnoreCase("application/x-www-form-urlencoded")
-						|| contentType.equalsIgnoreCase("application/xml") || contentType.equalsIgnoreCase("text/html")
-						|| contentType.equalsIgnoreCase("text/plain"))) {
-					requestLog.setResponseBody(responseVo.getResponseBody());
-				}
+			if (contentType != null && (contentType.equalsIgnoreCase("application/json")
+					|| contentType.equalsIgnoreCase("application/x-www-form-urlencoded")
+					|| contentType.equalsIgnoreCase("application/xml") || contentType.equalsIgnoreCase("text/html")
+					|| contentType.equalsIgnoreCase("text/plain"))) {
+				requestLog.setResponseBody(mockOrUpstreamReturnedResponse.getResponseBody());
+			}
 			requestLogMongoRepository.save(requestLog);
 
-			return new ResponseEntity<>(responseVo.getResponseBody(), responseHeaders, HttpStatus.OK);
+			return new ResponseEntity<>(mockOrUpstreamReturnedResponse.getResponseBody(), responseHeaders,
+					HttpStatus.OK);
 
 		}
 		responseHeaders.setContentType(new MediaType("application", "json"));
@@ -148,19 +157,13 @@ public class MockForwardController implements ErrorController {
 				responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	public static void main(String[] args) {
-
-		JSON.parse("xxxxx");
-
-	}
-
 	/**
 	 * This is not used actually. "server.error.path=/forward" in
 	 * application.properties will define the error path to be the "/forward".
 	 */
 	@Override
 	public String getErrorPath() {
-		log.info("get forward path");
+		log.debug("get forward path");
 		return "/forward";
 	}
 

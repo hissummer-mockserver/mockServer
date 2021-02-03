@@ -19,12 +19,12 @@ public class RequestLog {
 	private String uri;
 	@Builder.Default
 	private String protocol = "http";
-	private Map<String,String> requestHeaders;
+	private Map<String, String> requestHeaders;
 	private String requestBody;
-	private Map<String,String>  responseHeaders;
+	private Map<String, String> responseHeaders;
 	private String responseBody;
 	private String upstreamRequestUri;
-	private Map<String,String>  upstreamRequestHeaders;
+	private Map<String, String> upstreamRequestHeaders;
 	private String upstreamRequestBody;
 
 	private Date createTime;
