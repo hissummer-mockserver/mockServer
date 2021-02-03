@@ -1,7 +1,11 @@
 package com.hissummer.mockserver.mock.controller;
 
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +25,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.alibaba.fastjson.JSON;
+import com.hissummer.mockserver.mgmt.service.jpa.RequestLogMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
+import com.hissummer.mockserver.mgmt.vo.RequestLog;
 import com.hissummer.mockserver.mock.service.MockserviceImpl;
 import com.hissummer.mockserver.mock.vo.MockResponse;
 
@@ -35,6 +43,9 @@ public class MockForwardController implements ErrorController {
 
 	@Autowired
 	MockserviceImpl mockservice;
+
+	@Autowired
+	RequestLogMongoRepository requestLogMongoRepository;
 
 	/**
 	 * forward to the mocked rules or upstream.
@@ -82,10 +93,10 @@ public class MockForwardController implements ErrorController {
 				log.info(e.getMessage());
 			}
 
+			String requestUri = (String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
 			// 404 not found
 			MockResponse responseVo = mockservice.getResponse(requestHeaders, requestHost, request.getMethod(),
-					(String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI), requestQueryString,
-					requestBody);
+					requestUri, requestQueryString, requestBody);
 
 			if (responseVo.getHeaders() != null) {
 				responseVo.getHeaders().keySet()
@@ -93,8 +104,41 @@ public class MockForwardController implements ErrorController {
 			}
 
 			if (responseHeaders.getContentType() == null) {
-				responseHeaders.setContentType(new MediaType("application", "json"));
+				try {
+					JSON.parse(responseVo.getResponseBody());
+					responseHeaders.setContentType(new MediaType("application", "json"));
+				} catch (Exception e) {
+					responseHeaders.setContentType(new MediaType("text", "plain"));
+				}
 			}
+			RequestLog requestLog = RequestLog.builder().requestHeaders(requestHeaders)
+					.uri(requestUri + "?" + requestQueryString).isMock(responseVo.isMock()).createTime(new Date()).build();
+			String contentType = requestHeaders.get("content-type");
+
+			if (contentType != null && (contentType.equalsIgnoreCase("application/json")
+					|| contentType.equalsIgnoreCase("application/x-www-form-urlencoded")
+					|| contentType.equalsIgnoreCase("application/xml") || contentType.equalsIgnoreCase("text/html")
+					|| contentType.equalsIgnoreCase("text/plain"))) {
+				requestLog.setRequestBody(new String(requestBody, StandardCharsets.UTF_8));
+			}
+
+			Map<String, String> responseHeaderMap =
+					responseHeaders.entrySet().stream()
+				   .collect(Collectors.toMap(Map.Entry::getKey,
+				        e -> e.getValue().get(0)));
+			
+			requestLog.setResponseHeaders(responseHeaderMap);
+
+				contentType = responseHeaders.getContentType().getType()+"/"+responseHeaders.getContentType().getSubtype();
+
+				if (contentType != null && (contentType.equalsIgnoreCase("application/json")
+						|| contentType.equalsIgnoreCase("application/x-www-form-urlencoded")
+						|| contentType.equalsIgnoreCase("application/xml") || contentType.equalsIgnoreCase("text/html")
+						|| contentType.equalsIgnoreCase("text/plain"))) {
+					requestLog.setResponseBody(responseVo.getResponseBody());
+				}
+			requestLogMongoRepository.save(requestLog);
+
 			return new ResponseEntity<>(responseVo.getResponseBody(), responseHeaders, HttpStatus.OK);
 
 		}
@@ -102,6 +146,12 @@ public class MockForwardController implements ErrorController {
 		return new ResponseEntity<>(
 				MockRuleMgmtResponseVo.builder().status(0).success(false).message(errorMessage).build().toString(),
 				responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	public static void main(String[] args) {
+
+		JSON.parse("xxxxx");
+
 	}
 
 	/**

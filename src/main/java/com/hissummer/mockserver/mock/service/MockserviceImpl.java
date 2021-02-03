@@ -1,6 +1,8 @@
 package com.hissummer.mockserver.mock.service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,8 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.hissummer.mockserver.mgmt.service.jpa.RequestLogMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
+import com.hissummer.mockserver.mgmt.vo.RequestLog;
 import com.hissummer.mockserver.mgmt.vo.HttpMockWorkMode;
 import com.hissummer.mockserver.mock.service.jpa.MockRuleMongoRepository;
 import com.hissummer.mockserver.mock.service.mockresponseconverters.GroovyScriptsHandler;
@@ -80,12 +84,14 @@ public class MockserviceImpl {
 				requestQueryString, requestBody);
 
 		if (response != null) {
+
 			return response;
 		} else {
-			return MockResponse.builder()
-					.responseBody(JSON.toJSONString(
-							MockRuleMgmtResponseVo.builder().status(0).success(true).message(NOMATCHED).build()))
-					.build();
+
+			String nomatchresponse = JSON
+					.toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(true).message(NOMATCHED).build());
+			
+			return MockResponse.builder().responseBody(nomatchresponse).build();
 		}
 	}
 
@@ -123,7 +129,8 @@ public class MockserviceImpl {
 			if (workMode != null && workMode.equals(HttpMockWorkMode.UPSTREAM)) {
 
 				// mock rule 的工作模式为upstream模式. 后期将upstream作为hostname的rule单独管理，这里的代码将会移除！
-				return __getUpstreamResponse(matchedMockRule, requestHeaders, requestMethod, requestUri, requestBody);
+				return __getUpstreamResponse(matchedMockRule, requestHeaders, requestMethod,
+						requestUri + "?" + requestQueryString, requestBody);
 
 			} else {
 				// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
@@ -144,22 +151,22 @@ public class MockserviceImpl {
 		if (requestHeders.get("content-type") == null || requestHeders.get("content-type").contains("multipart")) {
 			// requestBody = "";
 		}
-
-		String[] queryStrings = requestQueryString.split("&");
-
 		Map<String, String> requestQueryStringMap = new HashMap<>();
 
-		for (String queryString : queryStrings) {
-			String[] keyvalue = queryString.split("=");
-			String value = keyvalue[1] == null ? null : keyvalue[1];
-			if (keyvalue[0] != null)
+		if (requestQueryString != null) {
+			String[] queryStrings = requestQueryString.split("&");
 
-			{
-				requestQueryStringMap.put(keyvalue[0], value);
+			for (String queryString : queryStrings) {
+				String[] keyvalue = queryString.split("=");
+				String value = keyvalue[1] == null ? null : keyvalue[1];
+				if (keyvalue[0] != null)
+
+				{
+					requestQueryStringMap.put(keyvalue[0], value);
+				}
+
 			}
-
 		}
-
 		String mockResponse = originalMockResponse;
 		for (MockResponseSetUpConverterInterface mockResponseConverter : mockResponseConverters) {
 			mockResponse = mockResponseConverter.converter(mockResponse, requestHeders, requestQueryStringMap,
@@ -196,7 +203,7 @@ public class MockserviceImpl {
 				upstreamUri = matchedMockRule.getUpstreams().getNodes().get(0).getUri();
 
 		} catch (Exception e) {
-			log.info("{} mockrule : upstream data is not defined{}", matchedMockRule.getId(),
+			log.error("{} mockrule : upstream data is not defined{}", matchedMockRule.getId(),
 					matchedMockRule.getUpstreams());
 		}
 
@@ -250,8 +257,9 @@ public class MockserviceImpl {
 	private MockResponse __getUpstreamResponse(String protocol, Map<String, String> requestHeaders,
 			String upstreamAddress, String requestMethod, String requestUri, byte[] requestBody) {
 
-		final OkHttpClient client = new OkHttpClient();
-
+		OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
+		final OkHttpClient client = httpClientBuilder.connectTimeout(Duration.ofSeconds(10))
+				.readTimeout(Duration.ofSeconds(60)).build();
 		Headers.Builder headerBuilder = new Headers.Builder();
 
 		for (Entry<String, String> header : requestHeaders.entrySet()) {
@@ -270,23 +278,25 @@ public class MockserviceImpl {
 		}
 		Request request = new Request.Builder().url(protocol + "://" + upstreamAddress + requestUri)
 				.method(requestMethod, okHttpRequestBody).headers(requestUpstreamHeaders).build();
-		log.info("upstream request: {} | {}", JSON.toJSONString(request.headers()), JSON.toJSONString(request.body()));
+		log.debug("upstream request: {} | {}", JSON.toJSONString(request.headers()), JSON.toJSONString(request.body()));
 		Call call = client.newCall(request);
 		try {
 			Response response = call.execute();
-			log.info("upstream response:{} | {} | {}", JSON.toJSONString(response.code()),
+			log.debug("upstream response:{} | {} | {}", JSON.toJSONString(response.code()),
 					JSON.toJSONString(response.headers()), JSON.toJSONString(response.body()));
 
 			JSONObject responseJson = new JSONObject();
-
+			Map<String, String> upstreamResponseHeaders = new HashMap<>();
 			if (response.isSuccessful()) {
 				Iterator<Pair<String, String>> headerIterator = response.headers().iterator();
 				while (headerIterator.hasNext()) {
 					Pair<String, String> responseHeader = headerIterator.next();
-					requestHeaders.put(responseHeader.getFirst(), responseHeader.getSecond());
+					upstreamResponseHeaders.put(responseHeader.getFirst(), responseHeader.getSecond());
 				}
+				
+				upstreamResponseHeaders.put("X-Forwarded-For:", value);
 
-				return MockResponse.builder().headers(requestHeaders).responseBody(response.body().string())
+				return MockResponse.builder().headers(upstreamResponseHeaders).responseBody(response.body().string())
 						.isUpstream(true).isMock(false).build();
 			} else {
 
@@ -359,9 +369,18 @@ public class MockserviceImpl {
 		List<String> matchRequestURI = new ArrayList<String>(Arrays.asList(requestURIArray));
 		String matchRequestURIString = requestUriFormat;
 		int loops = matchRequestURI.size();
+
+		/**
+		 * uri: /1/2/3/4 size=4, loop=5 first loop: /1/2/3/4 second loop: /1/2/3 third
+		 * loop: /1/2 fourth loop: /1 fifth loop: /
+		 * 
+		 */
+
 		for (int i = 0; i <= loops; i++) {
 
 			if (i != 0) {
+				// Verify that "remove()" is used correctly. Here is correct, we don't use i in
+				// loop. Every loop remove last element of the list.
 				matchRequestURI.remove(matchRequestURI.size() - 1);
 				if (matchRequestURI.isEmpty()) {
 					matchRequestURIString = "/";

@@ -41,12 +41,12 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 		int offposition = 0;
 
 		while (m.find()) {
-			log.info("CusotomFunctionExecuteConverterHandler - Found custom function: " + m.group(0));
-			log.info("CusotomFunctionExecuteConverterHandler - start{} end{}", m.start(), m.end());
-			log.info("CusotomFunctionExecuteConverterHandler - Found args: " + m.group(1));
-			log.info("CusotomFunctionExecuteConverterHandler - Found args: " + m.group(2));
+			log.debug("CusotomFunctionExecuteConverterHandler - Found custom function: " + m.group(0));
+			log.debug("CusotomFunctionExecuteConverterHandler - start{} end{}", m.start(), m.end());
+			log.debug("CusotomFunctionExecuteConverterHandler - Found args: " + m.group(1));
+			log.debug("CusotomFunctionExecuteConverterHandler - Found args: " + m.group(2));
 
-			log.info(originalResponse);
+			log.debug(originalResponse);
 
 			int newStart = m.start();
 			int newEnd = m.end();
@@ -71,7 +71,7 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 								+ originalResponse.substring(newEnd);
 					} else {
 
-						replaceString = "!Function_" + m.group(1) + "_Exception!";
+						replaceString = "!!Function_" + m.group(1) + "_Exception!!";
 						offposition = offposition + replaceString.length() - m.group(0).length();
 
 						originalResponse = originalResponse.substring(0, newStart) + replaceString
@@ -81,16 +81,16 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 
 				} else {
 
-					replaceString = "!Function_" + m.group(1) + "_NotFound!";
+					replaceString = "!!Function_" + m.group(1) + "_NotFound!!";
 					offposition = offposition + replaceString.length() - m.group(0).length();
 
 					originalResponse = originalResponse.substring(0, newStart) + replaceString
 							+ originalResponse.substring(newEnd);
 				}
-				log.info(originalResponse);
+				log.debug(originalResponse);
 			} catch (NoSuchBeanDefinitionException e) {
 
-				replaceString = "!Function_" + m.group(1) + "_NotFound!";
+				replaceString = "!!Function_" + m.group(1) + "_NotFound!!";
 				offposition = offposition + replaceString.length() - m.group(0).length();
 
 				originalResponse = originalResponse.substring(0, newStart) + replaceString
@@ -111,12 +111,12 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 
 		String[] argumentArray = argumentsStr.split(",");
 
-		log.info("argument length is {}", argumentArray.length);
+		log.debug("argument length is {}", argumentArray.length);
 
 		int i = 0;
 
 		for (String argument : argumentArray) {
-			log.info("before resolve argument {}", argument);
+			log.debug("before resolve argument {}", argument);
 			argument.replace("[comma]", ",");
 
 			if ((argument.startsWith("\"") && argument.endsWith("\"")))
@@ -128,7 +128,7 @@ public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUp
 				argumentArray[i] = argument.substring(1, argument.length() - 1);
 			}
 
-			log.info("after resolve argument {}", argumentArray[i]);
+			log.debug("after resolve argument {}", argumentArray[i]);
 
 			i++;
 		}
