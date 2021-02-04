@@ -254,7 +254,6 @@ public class MockserviceImpl {
 	private MockResponse __getUpstreamResponse(String protocol, Map<String, String> requestHeaders,
 			String upstreamAddress, String requestMethod, String requestUri, byte[] requestBody) {
 
-		
 		Headers.Builder headerBuilder = new Headers.Builder();
 
 		for (Entry<String, String> header : requestHeaders.entrySet()) {

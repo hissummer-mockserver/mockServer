@@ -23,7 +23,7 @@ import com.jayway.jsonpath.ReadContext;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
-@Order(value = 2)
+@Order(value = 1)
 @Slf4j
 public class CusotomVarReplacementConverterHandler implements MockResponseSetUpConverterInterface {
 
@@ -100,12 +100,12 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 		returnValue = requestQueryString.get(extractPath);
 
 		if (returnValue == null)
-			returnValue = "!!requestHeader_" + extractPath + "_notExist!!";
+			returnValue = "!!requestQueryString_" + extractPath + "_Undefined!!";
 		else {
 			try {
 				returnValue = URLDecoder.decode(returnValue, "UTF-8");
 			} catch (UnsupportedEncodingException e) {
-
+				log.warn("url decode exception!{}", e);
 			}
 		}
 		return returnValue;
@@ -122,7 +122,7 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 			returnValue = requestHeaders.get(extractPath);
 		}
 		if (returnValue == null)
-			returnValue = "!!requestHeader_" + extractPath + "_notExist!!";
+			returnValue = "!!requestHeader_" + extractPath + "_Undefined!!";
 		return returnValue;
 
 	}
@@ -137,13 +137,13 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 					.get(extractPath.replace("$.", ""));
 
 			if (extractValue == null)
-				return "!!requestBody_" + extractPath + "_valueNotFound!!";
+				return "!!requestBody_" + extractPath + "_Undefined!!";
 			else
 				return extractValue;
 
 		} else if (contentTypeContains(requestHeaders, "application/xml")) {
 			log.warn("content type: xml not support to extract!");
-			return "!!xml_content_not_support!!";
+			return "!!xml_content_not_support_extract!!";
 		} else if (contentTypeContains(requestHeaders, "application/json")) {
 			try {
 				ReadContext ctx = JsonPath.parse(new String(requestBody, Charset.defaultCharset()));
@@ -151,7 +151,7 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 				// 因为JSON.toJSONString后非json format串会加上双引号，因为我们不需要双引号，此时我们需要处理下。
 				jsonValue = StringUtils.strip(jsonValue, "\"");
 				if (jsonValue == null)
-					return "!!requestBody_" + extractPath + "_valueNotFound!!";
+					return "!!requestBody_" + extractPath + "_Undefined!!";
 				return jsonValue;
 
 			} catch (Exception e) {
@@ -161,7 +161,7 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 			log.warn(" {} not support  to extract!", requestHeaders.get("content-type"));
 		}
 
-		return "!!requestBody_" + extractPath + "_valueNotFound!!";
+		return "!!requestBody_" + extractPath + "_Undefined!!";
 	}
 
 	private boolean contentTypeContains(Map<String, String> requestHeaders, String content) {

@@ -199,6 +199,47 @@ public class MockMgmtV2Controller {
 
 	}
 
+	@PostMapping(value = "/queryRequestLog")
+	public MockRuleMgmtResponseVo queryRequestLog(@RequestBody JSONObject requestBody) {
+
+		int pageNumber = requestBody.getIntValue("pageNumber") < 0 ? 0 : requestBody.getIntValue("pageNumber");
+		int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 50 : requestBody.getIntValue("pageSize");
+
+		PageRequest page = PageRequest.of(pageNumber, pageSize);
+
+		Page<HttpMockRule> rules = null;
+
+		String uri = ".*";
+		String host = ".*";
+
+		if (!StringUtils.isEmpty(requestBody.getString("uri"))) {
+			uri = requestBody.getString("uri");
+		}
+		if (!StringUtils.isEmpty(requestBody.getString("host"))) {
+
+			if (requestBody.getString("host").equals("*")) {
+				// 因为做的是正则匹配查询，所以特殊的*字符转换为\*，即查询包含*字符的host值。
+				host = "\\*";
+			} else {
+				host = requestBody.getString("host");
+			}
+
+		}
+		String category = requestBody.getString("category");
+
+		if (StringUtils.isEmpty(category)) {
+			rules = mockRuleMgmtMongoRepository.findByHostRegexpAndUriRegexp(host, uri, page);
+		} else {
+			rules = mockRuleMgmtMongoRepository.findByHostRegexpAndUriRegexpAndCategory(host, uri, category, page);
+		}
+
+		if (rules != null && !rules.getContent().isEmpty())
+			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
+		else
+			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("No Rules found.").build();
+
+	}
+
 	@PostMapping(value = "/queryEurekaRule")
 	public MockRuleMgmtResponseVo queryEurekaRules(@RequestBody JSONObject requestBody) {
 

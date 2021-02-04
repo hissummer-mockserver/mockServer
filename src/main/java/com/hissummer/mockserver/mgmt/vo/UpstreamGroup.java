@@ -15,7 +15,7 @@ public class UpstreamGroup {
 	private int tryCount = 0;
 
 	@Builder.Default
-	private Long connectionTimeOut = 60000L;
+	private Long connectionTimeOut = 10000L;
 
 	@Builder.Default
 	private Long writeTimeOut = 60000L;
