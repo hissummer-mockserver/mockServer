@@ -30,6 +30,8 @@ public class HttpMockRule {
 	@Builder.Default
 	private HttpMockWorkMode workMode = HttpMockWorkMode.MOCK;
 
+	private List<HttpConditionRule> conditionRules;
+	
 	@Builder.Default
 	private Boolean enable = true;
 
