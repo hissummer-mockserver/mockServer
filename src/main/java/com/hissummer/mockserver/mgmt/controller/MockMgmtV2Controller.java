@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,10 +23,12 @@ import com.hissummer.mockserver.mgmt.service.MockRuleManagerServiceImpl;
 import com.hissummer.mockserver.mgmt.service.UserService;
 import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.service.jpa.MockRuleMgmtMongoRepository;
+import com.hissummer.mockserver.mgmt.service.jpa.RequestLogMongoRepository;
 import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
 import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
 import com.hissummer.mockserver.mgmt.vo.Loginpair;
 import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
+import com.hissummer.mockserver.mgmt.vo.RequestLog;
 import com.hissummer.mockserver.mock.service.MockserviceImpl;
 
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +50,9 @@ public class MockMgmtV2Controller {
 
 	@Autowired
 	MockRuleMgmtMongoRepository mockRuleMgmtMongoRepository;
+
+	@Autowired
+	RequestLogMongoRepository requestLogMongoRepository;
 
 	@Autowired
 	EurekaMockRuleMongoRepository eurekaMockRuleRepository;
@@ -203,40 +209,28 @@ public class MockMgmtV2Controller {
 	public MockRuleMgmtResponseVo queryRequestLog(@RequestBody JSONObject requestBody) {
 
 		int pageNumber = requestBody.getIntValue("pageNumber") < 0 ? 0 : requestBody.getIntValue("pageNumber");
-		int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 50 : requestBody.getIntValue("pageSize");
+		int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 20 : requestBody.getIntValue("pageSize");
 
-		PageRequest page = PageRequest.of(pageNumber, pageSize);
+		PageRequest page = PageRequest.of(pageNumber, pageSize, Sort.by("createTime").descending());
 
-		Page<HttpMockRule> rules = null;
+		Page<RequestLog> requestLogs = null;
 
-		String uri = ".*";
-		String host = ".*";
+		String uri = null;
 
 		if (!StringUtils.isEmpty(requestBody.getString("uri"))) {
 			uri = requestBody.getString("uri");
 		}
-		if (!StringUtils.isEmpty(requestBody.getString("host"))) {
 
-			if (requestBody.getString("host").equals("*")) {
-				// 因为做的是正则匹配查询，所以特殊的*字符转换为\*，即查询包含*字符的host值。
-				host = "\\*";
-			} else {
-				host = requestBody.getString("host");
-			}
-
-		}
-		String category = requestBody.getString("category");
-
-		if (StringUtils.isEmpty(category)) {
-			rules = mockRuleMgmtMongoRepository.findByHostRegexpAndUriRegexp(host, uri, page);
+		if (StringUtils.isEmpty(uri)) {
+			requestLogs = requestLogMongoRepository.findAll(page);
 		} else {
-			rules = mockRuleMgmtMongoRepository.findByHostRegexpAndUriRegexpAndCategory(host, uri, category, page);
+			requestLogs = requestLogMongoRepository.findByUri(uri, page);
 		}
 
-		if (rules != null && !rules.getContent().isEmpty())
-			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
+		if (requestLogs != null && !requestLogs.getContent().isEmpty())
+			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(requestLogs).build();
 		else
-			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("No Rules found.").build();
+			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("No request logs found.").build();
 
 	}
 

@@ -3,6 +3,7 @@ package com.hissummer.mockserver.mock.service.mockresponseconverters;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -133,7 +134,7 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 
 		if (contentTypeContains(requestHeaders, "application/x-www-form-urlencoded")) {
 
-			String extractValue = wwwformtoMap(new String(requestBody, Charset.defaultCharset()))
+			String extractValue = wwwformtoMap(new String(requestBody, StandardCharsets.UTF_8))
 					.get(extractPath.replace("$.", ""));
 
 			if (extractValue == null)
@@ -146,7 +147,7 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 			return "!!xml_content_not_support_extract!!";
 		} else if (contentTypeContains(requestHeaders, "application/json")) {
 			try {
-				ReadContext ctx = JsonPath.parse(new String(requestBody, Charset.defaultCharset()));
+				ReadContext ctx = JsonPath.parse(new String(requestBody, StandardCharsets.UTF_8));
 				String jsonValue = JSON.toJSONString(ctx.read(extractPath));
 				// 因为JSON.toJSONString后非json format串会加上双引号，因为我们不需要双引号，此时我们需要处理下。
 				jsonValue = StringUtils.strip(jsonValue, "\"");

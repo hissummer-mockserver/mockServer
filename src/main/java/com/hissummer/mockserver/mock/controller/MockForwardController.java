@@ -1,6 +1,10 @@
 package com.hissummer.mockserver.mock.controller;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
@@ -119,16 +123,23 @@ public class MockForwardController implements ErrorController {
 				}
 			}
 
-			RequestLog requestLog = RequestLog.builder().requestHeaders(requestHeaders)
-					.uri(requestUri + "?" + requestQueryString).isMock(mockOrUpstreamReturnedResponse.isMock())
-					.createTime(new Date()).build();
+			String actualFullRequestUri = requestUri
+					+ (requestQueryString == null || requestQueryString.equals("null") || requestQueryString.equals("")
+							? ""
+							: "?" + requestQueryString);
+
+			RequestLog requestLog = RequestLog.builder().requestHeaders(requestHeaders).uri(actualFullRequestUri)
+					.isMock(mockOrUpstreamReturnedResponse.isMock()).createTime(new Date()).build();
 			String contentType = requestHeaders.get("content-type");
 
-			if (contentType != null && (contentType.equalsIgnoreCase("application/json")
-					|| contentType.equalsIgnoreCase("application/x-www-form-urlencoded")
-					|| contentType.equalsIgnoreCase("application/xml") || contentType.equalsIgnoreCase("text/html")
-					|| contentType.equalsIgnoreCase("text/plain"))) {
-				requestLog.setRequestBody(new String(requestBody, StandardCharsets.UTF_8));
+			if (contentType != null && (contentType.contains("application/json")
+					|| contentType.contains("application/x-www-form-urlencoded")
+					|| contentType.contains("application/xml") || contentType.contains("text/html")
+					|| contentType.contains("text/plain"))) {
+				requestLog.setRequestBody(checkUTF8(requestBody) ? new String(requestBody, StandardCharsets.UTF_8)
+						: "非utf-8编码请求报文，此处不做记录");
+			} else {
+				requestLog.setRequestBody("非纯文本的content-type类型，不记录请求报文。");
 			}
 
 			Map<String, String> responseHeaderMap = responseHeaders.entrySet().stream()
@@ -139,11 +150,13 @@ public class MockForwardController implements ErrorController {
 			contentType = responseHeaders.getContentType().getType() + "/"
 					+ responseHeaders.getContentType().getSubtype();
 
-			if (contentType != null && (contentType.equalsIgnoreCase("application/json")
-					|| contentType.equalsIgnoreCase("application/x-www-form-urlencoded")
-					|| contentType.equalsIgnoreCase("application/xml") || contentType.equalsIgnoreCase("text/html")
-					|| contentType.equalsIgnoreCase("text/plain"))) {
+			if (contentType != null && (contentType.contains("application/json")
+					|| contentType.contains("application/x-www-form-urlencoded")
+					|| contentType.contains("application/xml") || contentType.contains("text/html")
+					|| contentType.contains("text/plain"))) {
 				requestLog.setResponseBody(mockOrUpstreamReturnedResponse.getResponseBody());
+			} else {
+				requestLog.setResponseBody("非纯文本的content-type类型，不记录请求报文。");
 			}
 			requestLogMongoRepository.save(requestLog);
 
@@ -155,6 +168,21 @@ public class MockForwardController implements ErrorController {
 		return new ResponseEntity<>(
 				MockRuleMgmtResponseVo.builder().status(0).success(false).message(errorMessage).build().toString(),
 				responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	private boolean checkUTF8(byte[] barr) {
+
+		CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder();
+		ByteBuffer buf = ByteBuffer.wrap(barr);
+
+		try {
+			decoder.decode(buf);
+
+		} catch (CharacterCodingException e) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
