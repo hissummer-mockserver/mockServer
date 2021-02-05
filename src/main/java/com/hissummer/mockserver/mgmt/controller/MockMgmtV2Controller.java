@@ -224,7 +224,7 @@ public class MockMgmtV2Controller {
 		if (StringUtils.isEmpty(uri)) {
 			requestLogs = requestLogMongoRepository.findAll(page);
 		} else {
-			requestLogs = requestLogMongoRepository.findByUri(uri, page);
+			requestLogs = requestLogMongoRepository.findByHittedMockRuleUri(uri, page);
 		}
 
 		if (requestLogs != null && !requestLogs.getContent().isEmpty())

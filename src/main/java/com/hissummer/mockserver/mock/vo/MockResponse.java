@@ -2,6 +2,8 @@ package com.hissummer.mockserver.mock.vo;
 
 import java.util.Map;
 
+import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,5 +15,5 @@ public class MockResponse {
 	private String responseBody; // now only support string responseBody
 	private boolean isMock;
 	private boolean isUpstream;
-
+	private HttpMockRule mockRule;
 }

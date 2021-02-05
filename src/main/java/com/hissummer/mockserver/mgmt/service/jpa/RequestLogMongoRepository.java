@@ -12,11 +12,9 @@ import com.hissummer.mockserver.mgmt.vo.RequestLog;
 
 public interface RequestLogMongoRepository extends MongoRepository<RequestLog, String> {
 
-	Page<RequestLog> findByUri(String uri, Pageable pageable);
+	Page<RequestLog> findByHittedMockRuleUri(String uri, Pageable pageable);
 
 	Page<RequestLog> findAll(Pageable pageable);
-
-	List<RequestLog> findByUri(String uri, Sort sort);
 
 	Optional<RequestLog> findById(String id);
 

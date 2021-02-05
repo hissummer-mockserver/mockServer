@@ -84,11 +84,13 @@ public class MockserviceImpl {
 
 			return response;
 		} else {
-
+			
+			
+			
 			String nomatchresponse = JSON
 					.toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(true).message(NOMATCHED).build());
 
-			return MockResponse.builder().responseBody(nomatchresponse).build();
+			return MockResponse.builder().responseBody(nomatchresponse).mockRule(HttpMockRule.builder().uri("null").build()).build();
 		}
 	}
 
@@ -133,7 +135,7 @@ public class MockserviceImpl {
 				// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
 				return MockResponse.builder()
 						.responseBody(__interpreterResponse(matchedMockRule.getMockResponse(), requestHeaders,
-								requestQueryString, requestBody))
+								requestQueryString, requestBody)).mockRule(matchedMockRule)
 						.isMock(true).isUpstream(false).headers(matchedMockRule.getResponseHeaders()).build();
 			}
 		} else {
@@ -206,8 +208,12 @@ public class MockserviceImpl {
 
 		upstreamUri = getActualRequestUpstreamUri(matchedMockRule.getUri(), requestUri, upstreamUri);
 
-		return __getUpstreamResponse(protocol, requestHeaders, upstreamAddress, requestMethod, upstreamUri,
+		MockResponse upstreamResponse =  __getUpstreamResponse(protocol, requestHeaders, upstreamAddress, requestMethod, upstreamUri,
 				requestBody);
+		
+		upstreamResponse.setMockRule(matchedMockRule);
+		
+		return upstreamResponse;
 	}
 
 	/**

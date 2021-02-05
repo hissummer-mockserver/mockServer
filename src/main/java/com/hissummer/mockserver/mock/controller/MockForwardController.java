@@ -22,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,6 +50,10 @@ public class MockForwardController implements ErrorController {
 
 	@Autowired
 	RequestLogMongoRepository requestLogMongoRepository;
+	
+	@Autowired
+	JmsTemplate jmsTemplate;
+
 
 	/**
 	 * forward to the mocked rules or upstream.
@@ -128,7 +133,7 @@ public class MockForwardController implements ErrorController {
 							? ""
 							: "?" + requestQueryString);
 
-			RequestLog requestLog = RequestLog.builder().requestHeaders(requestHeaders).uri(actualFullRequestUri)
+			RequestLog requestLog = RequestLog.builder().requestHeaders(requestHeaders).hittedMockRuleUri(mockOrUpstreamReturnedResponse.getMockRule().getUri()).requestUri(actualFullRequestUri)
 					.isMock(mockOrUpstreamReturnedResponse.isMock()).createTime(new Date()).build();
 			String contentType = requestHeaders.get("content-type");
 
@@ -165,7 +170,10 @@ public class MockForwardController implements ErrorController {
 			} else {
 				requestLog.setResponseBody("非纯文本的content-type类型，不记录请求报文。");
 			}
-			requestLogMongoRepository.save(requestLog);
+			
+		    // Send a message with a POJO - the template reuse the message converter		    
+		    jmsTemplate.convertAndSend("requestlog", requestLog);
+		    log.info("send the requestlog message to requestlog destination.");
 
 			return new ResponseEntity<>(mockOrUpstreamReturnedResponse.getResponseBody(), responseHeaders,
 					HttpStatus.OK);

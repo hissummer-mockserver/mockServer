@@ -16,7 +16,11 @@ import lombok.Data;
 public class RequestLog {
 
 	private String id;
-	private String uri;
+	/**
+	 * uri of the mockrule 
+	 */
+	private String hittedMockRuleUri;	
+	private String requestUri;
 	@Builder.Default
 	private String protocol = "http";
 	private Map<String, String> requestHeaders;
