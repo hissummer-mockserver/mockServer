@@ -132,10 +132,13 @@ public class MockForwardController implements ErrorController {
 					.isMock(mockOrUpstreamReturnedResponse.isMock()).createTime(new Date()).build();
 			String contentType = requestHeaders.get("content-type");
 
-			if (contentType != null && (contentType.contains("application/json")
-					|| contentType.contains("application/x-www-form-urlencoded")
-					|| contentType.contains("application/xml") || contentType.contains("text/html")
-					|| contentType.contains("text/plain"))) {
+			if (requestBody == null) {
+				requestLog.setRequestBody("无请求Body报文数据！");
+			} else if (requestBody != null && contentType != null
+					&& (contentType.contains("application/json")
+							|| contentType.contains("application/x-www-form-urlencoded")
+							|| contentType.contains("application/xml") || contentType.contains("text/html")
+							|| contentType.contains("text/plain"))) {
 				requestLog.setRequestBody(checkUTF8(requestBody) ? new String(requestBody, StandardCharsets.UTF_8)
 						: "非utf-8编码请求报文，此处不做记录");
 			} else {
@@ -150,10 +153,14 @@ public class MockForwardController implements ErrorController {
 			contentType = responseHeaders.getContentType().getType() + "/"
 					+ responseHeaders.getContentType().getSubtype();
 
-			if (contentType != null && (contentType.contains("application/json")
-					|| contentType.contains("application/x-www-form-urlencoded")
-					|| contentType.contains("application/xml") || contentType.contains("text/html")
-					|| contentType.contains("text/plain"))) {
+			if (mockOrUpstreamReturnedResponse.getResponseBody() == null) {
+				requestLog.setResponseBody("无返回Body数据！");
+
+			} else if (mockOrUpstreamReturnedResponse.getResponseBody() != null && contentType != null
+					&& (contentType.contains("application/json")
+							|| contentType.contains("application/x-www-form-urlencoded")
+							|| contentType.contains("application/xml") || contentType.contains("text/html")
+							|| contentType.contains("text/plain"))) {
 				requestLog.setResponseBody(mockOrUpstreamReturnedResponse.getResponseBody());
 			} else {
 				requestLog.setResponseBody("非纯文本的content-type类型，不记录请求报文。");
