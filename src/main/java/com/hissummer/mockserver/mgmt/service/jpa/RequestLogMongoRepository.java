@@ -14,6 +14,8 @@ public interface RequestLogMongoRepository extends MongoRepository<RequestLog, S
 
 	Page<RequestLog> findByHittedMockRuleUri(String uri, Pageable pageable);
 
+	Page<RequestLog> findByHittedMockRuleUriAndHittedMockRuleHostName(String uri, String hostname,Pageable pageable);
+	
 	Page<RequestLog> findAll(Pageable pageable);
 
 	Optional<RequestLog> findById(String id);

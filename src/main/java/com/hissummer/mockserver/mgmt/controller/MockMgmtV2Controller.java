@@ -215,16 +215,21 @@ public class MockMgmtV2Controller {
 
 		Page<RequestLog> requestLogs = null;
 
-		String uri = null;
+		String uri = "/";
+		String hostname = "*";
 
 		if (!StringUtils.isEmpty(requestBody.getString("uri"))) {
 			uri = requestBody.getString("uri");
 		}
-
+		
+		if (!StringUtils.isEmpty(requestBody.getString("hostname"))) {
+			hostname = requestBody.getString("hostname");
+		}		
+		
 		if (StringUtils.isEmpty(uri)) {
 			requestLogs = requestLogMongoRepository.findAll(page);
 		} else {
-			requestLogs = requestLogMongoRepository.findByHittedMockRuleUri(uri, page);
+			requestLogs = requestLogMongoRepository.findByHittedMockRuleUriAndHittedMockRuleHostName(uri, hostname,page);
 		}
 
 		if (requestLogs != null && !requestLogs.getContent().isEmpty())

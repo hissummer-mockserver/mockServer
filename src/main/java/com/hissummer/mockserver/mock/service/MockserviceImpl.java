@@ -84,13 +84,11 @@ public class MockserviceImpl {
 
 			return response;
 		} else {
-			
-			
-			
+						
 			String nomatchresponse = JSON
 					.toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(true).message(NOMATCHED).build());
 
-			return MockResponse.builder().responseBody(nomatchresponse).mockRule(HttpMockRule.builder().uri("null").build()).build();
+			return MockResponse.builder().responseBody(nomatchresponse).mockRule(HttpMockRule.builder().uri("null").host("*").build()).build();
 		}
 	}
 

@@ -50,10 +50,9 @@ public class MockForwardController implements ErrorController {
 
 	@Autowired
 	RequestLogMongoRepository requestLogMongoRepository;
-	
+
 	@Autowired
 	JmsTemplate jmsTemplate;
-
 
 	/**
 	 * forward to the mocked rules or upstream.
@@ -119,22 +118,25 @@ public class MockForwardController implements ErrorController {
 			responseHeaders.remove("ClientAddress");
 			responseHeaders.add("ClientAddress", request.getRemoteAddr() + ":" + request.getRemotePort());
 
-			if (responseHeaders.getContentType() == null) {
-				try {
+			try {
+				if (responseHeaders.getContentType() == null) {
+
 					JSON.parse(mockOrUpstreamReturnedResponse.getResponseBody());
 					responseHeaders.setContentType(new MediaType("application", "json"));
-				} catch (Exception e) {
-					responseHeaders.setContentType(new MediaType("text", "plain"));
-				}
-			}
 
+				}
+			} catch (Exception e) {
+				responseHeaders.setContentType(new MediaType("text", "plain",StandardCharsets.UTF_8));
+			}
 			String actualFullRequestUri = requestUri
 					+ (requestQueryString == null || requestQueryString.equals("null") || requestQueryString.equals("")
 							? ""
 							: "?" + requestQueryString);
 
-			RequestLog requestLog = RequestLog.builder().requestHeaders(requestHeaders).hittedMockRuleUri(mockOrUpstreamReturnedResponse.getMockRule().getUri()).requestUri(actualFullRequestUri)
-					.isMock(mockOrUpstreamReturnedResponse.isMock()).createTime(new Date()).build();
+			RequestLog requestLog = RequestLog.builder().requestHeaders(requestHeaders)
+					.hittedMockRuleUri(mockOrUpstreamReturnedResponse.getMockRule().getUri())
+					.requestUri(actualFullRequestUri).hittedMockRuleHostName(mockOrUpstreamReturnedResponse.getMockRule().getHost()).isMock(mockOrUpstreamReturnedResponse.isMock())
+					.createTime(new Date()).build();
 			String contentType = requestHeaders.get("content-type");
 
 			if (requestBody == null) {
@@ -170,10 +172,10 @@ public class MockForwardController implements ErrorController {
 			} else {
 				requestLog.setResponseBody("非纯文本的content-type类型，不记录请求报文。");
 			}
-			
-		    // Send a message with a POJO - the template reuse the message converter		    
-		    jmsTemplate.convertAndSend("requestlog", requestLog);
-		    log.info("send the requestlog message to requestlog destination.");
+
+			// Send a message with a POJO - the template reuse the message converter
+			jmsTemplate.convertAndSend("requestlog", requestLog);
+			log.info("send the requestlog message to requestlog destination.");
 
 			return new ResponseEntity<>(mockOrUpstreamReturnedResponse.getResponseBody(), responseHeaders,
 					HttpStatus.OK);
