@@ -1,9 +1,14 @@
-package com.hissummer.mockserver.mgmt.vo;
+package com.hissummer.mockserver.mgmt.entity;
 
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.hissummer.mockserver.mgmt.pojo.HttpConditionRule;
+import com.hissummer.mockserver.mgmt.pojo.HttpMockWorkMode;
+import com.hissummer.mockserver.mgmt.pojo.Plugin;
+import com.hissummer.mockserver.mgmt.pojo.UpstreamGroup;
 
 import lombok.Builder;
 import lombok.Data;
@@ -31,7 +36,7 @@ public class HttpMockRule {
 	private HttpMockWorkMode workMode = HttpMockWorkMode.MOCK;
 
 	private List<HttpConditionRule> conditionRules;
-	
+
 	@Builder.Default
 	private Boolean enable = true;
 

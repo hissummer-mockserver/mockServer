@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
+import com.hissummer.mockserver.mgmt.entity.User;
 import com.hissummer.mockserver.mgmt.service.jpa.UserMongoRepository;
-import com.hissummer.mockserver.mgmt.vo.Loginpair;
 
 @Service
-public class UserService {
+public class UserServiceImpl {
 	@Autowired
 	UserMongoRepository userMongoRepository;
 
@@ -25,7 +25,7 @@ public class UserService {
 
 			if (!StringUtils.isEmpty(username) && !StringUtils.isEmpty(password)) {
 
-				Loginpair loginuser = userMongoRepository.findByUsernameAndPassword(username, md5password(password));
+				User loginuser = userMongoRepository.findByUsernameAndPassword(username, md5password(password));
 
 				if (loginuser == null && username.equals("admin") && password.equals("hissummer.com")) {
 					// 第一次创建用户
@@ -46,7 +46,7 @@ public class UserService {
 
 	}
 
-	public Loginpair finduserByuserName(String username) {
+	public User finduserByuserName(String username) {
 
 		return userMongoRepository.findByUsername(username);
 
@@ -61,7 +61,7 @@ public class UserService {
 	public boolean logout(String username, Cookie[] cookies) {
 
 		if (!StringUtils.isEmpty(username)) {
-			Loginpair loginuser = userMongoRepository.findByUsername(username);
+			User loginuser = userMongoRepository.findByUsername(username);
 			if (loginuser == null || !loginuser.getId().equals(this.getCookieMu(cookies))) {
 
 				return false;
@@ -76,7 +76,7 @@ public class UserService {
 	}
 
 	// not used now!
-	public boolean logout(Loginpair user, Cookie[] cookies) {
+	public boolean logout(User user, Cookie[] cookies) {
 
 		if (user == null)
 			return false;
@@ -94,7 +94,7 @@ public class UserService {
 		if (userMongoRepository.findByUsername(username) != null) {
 			return false;
 		}
-		Loginpair user = Loginpair.builder().username(username).password(md5password(password)).createDate(new Date())
+		User user = User.builder().username(username).password(md5password(password)).createDate(new Date())
 				.enable(true).build();
 		userMongoRepository.insert(user);
 
@@ -105,7 +105,7 @@ public class UserService {
 
 		if (!StringUtils.isEmpty(username) && !StringUtils.isEmpty(password)) {
 
-			Loginpair loginuser = userMongoRepository.findByUsernameAndPassword(username, md5password(password));
+			User loginuser = userMongoRepository.findByUsernameAndPassword(username, md5password(password));
 
 			if (loginuser != null && loginuser.getId().equals(this.getCookieMu(cookies))) {
 
@@ -129,7 +129,7 @@ public class UserService {
 		if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password))
 			return false;
 
-		Loginpair user = userMongoRepository.findByUsernameAndPassword(username, md5password(password));
+		User user = userMongoRepository.findByUsernameAndPassword(username, md5password(password));
 
 		if (user == null || !user.getId().equals(this.getCookieMu(cookies))) {
 			return false;
@@ -142,7 +142,7 @@ public class UserService {
 
 	public boolean isUserLoginWithMuId(String muId) {
 
-		Optional<Loginpair> loginuser = userMongoRepository.findById(muId);
+		Optional<User> loginuser = userMongoRepository.findById(muId);
 
 		if (loginuser == null || !loginuser.isPresent()) {
 
@@ -162,7 +162,7 @@ public class UserService {
 
 	public boolean isUserLogin(String username) {
 
-		Loginpair loginuser = userMongoRepository.findByUsername(username);
+		User loginuser = userMongoRepository.findByUsername(username);
 
 		if (loginuser == null) {
 
@@ -185,7 +185,7 @@ public class UserService {
 		try {
 
 			if (!StringUtils.isEmpty(username)) {
-				Loginpair loginuser = userMongoRepository.findByUsername(username);
+				User loginuser = userMongoRepository.findByUsername(username);
 				return activeUser(loginuser);
 			}
 		} catch (Exception e) {
@@ -194,7 +194,7 @@ public class UserService {
 
 	}
 
-	private boolean activeUser(Loginpair loginuser) {
+	private boolean activeUser(User loginuser) {
 		if (loginuser == null) {
 			return false;
 		}

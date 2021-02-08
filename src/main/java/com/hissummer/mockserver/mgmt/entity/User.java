@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mgmt.vo;
+package com.hissummer.mockserver.mgmt.entity;
 
 import java.util.Date;
 
@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 @Document(collection = "user")
 @Builder
-public class Loginpair {
+public class User {
 
 	private String id;
 	private String username;

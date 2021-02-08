@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mgmt.vo;
+package com.hissummer.mockserver.mgmt.entity;
 
 import java.util.Date;
 import java.util.List;
@@ -18,7 +18,7 @@ public class RequestLog {
 	private String id;
 	private String hittedMockRuleHostName;
 	/**
-	 * uri of the mockrule 
+	 * uri of the mockrule
 	 */
 	private String hittedMockRuleUri;
 	/**

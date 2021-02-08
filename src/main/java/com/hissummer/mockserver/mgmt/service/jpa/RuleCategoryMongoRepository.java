@@ -2,10 +2,8 @@ package com.hissummer.mockserver.mgmt.service.jpa;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import com.hissummer.mockserver.mgmt.vo.RuleCategory;
+import com.hissummer.mockserver.mgmt.entity.RuleCategory;
 
-
-public interface RuleCategoryMongoRepository extends MongoRepository<RuleCategory, String>{
-	
+public interface RuleCategoryMongoRepository extends MongoRepository<RuleCategory, String> {
 
 }

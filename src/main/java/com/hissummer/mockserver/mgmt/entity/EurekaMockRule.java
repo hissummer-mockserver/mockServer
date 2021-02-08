@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mgmt.vo;
+package com.hissummer.mockserver.mgmt.entity;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 

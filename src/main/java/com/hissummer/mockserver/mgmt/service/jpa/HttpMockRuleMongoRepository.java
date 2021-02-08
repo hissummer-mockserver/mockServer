@@ -5,9 +5,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
-import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
+import com.hissummer.mockserver.mgmt.entity.HttpMockRule;
 
-public interface MockRuleMgmtMongoRepository extends MongoRepository<HttpMockRule, String> {
+public interface HttpMockRuleMongoRepository extends MongoRepository<HttpMockRule, String> {
 
 	Page<HttpMockRule> findAll(Pageable pageable);
 

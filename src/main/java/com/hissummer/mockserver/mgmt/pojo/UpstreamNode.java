@@ -1,4 +1,4 @@
-package com.hissummer.mockserver.mgmt.vo;
+package com.hissummer.mockserver.mgmt.pojo;
 
 import lombok.Builder;
 import lombok.Data;

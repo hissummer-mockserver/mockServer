@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.hissummer.mockserver.mgmt.vo.UpstreamGroup;
+import com.hissummer.mockserver.mgmt.pojo.UpstreamGroup;
 import com.hissummer.mockserver.mock.service.MongoDbRunCommandServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Service
+@Deprecated
 public class MockRuleManagerServiceImpl {
 
 	@Autowired

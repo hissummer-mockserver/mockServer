@@ -7,18 +7,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import com.hissummer.mockserver.mgmt.vo.Loginpair;
+import com.hissummer.mockserver.mgmt.entity.User;
 
-public interface UserMongoRepository extends MongoRepository<Loginpair, String> {
+public interface UserMongoRepository extends MongoRepository<User, String> {
 
-	Page<Loginpair> findByEnable(Boolean enable, Pageable pageable);
+	Page<User> findByEnable(Boolean enable, Pageable pageable);
 
-	List<Loginpair> findByEnable(Boolean enable);
+	List<User> findByEnable(Boolean enable);
 
-	Loginpair findByUsernameAndPassword(String username, String password);
+	User findByUsernameAndPassword(String username, String password);
 
-	Loginpair findByUsername(String username);
+	User findByUsername(String username);
 
-	Optional<Loginpair> findById(String id);
+	Optional<User> findById(String id);
 
 }

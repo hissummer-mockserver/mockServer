@@ -14,7 +14,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.hissumemr.mockserver.SpringBootTestBase;
 import com.hissummer.mockserver.mgmt.service.MockRuleManagerServiceImpl;
-import com.hissummer.mockserver.mgmt.service.jpa.MockRuleMgmtMongoRepository;
+import com.hissummer.mockserver.mgmt.service.jpa.HttpMockRuleMongoRepository;
 import com.hissummer.mockserver.mock.service.MongoDbRunCommandServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ public class MockserviceTest extends SpringBootTestBase {
 	MockRuleManagerServiceImpl mockservice;
 
 	@Autowired
-	MockRuleMgmtMongoRepository mockservice2;
+	HttpMockRuleMongoRepository mockservice2;
 
 	@Test
 	public void test() {

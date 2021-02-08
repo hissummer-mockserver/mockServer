@@ -21,8 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 public class CheckLoginInterceptor implements HandlerInterceptor {
 
 	@Autowired
-	UserService userService;
+	UserServiceImpl userService;
 
+	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 

@@ -1,4 +1,4 @@
-package com.hissummer.mockserver;
+package com.hissummer.mockserver.mgmt.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

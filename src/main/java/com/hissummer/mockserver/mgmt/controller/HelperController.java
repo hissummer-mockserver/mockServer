@@ -1,4 +1,4 @@
-package com.hissummer.mockserver;
+package com.hissummer.mockserver.mgmt.controller;
 
 import java.util.Arrays;
 import java.util.stream.StreamSupport;

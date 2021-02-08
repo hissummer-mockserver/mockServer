@@ -15,9 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.hissummer.mockserver.mgmt.vo.HttpMockRule;
-import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
-import com.hissummer.mockserver.mgmt.vo.HttpMockWorkMode;
+import com.hissummer.mockserver.mgmt.entity.HttpMockRule;
+import com.hissummer.mockserver.mgmt.pojo.HttpMockWorkMode;
+import com.hissummer.mockserver.mgmt.pojo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mock.service.jpa.MockRuleMongoRepository;
 import com.hissummer.mockserver.mock.service.mockresponseconverters.GroovyScriptsHandler;
 import com.hissummer.mockserver.mock.service.mockresponseconverters.converterinterface.MockResponseSetUpConverterInterface;
@@ -84,11 +84,12 @@ public class MockserviceImpl {
 
 			return response;
 		} else {
-						
+
 			String nomatchresponse = JSON
 					.toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(true).message(NOMATCHED).build());
 
-			return MockResponse.builder().responseBody(nomatchresponse).mockRule(HttpMockRule.builder().uri("null").host("*").build()).build();
+			return MockResponse.builder().responseBody(nomatchresponse)
+					.mockRule(HttpMockRule.builder().uri("null").host("*").build()).build();
 		}
 	}
 
@@ -133,8 +134,9 @@ public class MockserviceImpl {
 				// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
 				return MockResponse.builder()
 						.responseBody(__interpreterResponse(matchedMockRule.getMockResponse(), requestHeaders,
-								requestQueryString, requestBody)).mockRule(matchedMockRule)
-						.isMock(true).isUpstream(false).headers(matchedMockRule.getResponseHeaders()).build();
+								requestQueryString, requestBody))
+						.mockRule(matchedMockRule).isMock(true).isUpstream(false)
+						.headers(matchedMockRule.getResponseHeaders()).build();
 			}
 		} else {
 			return null;
@@ -206,11 +208,11 @@ public class MockserviceImpl {
 
 		upstreamUri = getActualRequestUpstreamUri(matchedMockRule.getUri(), requestUri, upstreamUri);
 
-		MockResponse upstreamResponse =  __getUpstreamResponse(protocol, requestHeaders, upstreamAddress, requestMethod, upstreamUri,
-				requestBody);
-		
+		MockResponse upstreamResponse = __getUpstreamResponse(protocol, requestHeaders, upstreamAddress, requestMethod,
+				upstreamUri, requestBody);
+
 		upstreamResponse.setMockRule(matchedMockRule);
-		
+
 		return upstreamResponse;
 	}
 

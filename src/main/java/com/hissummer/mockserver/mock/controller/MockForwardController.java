@@ -31,9 +31,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSON;
+import com.hissummer.mockserver.mgmt.entity.RequestLog;
+import com.hissummer.mockserver.mgmt.pojo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mgmt.service.jpa.RequestLogMongoRepository;
-import com.hissummer.mockserver.mgmt.vo.MockRuleMgmtResponseVo;
-import com.hissummer.mockserver.mgmt.vo.RequestLog;
 import com.hissummer.mockserver.mock.service.MockserviceImpl;
 import com.hissummer.mockserver.mock.vo.MockResponse;
 
@@ -126,7 +126,7 @@ public class MockForwardController implements ErrorController {
 
 				}
 			} catch (Exception e) {
-				responseHeaders.setContentType(new MediaType("text", "plain",StandardCharsets.UTF_8));
+				responseHeaders.setContentType(new MediaType("text", "plain", StandardCharsets.UTF_8));
 			}
 			String actualFullRequestUri = requestUri
 					+ (requestQueryString == null || requestQueryString.equals("null") || requestQueryString.equals("")
@@ -135,8 +135,9 @@ public class MockForwardController implements ErrorController {
 
 			RequestLog requestLog = RequestLog.builder().requestHeaders(requestHeaders)
 					.hittedMockRuleUri(mockOrUpstreamReturnedResponse.getMockRule().getUri())
-					.requestUri(actualFullRequestUri).hittedMockRuleHostName(mockOrUpstreamReturnedResponse.getMockRule().getHost()).isMock(mockOrUpstreamReturnedResponse.isMock())
-					.createTime(new Date()).build();
+					.requestUri(actualFullRequestUri)
+					.hittedMockRuleHostName(mockOrUpstreamReturnedResponse.getMockRule().getHost())
+					.isMock(mockOrUpstreamReturnedResponse.isMock()).createTime(new Date()).build();
 			String contentType = requestHeaders.get("content-type");
 
 			if (requestBody == null) {

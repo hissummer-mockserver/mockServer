@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.hissummer.mockserver.mgmt.entity.EurekaMockRule;
+import com.hissummer.mockserver.mgmt.pojo.Constants;
 import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
-import com.hissummer.mockserver.mgmt.vo.Constants;
-import com.hissummer.mockserver.mgmt.vo.EurekaMockRule;
 import com.hissummer.mockserver.mock.service.HttpClientUtil;
 import com.netflix.appinfo.DataCenterInfo;
 
