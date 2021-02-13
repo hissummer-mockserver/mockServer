@@ -23,11 +23,13 @@ import com.hissummer.mockserver.mgmt.entity.EurekaMockRule;
 import com.hissummer.mockserver.mgmt.entity.HttpMockRule;
 import com.hissummer.mockserver.mgmt.entity.User;
 import com.hissummer.mockserver.mgmt.entity.RequestLog;
+import com.hissummer.mockserver.mgmt.entity.RuleCategory;
 import com.hissummer.mockserver.mgmt.exception.ServiceException;
 import com.hissummer.mockserver.mgmt.pojo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mgmt.service.EurekaMockRuleServiceImpl;
 import com.hissummer.mockserver.mgmt.service.HttpMockRuleServiceImpl;
 import com.hissummer.mockserver.mgmt.service.MockRuleManagerServiceImpl;
+import com.hissummer.mockserver.mgmt.service.RuleCategoryServiceImpl;
 import com.hissummer.mockserver.mgmt.service.UserServiceImpl;
 import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.service.jpa.HttpMockRuleMongoRepository;
@@ -61,6 +63,9 @@ public class MockMgmtV2Controller {
 	EurekaMockRuleMongoRepository eurekaMockRuleRepository;
 
 	@Autowired
+	RuleCategoryServiceImpl ruleCategoryServiceImpl;
+
+	@Autowired
 	MockserviceImpl mockservice;
 
 	@Autowired
@@ -82,6 +87,8 @@ public class MockMgmtV2Controller {
 
 		try {
 
+			ruleCategoryServiceImpl.addCategory(RuleCategory.builder().category(mockRule.getCategory())
+					.description(mockRule.getCategory()).build());
 			HttpMockRule savedMockRule = httpMockRuleServiceImpl.addMockRule(mockRule);
 
 			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Add success.")
@@ -100,7 +107,8 @@ public class MockMgmtV2Controller {
 
 		MockRuleMgmtResponseVo result = null;
 		try {
-
+			ruleCategoryServiceImpl.addCategory(RuleCategory.builder().category(mockRule.getCategory())
+					.description(mockRule.getCategory()).build());
 			HttpMockRule savedMockRule = httpMockRuleServiceImpl.updateMockRule(mockRule);
 			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Update success.")
 					.data(savedMockRule).build();
@@ -117,22 +125,16 @@ public class MockMgmtV2Controller {
 	public MockRuleMgmtResponseVo deleteRule(@RequestBody HttpMockRule mockRule) {
 
 		MockRuleMgmtResponseVo result = null;
-		if (mockRule.getId() == null || mockRule.getId().equals("")) {
-			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
-					.build();
-		}
+
 		try {
-
-			mockRuleMgmtMongoRepository.deleteById(mockRule.getId());
-
+			httpMockRuleServiceImpl.deleteMockRule(mockRule);
 			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Delete success.").build();
-		} catch (Exception e) {
+		} catch (ServiceException e) {
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false)
-					.message("Delete failed: " + e.getMessage()).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getServiceMessage()).build();
 		}
-
 		return result;
+
 	}
 
 	@PostMapping(value = "/testRule")
@@ -158,35 +160,16 @@ public class MockMgmtV2Controller {
 
 		int pageNumber = requestBody.getIntValue("pageNumber") < 0 ? 0 : requestBody.getIntValue("pageNumber");
 		int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 50 : requestBody.getIntValue("pageSize");
-
-		PageRequest page = PageRequest.of(pageNumber, pageSize);
-
-		Page<HttpMockRule> rules = null;
-
-		String uri = ".*";
-		String host = ".*";
-
-		if (!StringUtils.isEmpty(requestBody.getString("uri"))) {
-			uri = requestBody.getString("uri");
-		}
-		if (!StringUtils.isEmpty(requestBody.getString("host"))) {
-
-			if (requestBody.getString("host").equals("*")) {
-				// 因为做的是正则匹配查询，所以特殊的*字符转换为\*，即查询包含*字符的host值。
-				host = "\\*";
-			} else {
-				host = requestBody.getString("host");
-			}
-
-		}
+		String uri = requestBody.getString("uri");
+		String host = requestBody.getString("host");
 		String category = requestBody.getString("category");
+		Page<HttpMockRule> rules = null;
+		try {
+			rules = httpMockRuleServiceImpl.queryMockRules(host, uri, category, pageNumber, pageSize);
+		} catch (ServiceException e) {
+			return MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getServiceMessage()).build();
 
-		if (StringUtils.isEmpty(category)) {
-			rules = mockRuleMgmtMongoRepository.findByHostRegexpAndUriRegexp(host, uri, page);
-		} else {
-			rules = mockRuleMgmtMongoRepository.findByHostRegexpAndUriRegexpAndCategory(host, uri, category, page);
 		}
-
 		if (rules != null && !rules.getContent().isEmpty())
 			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
 		else
@@ -195,27 +178,20 @@ public class MockMgmtV2Controller {
 	}
 
 	@PostMapping(value = "/addCategory")
-	public MockRuleMgmtResponseVo addCategory(@RequestBody HttpMockRule mockRule) {
+	public MockRuleMgmtResponseVo addCategory(@RequestBody RuleCategory ruleCategory) {
 
 		MockRuleMgmtResponseVo result = null;
 
 		try {
 
-			if (mockRuleMgmtMongoRepository.findByHostAndUri(mockRule.getHost(), mockRule.getUri()) != null) {
-				result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("mockrule already exist.")
-						.build();
-				return result;
-			}
-
-			HttpMockRule saveMockRule = mockRuleMgmtMongoRepository.insert(mockRule);
-
-			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Add success.").data(saveMockRule)
+			return MockRuleMgmtResponseVo.builder().status(0).success(true)
+					.data(ruleCategoryServiceImpl.addCategory(ruleCategory)).message("Add category successfully.")
 					.build();
 
-		} catch (Exception e) {
+		} catch (ServiceException e) {
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("Add failed: " + e.getMessage())
-					.build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false)
+					.message("Add failed: " + e.getServiceMessage()).build();
 		}
 
 		return result;
@@ -223,26 +199,27 @@ public class MockMgmtV2Controller {
 	}
 
 	@PostMapping(value = "/updateCategory")
-	public MockRuleMgmtResponseVo updateCategory(@RequestBody HttpMockRule mockRule) {
+	public MockRuleMgmtResponseVo updateCategory(@RequestBody RuleCategory ruleCategory) {
 
 		MockRuleMgmtResponseVo result = null;
-		if (mockRule.getId() == null || mockRule.getId().equals("")) {
-			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
-					.build();
-		}
+
 		try {
 
-			HttpMockRule saveMockRule = mockRuleMgmtMongoRepository.save(mockRule);
+			RuleCategory savedRuleCategory = ruleCategoryServiceImpl.updateCategory(ruleCategory);
 
 			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Update success.")
-					.data(saveMockRule).build();
+					.data(savedRuleCategory).build();
 
-		} catch (Exception e) {
+		} catch (ServiceException e) {
+
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("Update faild:" + e.getServiceMessage())
+					.build();
+		}
+		catch (Exception e) {
 
 			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("Update faild:" + e.getMessage())
 					.build();
 		}
-
 		return result;
 	}
 

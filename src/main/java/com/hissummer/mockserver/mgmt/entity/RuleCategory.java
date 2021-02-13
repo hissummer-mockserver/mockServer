@@ -15,4 +15,7 @@ public class RuleCategory {
 	private String category;
 
 	private String description;
+	
+	private int parent;
+	
 }
