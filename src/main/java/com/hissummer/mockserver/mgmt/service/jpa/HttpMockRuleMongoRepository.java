@@ -30,4 +30,6 @@ public interface HttpMockRuleMongoRepository extends MongoRepository<HttpMockRul
 	@Query("{uri : {$regex : ?0}}")
 	Page<HttpMockRule> findByUriWithRegex(String uri, Pageable pageable);
 
+	Long countByCategory(String category);
+
 }

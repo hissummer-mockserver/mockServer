@@ -1,11 +1,9 @@
 package com.hissummer.mockserver.mgmt.entity;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.util.MultiValueMap;
 
 import lombok.Builder;
 import lombok.Data;

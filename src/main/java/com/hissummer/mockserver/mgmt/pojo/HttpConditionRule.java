@@ -3,8 +3,6 @@ package com.hissummer.mockserver.mgmt.pojo;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.mongodb.core.mapping.Document;
-
 import lombok.Builder;
 import lombok.Data;
 

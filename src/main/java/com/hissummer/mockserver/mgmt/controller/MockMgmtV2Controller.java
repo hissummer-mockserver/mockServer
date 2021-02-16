@@ -1,10 +1,11 @@
 package com.hissummer.mockserver.mgmt.controller;
 
+import java.util.List;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
@@ -21,14 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSONObject;
 import com.hissummer.mockserver.mgmt.entity.EurekaMockRule;
 import com.hissummer.mockserver.mgmt.entity.HttpMockRule;
-import com.hissummer.mockserver.mgmt.entity.User;
 import com.hissummer.mockserver.mgmt.entity.RequestLog;
 import com.hissummer.mockserver.mgmt.entity.RuleCategory;
+import com.hissummer.mockserver.mgmt.entity.User;
 import com.hissummer.mockserver.mgmt.exception.ServiceException;
 import com.hissummer.mockserver.mgmt.pojo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mgmt.service.EurekaMockRuleServiceImpl;
 import com.hissummer.mockserver.mgmt.service.HttpMockRuleServiceImpl;
-import com.hissummer.mockserver.mgmt.service.MockRuleManagerServiceImpl;
 import com.hissummer.mockserver.mgmt.service.RuleCategoryServiceImpl;
 import com.hissummer.mockserver.mgmt.service.UserServiceImpl;
 import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
@@ -212,10 +212,9 @@ public class MockMgmtV2Controller {
 
 		} catch (ServiceException e) {
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("Update faild:" + e.getServiceMessage())
-					.build();
-		}
-		catch (Exception e) {
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false)
+					.message("Update faild:" + e.getServiceMessage()).build();
+		} catch (Exception e) {
 
 			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message("Update faild:" + e.getMessage())
 					.build();
@@ -224,22 +223,17 @@ public class MockMgmtV2Controller {
 	}
 
 	@PostMapping(value = "/deleteCategory")
-	public MockRuleMgmtResponseVo deleteCategory(@RequestBody HttpMockRule mockRule) {
+	public MockRuleMgmtResponseVo deleteCategory(@RequestBody RuleCategory ruleCategory) {
 
 		MockRuleMgmtResponseVo result = null;
-		if (mockRule.getId() == null || mockRule.getId().equals("")) {
-			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
-					.build();
-		}
 		try {
-
-			mockRuleMgmtMongoRepository.deleteById(mockRule.getId());
+			ruleCategoryServiceImpl.deleteCategory(ruleCategory);
 
 			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Delete success.").build();
-		} catch (Exception e) {
+		} catch (ServiceException e) {
 
 			result = MockRuleMgmtResponseVo.builder().status(0).success(false)
-					.message("Delete failed: " + e.getMessage()).build();
+					.message("Delete failed: " + e.getServiceMessage()).build();
 		}
 
 		return result;
@@ -248,41 +242,22 @@ public class MockMgmtV2Controller {
 	@PostMapping(value = "/queryCategory")
 	public MockRuleMgmtResponseVo queryCategorys(@RequestBody JSONObject requestBody) {
 
+		List<RuleCategory> categories = null;
+
+		if (!requestBody.containsKey("pageNumber") || !requestBody.containsKey("pageSize")) {
+
+			categories = ruleCategoryServiceImpl.queryCategories();
+
+			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(categories).build();
+
+		}
+
 		int pageNumber = requestBody.getIntValue("pageNumber") < 0 ? 0 : requestBody.getIntValue("pageNumber");
 		int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 50 : requestBody.getIntValue("pageSize");
 
-		PageRequest page = PageRequest.of(pageNumber, pageSize);
+		Page<RuleCategory> categoryWithPage = ruleCategoryServiceImpl.queryCategories(pageSize, pageNumber);
 
-		Page<HttpMockRule> rules = null;
-
-		String uri = ".*";
-		String host = ".*";
-
-		if (!StringUtils.isEmpty(requestBody.getString("uri"))) {
-			uri = requestBody.getString("uri");
-		}
-		if (!StringUtils.isEmpty(requestBody.getString("host"))) {
-
-			if (requestBody.getString("host").equals("*")) {
-				// 因为做的是正则匹配查询，所以特殊的*字符转换为\*，即查询包含*字符的host值。
-				host = "\\*";
-			} else {
-				host = requestBody.getString("host");
-			}
-
-		}
-		String category = requestBody.getString("category");
-
-		if (StringUtils.isEmpty(category)) {
-			rules = mockRuleMgmtMongoRepository.findByHostRegexpAndUriRegexp(host, uri, page);
-		} else {
-			rules = mockRuleMgmtMongoRepository.findByHostRegexpAndUriRegexpAndCategory(host, uri, category, page);
-		}
-
-		if (rules != null && !rules.getContent().isEmpty())
-			return MockRuleMgmtResponseVo.builder().status(0).success(true).data(rules).build();
-		else
-			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("No Rules found.").build();
+		return MockRuleMgmtResponseVo.builder().status(0).success(true).data(categoryWithPage.getContent()).build();
 
 	}
 

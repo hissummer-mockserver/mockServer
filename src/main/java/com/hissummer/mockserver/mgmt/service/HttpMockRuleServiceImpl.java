@@ -9,7 +9,6 @@ import org.springframework.util.StringUtils;
 
 import com.hissummer.mockserver.mgmt.entity.HttpMockRule;
 import com.hissummer.mockserver.mgmt.exception.ServiceException;
-import com.hissummer.mockserver.mgmt.pojo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mgmt.service.jpa.HttpMockRuleMongoRepository;
 
 @Service

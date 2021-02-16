@@ -16,7 +16,6 @@ import com.hissummer.mockserver.mgmt.entity.EurekaMockRule;
 import com.hissummer.mockserver.mgmt.pojo.Constants;
 import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mock.service.HttpClientUtil;
-import com.netflix.appinfo.DataCenterInfo;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
@@ -33,8 +32,6 @@ public class EurekaMockRuleServiceImpl {
 
 	@Autowired
 	EurekaMockRuleMongoRepository eurekaMockRepository;
-
-	private String credentials = Credentials.basic("user", "pass");
 
 	public boolean register(EurekaMockRule rule) {
 
@@ -61,6 +58,16 @@ public class EurekaMockRuleServiceImpl {
 				+ "			\"@enabled\": \"true\"" + "		}," + "		\"securePort\": {" + "			\"$\": %s,"
 				+ "			\"@enabled\": \"false\"" + "		}," + "		\"metadata\": {"
 				+ "			\"@class\": \"java.util.Collections$EmptyMap\"" + "		}" + "	}" + "}" + "";
+
+		String credentials = null;
+		if (rule.getEurekaServerUserName().isEmpty() || rule.getEurekaServerUserPass().isEmpty()) {
+
+			credentials = Credentials.basic("user", "pass");
+		} else {
+			credentials = Credentials.basic(rule.getEurekaServerUserName(), rule.getEurekaServerUserPass());
+
+		}
+
 		String jsonstr = String.format(registerInfoStringFormatter, rule.getHostName() + ":" + rule.getPort(),
 				rule.getServiceName(), rule.getHostName(),
 				Constants.HTTP + rule.getHostName() + ":" + rule.getPort() + "/status", rule.getServiceName(),
@@ -110,7 +117,14 @@ public class EurekaMockRuleServiceImpl {
 		final OkHttpClient client = HttpClientUtil.client;
 
 		Response response = null;
+		String credentials = null;
+		if (rule.getEurekaServerUserName().isEmpty() || rule.getEurekaServerUserPass().isEmpty()) {
 
+			credentials = Credentials.basic("user", "pass");
+		} else {
+			credentials = Credentials.basic(rule.getEurekaServerUserName(), rule.getEurekaServerUserPass());
+
+		}
 		Request request = new Request.Builder()
 				.url(Constants.HTTP + rule.getEurekaServer() + Constants.EUREKA_URI_BASE_PATH + rule.getServiceName()
 						+ "/" + rule.getHostName() + ":" + rule.getPort())
@@ -139,7 +153,14 @@ public class EurekaMockRuleServiceImpl {
 		final OkHttpClient client = HttpClientUtil.client;
 
 		Response response = null;
+		String credentials = null;
+		if (rule.getEurekaServerUserName().isEmpty() || rule.getEurekaServerUserPass().isEmpty()) {
 
+			credentials = Credentials.basic("user", "pass");
+		} else {
+			credentials = Credentials.basic(rule.getEurekaServerUserName(), rule.getEurekaServerUserPass());
+
+		}
 		Request request = new Request.Builder()
 				.url("http://" + rule.getEurekaServer() + Constants.EUREKA_URI_BASE_PATH + rule.getServiceName() + "/"
 						+ rule.getHostName() + ":" + rule.getPort())
