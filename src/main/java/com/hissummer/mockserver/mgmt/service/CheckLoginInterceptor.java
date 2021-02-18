@@ -32,7 +32,7 @@ public class CheckLoginInterceptor implements HandlerInterceptor {
 		if (request.getMethod().equals(HttpMethod.OPTIONS.name()))
 			return true;
 
-		boolean loginCheck[] = { false };
+		boolean[] loginCheck = { false };
 
 		List<Cookie> cookies = request.getCookies() == null ? Collections.emptyList()
 				: Arrays.asList(request.getCookies());
