@@ -68,19 +68,19 @@ public class RuleCategoryServiceImpl {
 
 		}
 
-		Long count = httpMockRuleMongoRepository.countByCategory(category.getCategory());
-
-		if (count > 0) {
-			throw ServiceException.builder().status(0).serviceMessage("Still exist rules under this category.").build();
-
-		}
-
-		Optional<RuleCategory> foundCategory = ruleCategoryMongoRepository.findById(category.getCategory());
+		Optional<RuleCategory> foundCategory = ruleCategoryMongoRepository.findById(category.getId());
 
 		if (!foundCategory.isPresent()) {
 
 			throw ServiceException.builder().status(0).serviceMessage("Can not find the category.").build();
 		} else {
+			Long count = httpMockRuleMongoRepository.countByCategory(foundCategory.get().getCategory());
+
+			if (count > 0) {
+				throw ServiceException.builder().status(0).serviceMessage("Still exist rules under this category.")
+						.build();
+
+			}
 			ruleCategoryMongoRepository.delete(category);
 			return category;
 

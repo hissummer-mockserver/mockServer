@@ -23,23 +23,23 @@ import groovy.transform.CompileStatic;
 @Component
 public class GroovyScriptsHandler implements ScriptsConverterInterface {
 
-//	private static final ScriptEngine engine = new ScriptEngineManager().getEngineByName("groovy");
+	// private static final ScriptEngine engine = new
+	// ScriptEngineManager().getEngineByName("groovy");
 
 	@Autowired
 	ScriptEnginePool scriptEnginePool;
-	
+
 	@Override
 	@CompileStatic
 	public String converter(String originalResponse, Map<String, String> requestHeders,
 			Map<String, String> requestQueryString, byte[] requestBody) {
 
 		ScriptEngine engine = scriptEnginePool.getSpareEngine();
-		
-		if(engine == null)
-		{
+
+		if (engine == null) {
 			return "Groovy engine is busy now,please try again later.";
 		}
-		
+
 		engine.put("response", originalResponse);
 		engine.put("requestBody", requestBody);
 		engine.put("requestHeaders", requestHeders);
@@ -49,11 +49,10 @@ public class GroovyScriptsHandler implements ScriptsConverterInterface {
 		} catch (ScriptException e) {
 			engine.put("response", e.getMessage() + e.getStackTrace().toString());
 			return engine.get("response").toString();
-		}
-		finally {
+		} finally {
 			scriptEnginePool.releaseEngine(engine);
 		}
-		
+
 	}
 
 	// @CompileStatic
