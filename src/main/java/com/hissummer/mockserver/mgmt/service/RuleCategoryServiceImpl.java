@@ -52,13 +52,12 @@ public class RuleCategoryServiceImpl {
 			throw ServiceException.builder().status(0).serviceMessage("Id is empty").build();
 
 		}
-		
+
 		RuleCategory foundCategoryByName = ruleCategoryMongoRepository.findByCategory(category.getCategory());
-		
-		if(foundCategoryByName != null)
-		{
+
+		if (foundCategoryByName != null && !foundCategoryByName.getId().equals(category.getId())) {
 			throw ServiceException.builder().status(0).serviceMessage("Already exists the category name.").build();
-			
+
 		}
 
 		Optional<RuleCategory> foundCategory = ruleCategoryMongoRepository.findById(category.getId());
@@ -68,13 +67,16 @@ public class RuleCategoryServiceImpl {
 			throw ServiceException.builder().status(0).serviceMessage("Can not find the category.").build();
 		} else {
 
-			List<HttpMockRule> httpmockrules =  httpMockRuleMongoRepository.findByCategory(foundCategory.get().getCategory());
-			
-			httpmockrules.forEach(rule->{
-				rule.setCategory(category.getCategory());
-				
-			});
-			httpMockRuleMongoRepository.saveAll(httpmockrules);
+			if (!category.getCategory().equals(foundCategory.get().getCategory())) {
+				List<HttpMockRule> httpmockrules = httpMockRuleMongoRepository
+						.findByCategory(foundCategory.get().getCategory());
+
+				httpmockrules.forEach(rule -> {
+					rule.setCategory(category.getCategory());
+
+				});
+				httpMockRuleMongoRepository.saveAll(httpmockrules);
+			}
 			return ruleCategoryMongoRepository.save(category);
 		}
 
