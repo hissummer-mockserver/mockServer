@@ -118,7 +118,7 @@ public class EurekaMockRuleServiceImpl {
 
 		Response response = null;
 		String credentials = null;
-		if (rule.getEurekaServerUserName() != null || rule.getEurekaServerUserPass() == null
+		if (rule.getEurekaServerUserName() == null || rule.getEurekaServerUserPass() == null
 				|| rule.getEurekaServerUserName().isEmpty() || rule.getEurekaServerUserPass().isEmpty()) {
 
 			credentials = Credentials.basic("user", "pass");
@@ -155,7 +155,8 @@ public class EurekaMockRuleServiceImpl {
 
 		Response response = null;
 		String credentials = null;
-		if (rule.getEurekaServerUserName().isEmpty() || rule.getEurekaServerUserPass().isEmpty()) {
+		if (rule.getEurekaServerUserName() == null || rule.getEurekaServerUserPass() == null
+				|| rule.getEurekaServerUserName().isEmpty() || rule.getEurekaServerUserPass().isEmpty()) {
 
 			credentials = Credentials.basic("user", "pass");
 		} else {

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.hissummer.mockserver.mgmt.entity.HttpMockRule;
 import com.hissummer.mockserver.mgmt.entity.RuleCategory;
 import com.hissummer.mockserver.mgmt.exception.ServiceException;
 import com.hissummer.mockserver.mgmt.service.jpa.HttpMockRuleMongoRepository;
@@ -27,6 +28,10 @@ public class RuleCategoryServiceImpl {
 	@Transactional
 	public RuleCategory addCategory(RuleCategory category) throws ServiceException {
 
+		if (StringUtils.isEmpty(category.getCategory())) {
+			throw ServiceException.builder().status(0).serviceMessage("Category is empty").build();
+
+		}
 		RuleCategory foundCategory = ruleCategoryMongoRepository.findByCategory(category.getCategory());
 
 		if (foundCategory == null) {
@@ -47,14 +52,29 @@ public class RuleCategoryServiceImpl {
 			throw ServiceException.builder().status(0).serviceMessage("Id is empty").build();
 
 		}
+		
+		RuleCategory foundCategoryByName = ruleCategoryMongoRepository.findByCategory(category.getCategory());
+		
+		if(foundCategoryByName != null)
+		{
+			throw ServiceException.builder().status(0).serviceMessage("Already exists the category name.").build();
+			
+		}
 
-		Optional<RuleCategory> foundCategory = ruleCategoryMongoRepository.findById(category.getCategory());
+		Optional<RuleCategory> foundCategory = ruleCategoryMongoRepository.findById(category.getId());
 
 		if (!foundCategory.isPresent()) {
 
 			throw ServiceException.builder().status(0).serviceMessage("Can not find the category.").build();
 		} else {
 
+			List<HttpMockRule> httpmockrules =  httpMockRuleMongoRepository.findByCategory(foundCategory.get().getCategory());
+			
+			httpmockrules.forEach(rule->{
+				rule.setCategory(category.getCategory());
+				
+			});
+			httpMockRuleMongoRepository.saveAll(httpmockrules);
 			return ruleCategoryMongoRepository.save(category);
 		}
 

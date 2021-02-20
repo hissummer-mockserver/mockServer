@@ -1,5 +1,7 @@
 package com.hissummer.mockserver.mgmt.service.jpa;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -32,4 +34,7 @@ public interface HttpMockRuleMongoRepository extends MongoRepository<HttpMockRul
 
 	Long countByCategory(String category);
 
+	List<HttpMockRule> findByCategory(String category);
+	
+	
 }
