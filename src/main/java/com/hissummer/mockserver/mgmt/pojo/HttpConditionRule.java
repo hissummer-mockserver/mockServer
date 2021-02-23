@@ -10,8 +10,9 @@ import lombok.Data;
 @Builder
 public class HttpConditionRule {
 
-	private List<String> condition;
-	private List<String> conditionValue;
+	private String conditionValue;
+	private String condition;
+	private String objectValue;
 	private String mockResponse;
 	private Map<String, String> responseHeaders;
 	private UpstreamGroup upstreams;
