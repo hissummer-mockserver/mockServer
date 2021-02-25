@@ -47,7 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @CrossOrigin(origins = "*", allowCredentials = "true")
 @RestController
-@RequestMapping("/api/mock/2.0")
+@RequestMapping("/xxxxhissummerxxxx/api")
 public class MockMgmtV2Controller {
 
 	private static final String USERNAME = "username";

@@ -10,11 +10,9 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import com.hissummer.mockserver.mgmt.entity.HttpConditionRule;
 
 public interface HttpConditionRuleMongoRepository extends MongoRepository<HttpConditionRule, String> {
-
-	Page<HttpConditionRule> findByEnable(Boolean enable, Pageable pageable);
-
-	List<HttpConditionRule> findByEnable(Boolean enable);
 		
 	Optional<HttpConditionRule> findById(String id);
+	
+	Optional<HttpConditionRule> findByHttpMockRuleId(String httpMockRuleId);
 
 }
