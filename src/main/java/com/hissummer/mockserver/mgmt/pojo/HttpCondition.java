@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class HttpConditionRule {
+public class HttpCondition {
 
 	private String toBeCompareValue;
 	private CompareConditionEnum compareCondition;
