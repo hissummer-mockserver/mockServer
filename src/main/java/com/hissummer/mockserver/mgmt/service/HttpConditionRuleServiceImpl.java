@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.hissummer.mockserver.mgmt.entity.HttpConditionRule;
+import com.hissummer.mockserver.mgmt.exception.ServiceException;
 import com.hissummer.mockserver.mgmt.service.jpa.HttpConditionRuleMongoRepository;
 
 public class HttpConditionRuleServiceImpl {
@@ -13,8 +14,13 @@ public class HttpConditionRuleServiceImpl {
 	HttpConditionRuleMongoRepository httpConditionRuleMongoRepository;
 
 	public HttpConditionRule addHttpConditionRule(HttpConditionRule conditionRules) {
+		HttpConditionRule rule = getHttpConditionRulesByHttpMockRuleId(conditionRules.getHttpMockRuleId());
+		if(rule == null)
+			return httpConditionRuleMongoRepository.insert(conditionRules);
+		else {
+			throw ServiceException.builder().status(0).serviceMessage("conditionrule already exist.").build();
 
-		return httpConditionRuleMongoRepository.insert(conditionRules);
+		}
 
 	}
 
@@ -39,7 +45,7 @@ public class HttpConditionRuleServiceImpl {
 
 	}
 
-	public boolean deleteAllHttpConditionRules(HttpConditionRule conditionRules) {
+	public boolean deleteWholeHttpConditionRules(HttpConditionRule conditionRules) {
 		Optional<HttpConditionRule> httpConditionRule = httpConditionRuleMongoRepository
 				.findById(conditionRules.getId());
 		if (httpConditionRule.isPresent()) {
@@ -70,7 +76,7 @@ public class HttpConditionRuleServiceImpl {
 			return false;
 	}
 
-	public HttpConditionRule getHttpConditionRules(String mockRuleId) {
+	public HttpConditionRule getHttpConditionRulesByHttpMockRuleId(String mockRuleId) {
 		Optional<HttpConditionRule> httpConditionRule = httpConditionRuleMongoRepository
 				.findByHttpMockRuleId(mockRuleId);
 
