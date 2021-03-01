@@ -35,6 +35,5 @@ public interface HttpMockRuleMongoRepository extends MongoRepository<HttpMockRul
 	Long countByCategory(String category);
 
 	List<HttpMockRule> findByCategory(String category);
-	
-	
+
 }

@@ -19,7 +19,7 @@ public class RequestLogMessageReceiver {
 	@JmsListener(destination = "requestlog", containerFactory = "jmsListenerFactory")
 	public void receiveMessage(RequestLog requestLog) {
 		requestLogMongoRepository.save(requestLog);
-		log.info("request log saved ok!");
+		log.debug("request log saved ok!");
 	}
 
 }

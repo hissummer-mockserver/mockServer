@@ -15,7 +15,7 @@ public class HttpConditionRuleServiceImpl {
 
 	public HttpConditionRule addHttpConditionRule(HttpConditionRule conditionRules) {
 		HttpConditionRule rule = getHttpConditionRulesByHttpMockRuleId(conditionRules.getHttpMockRuleId());
-		if(rule == null)
+		if (rule == null)
 			return httpConditionRuleMongoRepository.insert(conditionRules);
 		else {
 			throw ServiceException.builder().status(0).serviceMessage("conditionrule already exist.").build();
