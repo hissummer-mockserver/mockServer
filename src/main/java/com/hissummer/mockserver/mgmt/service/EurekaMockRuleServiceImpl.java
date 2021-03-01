@@ -60,7 +60,8 @@ public class EurekaMockRuleServiceImpl {
 				+ "			\"@class\": \"java.util.Collections$EmptyMap\"" + "		}" + "	}" + "}" + "";
 
 		String credentials = null;
-		if (rule.getEurekaServerUserName().isEmpty() || rule.getEurekaServerUserPass().isEmpty()) {
+		if (rule.getEurekaServerUserName() == null || rule.getEurekaServerUserPass() == null
+				||rule.getEurekaServerUserName().isEmpty() || rule.getEurekaServerUserPass().isEmpty()) {
 
 			credentials = Credentials.basic("user", "pass");
 		} else {
