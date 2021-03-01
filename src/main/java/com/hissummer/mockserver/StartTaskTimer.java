@@ -20,19 +20,19 @@ public class StartTaskTimer {
 
 		Calendar calendar = Calendar.getInstance();
 
-//		if (calendar.get(Calendar.HOUR_OF_DAY) >= 19) {
-//			calendar.add(Calendar.DATE, 1);
-//		}
-//
-//		calendar.set(Calendar.HOUR_OF_DAY, 19);
-//		calendar.set(Calendar.MINUTE, 0);
-//		calendar.set(Calendar.SECOND, 0);
-//		calendar.set(Calendar.MILLISECOND, 0);
+		if (calendar.get(Calendar.HOUR_OF_DAY) >= 9) {
+			calendar.add(Calendar.DATE, 1);
+		}
+
+		calendar.set(Calendar.HOUR_OF_DAY, 1);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
 
 		// running timer task as daemon thread
 		Timer timer = new Timer(true);
-		timer.schedule(taskMonitorTimerTask, calendar.getTime(), TimeUnit.MINUTES.toMillis(5));
-		// timer.schedule(taskmonitor, new Date(), TimeUnit.HOURS.toMillis(24));
+		//timer.schedule(taskMonitorTimerTask, calendar.getTime(), TimeUnit.MINUTES.toMillis(5));
+		timer.schedule(taskMonitorTimerTask, calendar.getTime(), TimeUnit.HOURS.toMillis(24));
 
 	}
 }
