@@ -176,7 +176,7 @@ public class MockForwardController implements ErrorController {
 
 			// Send a message with a POJO - the template reuse the message converter
 			jmsTemplate.convertAndSend("requestlog", requestLog);
-			log.info("send the requestlog message to requestlog destination.");
+			log.debug("send the requestlog message to requestlog destination.");
 
 			return new ResponseEntity<>(mockOrUpstreamReturnedResponse.getResponseBody(), responseHeaders,
 					HttpStatus.OK);

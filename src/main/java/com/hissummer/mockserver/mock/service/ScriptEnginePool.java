@@ -9,9 +9,12 @@ import javax.script.ScriptEngineManager;
 
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class ScriptEnginePool {
-	private static final int DEFAULT_CAPACITY = 20;
+	private static final int DEFAULT_CAPACITY = 150;
 	private int capacity;
 	private LinkedBlockingQueue<ScriptEngine> sparePool;
 
@@ -34,7 +37,7 @@ public class ScriptEnginePool {
 	public synchronized ScriptEngine getSpareEngine() {
 
 		try {
-			return this.sparePool.poll(60L, TimeUnit.SECONDS);
+			return this.sparePool.poll(30L, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			return null;
 		}
@@ -46,7 +49,9 @@ public class ScriptEnginePool {
 	 */
 	public synchronized void releaseEngine(ScriptEngine engine) {
 
-		this.sparePool.add(engine);
+		if(!this.sparePool.offer(engine)) {
+			log.error("add error!!!");
+		}
 
 	}
 
