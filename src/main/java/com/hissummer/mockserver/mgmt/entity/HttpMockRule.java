@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.hissummer.mockserver.mgmt.pojo.HttpCondition;
 import com.hissummer.mockserver.mgmt.pojo.HttpMockWorkMode;
 import com.hissummer.mockserver.mgmt.pojo.Plugin;
 import com.hissummer.mockserver.mgmt.pojo.UpstreamGroup;

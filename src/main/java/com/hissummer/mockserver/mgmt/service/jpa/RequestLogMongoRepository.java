@@ -1,5 +1,6 @@
 package com.hissummer.mockserver.mgmt.service.jpa;
 
+import java.util.Date;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -17,5 +18,7 @@ public interface RequestLogMongoRepository extends MongoRepository<RequestLog, S
 	Page<RequestLog> findAll(Pageable pageable);
 
 	Optional<RequestLog> findById(String id);
+
+	void deleteByCreateTimeLessThan(Date createTime);
 
 }

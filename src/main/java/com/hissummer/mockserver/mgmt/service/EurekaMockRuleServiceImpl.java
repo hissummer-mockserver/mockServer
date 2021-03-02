@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hissummer.mockserver.mgmt.entity.EurekaMockRule;
+import com.hissummer.mockserver.mgmt.exception.ServiceException;
 import com.hissummer.mockserver.mgmt.pojo.Constants;
 import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mock.service.HttpClientUtil;
@@ -43,25 +44,21 @@ public class EurekaMockRuleServiceImpl {
 		 * 
 		 */
 
-		String registerInfoStringFormatter = "{" + "	\"instance\": {" + "		\"instanceId\": \"%s\","
-				+ "		\"app\": \"%s\"," + "		\"appGroutName\": null," + "		\"ipAddr\": \"%s\","
-				+ "		\"sid\": \"na\"," + "		\"homePageUrl\": null," + "		\"statusPageUrl\": \"%s\","
-				+ "		\"healthCheckUrl\": null," + "		\"secureHealthCheckUrl\": null,"
-				+ "		\"vipAddress\": \"%s\"," + "		\"secureVipAddress\": \"%s\"," + "		\"countryId\": 1,"
-				+ "		\"dataCenterInfo\": {"
-				+ "			\"@class\": \"com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo\","
-				+ "			\"name\": \"MyOwn\"" + "		}," + "		\"hostName\": \"%s\","
-				+ "		\"status\": \"UP\"," + "		\"leaseInfo\": {\"evictionDurationInSecs\":180},"
-				+ "		\"isCoordinatingDiscoveryServer\": false," + "		\"lastUpdatedTimestamp\": null,"
-				+ "		\"lastDirtyTimestamp\": null," + "		\"actionType\": null," + "		\"asgName\": null,"
-				+ "		\"overridden_status\": \"UNKNOWN\"," + "		\"port\": {" + "			\"$\": %s,"
-				+ "			\"@enabled\": \"true\"" + "		}," + "		\"securePort\": {" + "			\"$\": %s,"
-				+ "			\"@enabled\": \"false\"" + "		}," + "		\"metadata\": {"
-				+ "			\"@class\": \"java.util.Collections$EmptyMap\"" + "		}" + "	}" + "}" + "";
+		String registerInfoStringFormatter = "{" + "\"instance\":{" + "\"instanceId\":\"%s\"," + "\"app\":\"%s\","
+				+ "\"appGroutName\": null," + "\"ipAddr\":\"%s\"," + "\"sid\":\"na\"," + "\"homePageUrl\": null,"
+				+ "\"statusPageUrl\":\"%s\"," + "\"healthCheckUrl\": null," + "\"secureHealthCheckUrl\": null,"
+				+ "\"vipAddress\":\"%s\"," + "\"secureVipAddress\":\"%s\"," + "\"countryId\": 1,"
+				+ "\"dataCenterInfo\": {" + "\"@class\":\"com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo\","
+				+ "\"name\":\"MyOwn\"" + "}," + "\"hostName\":\"%s\"," + "\"status\":\"UP\","
+				+ "\"leaseInfo\": {\"evictionDurationInSecs\":180}," + "\"isCoordinatingDiscoveryServer\": false,"
+				+ "\"lastUpdatedTimestamp\": null," + "\"lastDirtyTimestamp\": null," + "\"actionType\": null,"
+				+ "\"asgName\": null," + "\"overridden_status\":\"UNKNOWN\"," + "\"port\": {" + "\"$\": %s,"
+				+ "\"@enabled\":\"true\"" + "}," + "\"securePort\": {" + "\"$\": %s," + "\"@enabled\":\"false\"" + "},"
+				+ "\"metadata\": {" + "\"@class\":\"java.util.Collections$EmptyMap\"" + "}" + "}" + "}" + "";
 
 		String credentials = null;
 		if (rule.getEurekaServerUserName() == null || rule.getEurekaServerUserPass() == null
-				||rule.getEurekaServerUserName().isEmpty() || rule.getEurekaServerUserPass().isEmpty()) {
+				|| rule.getEurekaServerUserName().isEmpty() || rule.getEurekaServerUserPass().isEmpty()) {
 
 			credentials = Credentials.basic("user", "pass");
 		} else {
@@ -220,7 +217,7 @@ public class EurekaMockRuleServiceImpl {
 				log.warn("heartbeat sleep interrupted: {}", e);
 				shutdownAndAwaitTermination(threadPool);
 				Thread.currentThread().interrupt();
-				throw new RuntimeException("interrupted");
+				throw new ServiceException(-1, "intterrupt!");
 
 			}
 
