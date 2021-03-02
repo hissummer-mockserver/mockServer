@@ -16,7 +16,7 @@ public class LoginCheckInterceptorAppConfig implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 
-		registry.addInterceptor(checkLoginInterceptor).addPathPatterns("/api/mock/**")
-				.excludePathPatterns("/api/mock/2.0/login", "/api/mock/2.0/logout");
+		registry.addInterceptor(checkLoginInterceptor).addPathPatterns("/xxxxhissummerxxxx/api/**")
+				.excludePathPatterns("/xxxxhissummerxxxx/api/login", "/xxxxhissummerxxxx/api/logout");
 	}
 }
