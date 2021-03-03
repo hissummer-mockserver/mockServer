@@ -34,7 +34,7 @@ public class ScriptEnginePool {
 	/**
 	 * if no spare engine, will hang.
 	 */
-	public synchronized ScriptEngine getSpareEngine() {
+	public ScriptEngine getSpareEngine() {
 
 		try {
 			return this.sparePool.poll(30L, TimeUnit.SECONDS);
@@ -47,10 +47,10 @@ public class ScriptEnginePool {
 	/**
 	 * if no spare engine, will hang.
 	 */
-	public synchronized void releaseEngine(ScriptEngine engine) {
+	public void releaseEngine(ScriptEngine engine) {
 
 		if(!this.sparePool.offer(engine)) {
-			log.error("add error!!!");
+			log.error("add engine! ");
 		}
 
 	}
