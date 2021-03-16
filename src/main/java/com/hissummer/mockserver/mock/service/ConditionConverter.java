@@ -13,7 +13,7 @@ public class ConditionConverter {
 	
 	public String converToGroovyExpression(String toBeCompareValue, CompareConditionEnum compareCondition,String conditionValue) {
 		
-		String convertResult = "false";
+		String convertResult = "";
 		
 		switch(compareCondition)
 		{
@@ -55,14 +55,19 @@ public class ConditionConverter {
 		case  REGREX_MATCH:	
 			convertResult = "\""+toBeCompareValue+"\".matches(\""+conditionValue+"\")";			
 			break;		
+		case AND:
+			convertResult = " && ";			
+			break;
 			
+		case OR:
+			convertResult = " || ";			
+			break;
 			
-			default :
-				;
-		}
-		
-		
-		
+		default :
+				convertResult = "";	
+				break;
+		}		
+
 		return convertResult;
 	}
 	
