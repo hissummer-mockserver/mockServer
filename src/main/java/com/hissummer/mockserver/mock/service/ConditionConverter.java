@@ -30,7 +30,7 @@ public class ConditionConverter {
 			convertResult = toBeCompareValue+" >= "+conditionValue;
 			break;
 		case  LESS_THAN:	
-			convertResult = toBeCompareValue+" < "+conditionValue;aima y
+			convertResult = toBeCompareValue+" < "+conditionValue;
 			break;			
 		case  LESS_OR_EQUAL:	
 			convertResult = toBeCompareValue+" <= "+conditionValue;
