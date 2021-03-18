@@ -1,5 +1,6 @@
 package com.hissummer.mockserver.mgmt.entity;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,6 +15,6 @@ import lombok.Data;
 public class HttpConditionRule {
 	String id;
 	String httpMockRuleId;
-	Map<Integer, HttpCondition> conditionRules;
+	List<HttpCondition> conditionRules;
 
 }

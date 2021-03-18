@@ -1,11 +1,15 @@
 package com.hissummer.mockserver.mgmt.service;
 
+import java.lang.reflect.Array;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.github.andrewoma.dexx.collection.ArrayList;
 import com.hissummer.mockserver.mgmt.entity.HttpConditionRule;
 import com.hissummer.mockserver.mgmt.exception.ServiceException;
+import com.hissummer.mockserver.mgmt.pojo.HttpCondition;
 import com.hissummer.mockserver.mgmt.service.jpa.HttpConditionRuleMongoRepository;
 
 public class HttpConditionRuleServiceImpl {
@@ -30,13 +34,8 @@ public class HttpConditionRuleServiceImpl {
 				.findById(conditionRules.getId());
 
 		if (httpConditionRule.isPresent()) {
-
-			conditionRules.getConditionRules().forEach((order, condition) ->
-
-			httpConditionRule.get().getConditionRules().put(order, condition)
-
-			);
-
+			
+			httpConditionRule.get().setConditionRules(conditionRules.getConditionRules());			
 			httpConditionRuleMongoRepository.save(httpConditionRule.get());
 			return true;
 		}
@@ -63,17 +62,32 @@ public class HttpConditionRuleServiceImpl {
 				.findById(conditionRules.getId());
 		if (httpConditionRule.isPresent()) {
 
-			conditionRules.getConditionRules().forEach((order, condition) ->
-
-			httpConditionRule.get().getConditionRules().remove(order)
+			conditionRules.getConditionRules().forEach( condition ->
+			httpConditionRule.get().getConditionRules().remove(condition)
 
 			);
+			reOrderTheIndexOfConditionRules(httpConditionRule.get().getConditionRules());
+			
 			httpConditionRuleMongoRepository.save(httpConditionRule.get());
 
 			return true;
 
 		} else
 			return false;
+	}
+	
+	
+	private List<HttpCondition>  reOrderTheIndexOfConditionRules(List<HttpCondition> httpConditions) {
+		
+		int[] i = {0};
+		httpConditions.forEach(condition->{			
+			condition.setOrderId(i[0]);
+			i[0]++;			
+		});
+		
+		return httpConditions;
+		
+		
 	}
 
 	public HttpConditionRule getHttpConditionRulesByHttpMockRuleId(String mockRuleId) {

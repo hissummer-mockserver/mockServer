@@ -1,5 +1,6 @@
 package com.hissummer.mockserver.mgmt.pojo;
 
+import java.util.List;
 import java.util.Map;
 
 import lombok.Builder;
@@ -9,9 +10,8 @@ import lombok.Data;
 @Builder
 public class HttpCondition {
 
-	private String toBeCompareValue;
-	private CompareConditionEnum compareCondition;
-	private String conditionValue;
+	private List<CompareCondition> conditionExpression;
+	private int orderId;
 	private String mockResponse;
 	private Map<String, String> responseHeaders;
 	private UpstreamGroup upstreams;

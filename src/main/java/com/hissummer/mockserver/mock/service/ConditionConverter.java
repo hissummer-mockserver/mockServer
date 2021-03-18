@@ -11,7 +11,7 @@ public class ConditionConverter {
 	
 	final static private String VALIDINTORFLOAT = "[-+]?[0-9]+\\\\.?[0-9]*";
 	
-	public String converToGroovyExpression(String toBeCompareValue, CompareConditionEnum compareCondition,String conditionValue) {
+	public static String converToGroovyExpression(String toBeCompareValue, CompareConditionEnum compareCondition,String conditionValue) {
 		
 		String convertResult = "";
 		
