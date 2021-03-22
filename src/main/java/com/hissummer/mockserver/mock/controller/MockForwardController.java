@@ -78,19 +78,19 @@ public class MockForwardController implements ErrorController {
 		HttpHeaders responseHeaders = new HttpHeaders();
 
 		if (status != null && Integer.valueOf(status.toString()) == HttpStatus.NOT_FOUND.value()) {
-
+			// 如果http code码是404 notfound， 则那么认为这个接口在mockserver不存在，然后去查找mock规则。
 			try {
 				/**
-				 * change HTTP response code 404(NOT_FOUND) to 200.
+				 * change HTTP response code 404(NOT_FOUND) to 200(OK).
 				 */
 				ResponseFacade responsefacade = (ResponseFacade) response;
 				Field innerResponse = getField(responsefacade.getClass(), "response");
-				// 强制修改inneResponse的可见
+				// 强制修改inneResponse为可见
 				innerResponse.setAccessible(true);
 				Response innterResponseObject = (Response) innerResponse.get(responsefacade);
 				org.apache.coyote.Response coyoteResponse = innterResponseObject.getCoyoteResponse();
 				Field httpstatus = getField(coyoteResponse.getClass(), "status");
-				// 强制修改httpStatus的可见，并将httpStatus改为200错误，而不是404。
+				// 强制修改httpStatus的可见，并将httpStatus由原来的404改为200。
 				httpstatus.setAccessible(true);
 				httpstatus.set(coyoteResponse, 200);
 			}

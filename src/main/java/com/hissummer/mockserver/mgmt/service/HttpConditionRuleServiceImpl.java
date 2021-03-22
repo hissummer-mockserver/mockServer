@@ -34,8 +34,8 @@ public class HttpConditionRuleServiceImpl {
 				.findById(conditionRules.getId());
 
 		if (httpConditionRule.isPresent()) {
-			
-			httpConditionRule.get().setConditionRules(conditionRules.getConditionRules());			
+
+			httpConditionRule.get().setConditionRules(conditionRules.getConditionRules());
 			httpConditionRuleMongoRepository.save(httpConditionRule.get());
 			return true;
 		}
@@ -62,12 +62,12 @@ public class HttpConditionRuleServiceImpl {
 				.findById(conditionRules.getId());
 		if (httpConditionRule.isPresent()) {
 
-			conditionRules.getConditionRules().forEach( condition ->
-			httpConditionRule.get().getConditionRules().remove(condition)
+			conditionRules.getConditionRules()
+					.forEach(condition -> httpConditionRule.get().getConditionRules().remove(condition)
 
 			);
 			reOrderTheIndexOfConditionRules(httpConditionRule.get().getConditionRules());
-			
+
 			httpConditionRuleMongoRepository.save(httpConditionRule.get());
 
 			return true;
@@ -75,19 +75,17 @@ public class HttpConditionRuleServiceImpl {
 		} else
 			return false;
 	}
-	
-	
-	private List<HttpCondition>  reOrderTheIndexOfConditionRules(List<HttpCondition> httpConditions) {
-		
-		int[] i = {0};
-		httpConditions.forEach(condition->{			
+
+	private List<HttpCondition> reOrderTheIndexOfConditionRules(List<HttpCondition> httpConditions) {
+
+		int[] i = { 0 };
+		httpConditions.forEach(condition -> {
 			condition.setOrderId(i[0]);
-			i[0]++;			
+			i[0]++;
 		});
-		
+
 		return httpConditions;
-		
-		
+
 	}
 
 	public HttpConditionRule getHttpConditionRulesByHttpMockRuleId(String mockRuleId) {
@@ -102,4 +100,14 @@ public class HttpConditionRuleServiceImpl {
 			return null;
 	}
 
+	public HttpConditionRule getHttpConditionRulesById(String id) {
+		Optional<HttpConditionRule> httpConditionRule = httpConditionRuleMongoRepository.findById(id);
+
+		if (httpConditionRule.isPresent()) {
+
+			return httpConditionRule.get();
+
+		} else
+			return null;
+	}
 }

@@ -49,7 +49,7 @@ public class ScriptEnginePool {
 	 */
 	public void releaseEngine(ScriptEngine engine) {
 
-		if(!this.sparePool.offer(engine)) {
+		if (!this.sparePool.offer(engine)) {
 			log.error("add engine! ");
 		}
 

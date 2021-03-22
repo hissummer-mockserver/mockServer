@@ -50,8 +50,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/xxxxhissummerxxxx/api")
 public class MockRuleMgmtController {
 
-	private static final String USERNAME = "username";
-	private static final String PASSWORD = "password";
+	private static final String USERNAMEPARAM = "username";
+	private static final String PASSWORDPARAM = "password";
 
 	@Autowired
 	HttpMockRuleMongoRepository mockRuleMgmtMongoRepository;
@@ -388,8 +388,8 @@ public class MockRuleMgmtController {
 	@PostMapping(value = "/login")
 	public MockRuleMgmtResponseVo login(@RequestBody JSONObject requestBody, HttpServletResponse response) {
 
-		String username = requestBody.getString(USERNAME);
-		String password = requestBody.getString(PASSWORD);
+		String username = requestBody.getString(USERNAMEPARAM);
+		String password = requestBody.getString(PASSWORDPARAM);
 
 		boolean loginStatus = userService.login(username, password);
 		User user = userService.finduserByuserName(username);
@@ -404,7 +404,7 @@ public class MockRuleMgmtController {
 	@PostMapping(value = "/logout")
 	public MockRuleMgmtResponseVo logout(@RequestBody JSONObject requestBody, HttpServletRequest request) {
 
-		String username = requestBody.getString(USERNAME);
+		String username = requestBody.getString(USERNAMEPARAM);
 
 		return MockRuleMgmtResponseVo.builder().status(0).success(userService.logout(username, request.getCookies()))
 				.build();
@@ -413,8 +413,8 @@ public class MockRuleMgmtController {
 	@PostMapping(value = "/createUser")
 	public MockRuleMgmtResponseVo createUser(@RequestBody JSONObject requestBody) {
 
-		String username = requestBody.getString(USERNAME);
-		String password = requestBody.getString(PASSWORD);
+		String username = requestBody.getString(USERNAMEPARAM);
+		String password = requestBody.getString(PASSWORDPARAM);
 
 		return MockRuleMgmtResponseVo.builder().status(0).success(userService.createUser(username, password)).build();
 	}
@@ -422,8 +422,8 @@ public class MockRuleMgmtController {
 	@PostMapping(value = "/rePassword")
 	public MockRuleMgmtResponseVo rePasswordUser(@RequestBody JSONObject requestBody, HttpServletRequest request) {
 
-		String username = requestBody.getString(USERNAME);
-		String password = requestBody.getString(PASSWORD);
+		String username = requestBody.getString(USERNAMEPARAM);
+		String password = requestBody.getString(PASSWORDPARAM);
 		String newpassword = requestBody.getString("newpassword");
 
 		return MockRuleMgmtResponseVo.builder().status(0)
@@ -433,8 +433,8 @@ public class MockRuleMgmtController {
 	@PostMapping(value = "/delUser")
 	public MockRuleMgmtResponseVo delUser(@RequestBody JSONObject requestBody, HttpServletRequest request) {
 
-		String username = requestBody.getString(USERNAME);
-		String password = requestBody.getString(PASSWORD);
+		String username = requestBody.getString(USERNAMEPARAM);
+		String password = requestBody.getString(PASSWORDPARAM);
 
 		return MockRuleMgmtResponseVo.builder().status(0)
 				.success(userService.delUser(username, password, request.getCookies())).build();
