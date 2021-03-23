@@ -44,17 +44,41 @@ public class HttpConditionRuleServiceImpl {
 
 	}
 
-	public boolean deleteWholeHttpConditionRules(HttpConditionRule conditionRules) {
+	public boolean deleteWholeHttpConditionRules(HttpConditionRule conditionRule) {
 		Optional<HttpConditionRule> httpConditionRule = httpConditionRuleMongoRepository
-				.findById(conditionRules.getId());
+				.findById(conditionRule.getId());
 		if (httpConditionRule.isPresent()) {
 
 			httpConditionRuleMongoRepository.delete(httpConditionRule.get());
 			;
 			return true;
 
-		} else
+		} else {
 			return false;
+		}
+	}
+
+	public boolean deleteHttpConditionRuleById(String id) {
+		Optional<HttpConditionRule> httpConditionRule = httpConditionRuleMongoRepository.findById(id);
+		if (httpConditionRule.isPresent()) {
+			httpConditionRuleMongoRepository.deleteById(id);
+			return true;
+
+		} else {
+			return false;
+		}
+	}
+
+	public boolean deleteHttpConditionRuleByMockRuleId(String mockRuleid) {
+		Optional<HttpConditionRule> httpConditionRule = httpConditionRuleMongoRepository
+				.findByHttpMockRuleId(mockRuleid);
+		if (httpConditionRule.isPresent()) {
+			httpConditionRuleMongoRepository.deleteByHttpMockRuleId(mockRuleid);
+			return true;
+
+		} else {
+			return false;
+		}
 	}
 
 	public boolean deleteHttpConditionRules(HttpConditionRule conditionRules) {

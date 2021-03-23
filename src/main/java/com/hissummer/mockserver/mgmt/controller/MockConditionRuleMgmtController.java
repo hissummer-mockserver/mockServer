@@ -33,13 +33,14 @@ public class MockConditionRuleMgmtController {
 	@Autowired
 	HttpConditionRuleServiceImpl httpConditionRuleServiceImpl;
 
-	@RequestMapping(value = "/addRule/{id}", method = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+	@RequestMapping(value = "/httpConditionRule/{id}", method = { RequestMethod.GET, RequestMethod.POST,
 			RequestMethod.DELETE })
-	public MockRuleMgmtResponseVo addConditionRule(HttpServletRequest request, @PathVariable("") String id,
+	public MockRuleMgmtResponseVo operateConditionRuleById(HttpServletRequest request, @PathVariable("id") String id,
 			@RequestBody HttpConditionRule conditionRule) {
 
 		MockRuleMgmtResponseVo result = null;
 		HttpConditionRule localTempConditionRule = null;
+		boolean operationResult = true;
 		try {
 
 			switch (request.getMethod())
@@ -49,7 +50,7 @@ public class MockConditionRuleMgmtController {
 				if (id == null)
 					throw ServiceException.builder().status(0).serviceMessage("id is not exist.").build();
 				else {
-					localTempConditionRule = httpConditionRuleServiceImpl.getHttpConditionRulesByHttpMockRuleId(id);
+					localTempConditionRule = httpConditionRuleServiceImpl.getHttpConditionRulesById(id);
 				}
 				break;
 			case "POST":
@@ -57,19 +58,26 @@ public class MockConditionRuleMgmtController {
 					throw ServiceException.builder().status(0).serviceMessage("id problems,please check your input id.")
 							.build();
 				else {
-					httpConditionRuleServiceImpl.updateHttpConditionRule(conditionRule);
+					if (!httpConditionRuleServiceImpl.updateHttpConditionRule(conditionRule))
+						operationResult = false;
 				}
 				break;
-			case "PUT":
-				break;
+
 			case "DELETE":
+				if (id == null || !id.equals(conditionRule.getId()))
+					throw ServiceException.builder().status(0).serviceMessage("id is not exist.").build();
+				else {
+					if (!httpConditionRuleServiceImpl.deleteHttpConditionRuleById(id))
+						operationResult = false;
+				}
 				break;
 			default:
 				break;
 
 			}
 
-			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("success.").data(null).build();
+			result = MockRuleMgmtResponseVo.builder().status(0).success(operationResult).message("")
+					.data(localTempConditionRule).build();
 
 		} catch (ServiceException e) {
 
@@ -79,4 +87,73 @@ public class MockConditionRuleMgmtController {
 
 	}
 
+	@RequestMapping(value = "/httpConditionRule/mockRuleId-{id}", method = { RequestMethod.GET, RequestMethod.POST,
+			RequestMethod.DELETE })
+	public MockRuleMgmtResponseVo operateConditionRuleByMockruleId(HttpServletRequest request,
+			@PathVariable("id") String mockRuleId, @RequestBody HttpConditionRule conditionRule) {
+
+		MockRuleMgmtResponseVo result = null;
+		HttpConditionRule localTempConditionRule = null;
+		boolean operationResult = true;
+		try {
+
+			switch (request.getMethod())
+
+			{
+			case "GET":
+				if (mockRuleId == null)
+					throw ServiceException.builder().status(0).serviceMessage("mockRuleId is not exist.").build();
+				else {
+					localTempConditionRule = httpConditionRuleServiceImpl.getHttpConditionRulesByHttpMockRuleId(mockRuleId);
+				}
+				break;
+			case "POST":
+				if (mockRuleId == null || !mockRuleId.equals(conditionRule.getHttpMockRuleId()))
+					throw ServiceException.builder().status(0).serviceMessage("mockRuleId problems,please check your input id.")
+							.build();
+				else {
+					if (!httpConditionRuleServiceImpl.updateHttpConditionRule(conditionRule))
+						operationResult = false;
+				}
+				break;
+
+			case "DELETE":
+				if (mockRuleId == null || !mockRuleId.equals(conditionRule.getHttpMockRuleId()))
+					throw ServiceException.builder().status(0).serviceMessage("mockRuleId is not exist.").build();
+				else {
+					if (!httpConditionRuleServiceImpl.deleteHttpConditionRuleByMockRuleId(mockRuleId))
+						operationResult = false;
+				}
+				break;
+			default:
+				break;
+
+			}
+
+			result = MockRuleMgmtResponseVo.builder().status(0).success(operationResult).message("")
+					.data(localTempConditionRule).build();
+
+		} catch (ServiceException e) {
+
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getServiceMessage()).build();
+		}
+		return result;
+
+	}
+
+	@RequestMapping(value = "/httpConditionRule", method = { RequestMethod.PUT })
+	public MockRuleMgmtResponseVo addConditionRule(@RequestBody HttpConditionRule conditionRule) {
+		MockRuleMgmtResponseVo result = null;
+		HttpConditionRule localTempConditionRule = null;
+		try {
+			localTempConditionRule = httpConditionRuleServiceImpl.addHttpConditionRule(conditionRule);
+			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("").data(localTempConditionRule)
+					.build();
+		} catch (ServiceException e) {
+
+			result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getServiceMessage()).build();
+		}
+		return result;
+
+	}
 }

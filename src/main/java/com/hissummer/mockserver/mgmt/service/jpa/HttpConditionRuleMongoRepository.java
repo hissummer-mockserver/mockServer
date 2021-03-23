@@ -12,4 +12,8 @@ public interface HttpConditionRuleMongoRepository extends MongoRepository<HttpCo
 
 	Optional<HttpConditionRule> findByHttpMockRuleId(String httpMockRuleId);
 
+	void deleteById(String id);
+
+	void deleteByHttpMockRuleId(String httpMockRuleId);
+
 }
