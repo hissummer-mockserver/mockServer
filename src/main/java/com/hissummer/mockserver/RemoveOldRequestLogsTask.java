@@ -24,8 +24,8 @@ public class RemoveOldRequestLogsTask extends TimerTask {
 	public void removeOldRequestLogs() {
 
 		Calendar now = Calendar.getInstance();
-		// now.add(Calendar.DAY_OF_YEAR, -7);
-		now.add(Calendar.MINUTE, -1);
+		now.add(Calendar.DAY_OF_YEAR, -7);
+		//now.add(Calendar.MINUTE, -1);
 		requestLogMongoRepository.deleteByCreateTimeLessThan(now.getTime());
 		log.info("removed old request logs!");
 	}
