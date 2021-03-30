@@ -1,9 +1,9 @@
 package com.hissummer.mockserver.mgmt.entity;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import com.hissummer.mockserver.mgmt.pojo.HttpCondition;
 
 import lombok.Builder;

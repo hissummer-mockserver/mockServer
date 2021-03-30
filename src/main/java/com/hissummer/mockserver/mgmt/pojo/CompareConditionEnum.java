@@ -1,7 +1,5 @@
 package com.hissummer.mockserver.mgmt.pojo;
 
-import java.util.EnumSet;
-
 public enum CompareConditionEnum {
 	EQUAL("equal"), NON_EQUAL("non_equal"), REGREX_MATCH("regrex_match"), GREATER_THAN(
 			"greater_than"), GREATER_OR_EQUAL("greater_than_or_equal"), LESS_THAN("less_than"), LESS_OR_EQUAL(

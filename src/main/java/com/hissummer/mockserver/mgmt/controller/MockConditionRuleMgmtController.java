@@ -104,13 +104,14 @@ public class MockConditionRuleMgmtController {
 				if (mockRuleId == null)
 					throw ServiceException.builder().status(0).serviceMessage("mockRuleId is not exist.").build();
 				else {
-					localTempConditionRule = httpConditionRuleServiceImpl.getHttpConditionRulesByHttpMockRuleId(mockRuleId);
+					localTempConditionRule = httpConditionRuleServiceImpl
+							.getHttpConditionRulesByHttpMockRuleId(mockRuleId);
 				}
 				break;
 			case "POST":
 				if (mockRuleId == null || !mockRuleId.equals(conditionRule.getHttpMockRuleId()))
-					throw ServiceException.builder().status(0).serviceMessage("mockRuleId problems,please check your input id.")
-							.build();
+					throw ServiceException.builder().status(0)
+							.serviceMessage("mockRuleId problems,please check your input id.").build();
 				else {
 					if (!httpConditionRuleServiceImpl.updateHttpConditionRule(conditionRule))
 						operationResult = false;
@@ -156,4 +157,5 @@ public class MockConditionRuleMgmtController {
 		return result;
 
 	}
+
 }
