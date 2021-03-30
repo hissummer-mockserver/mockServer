@@ -1,17 +1,17 @@
 package com.hissummer.mockserver.mgmt.service;
 
-import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import com.github.andrewoma.dexx.collection.ArrayList;
 import com.hissummer.mockserver.mgmt.entity.HttpConditionRule;
 import com.hissummer.mockserver.mgmt.exception.ServiceException;
 import com.hissummer.mockserver.mgmt.pojo.HttpCondition;
 import com.hissummer.mockserver.mgmt.service.jpa.HttpConditionRuleMongoRepository;
 
+@Service
 public class HttpConditionRuleServiceImpl {
 
 	@Autowired
@@ -50,7 +50,6 @@ public class HttpConditionRuleServiceImpl {
 		if (httpConditionRule.isPresent()) {
 
 			httpConditionRuleMongoRepository.delete(httpConditionRule.get());
-			;
 			return true;
 
 		} else {
