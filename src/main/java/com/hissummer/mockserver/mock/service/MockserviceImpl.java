@@ -132,11 +132,11 @@ public class MockserviceImpl {
 			HttpConditionRule conditionRulesOnMockRule = httpConditionRuleServiceImpl
 					.getHttpConditionRulesByHttpMockRuleId(matchedMockRule.getId());
 
-			if (conditionRulesOnMockRule != null) {
+			if (conditionRulesOnMockRule != null
+					&& (conditionRule = getMatchedConditionRule(conditionRulesOnMockRule.getConditionRules(),
+							requestUri, requestMethod, requestQueryString, requestHeaders, requestBody)) != null) {
 
 				// 如果存在条件规则，则直接看是否命中某一条规则
-				conditionRule = getMatchedConditionRule(conditionRulesOnMockRule.getConditionRules(), requestUri,
-						requestMethod, requestQueryString, requestHeaders, requestBody);
 
 				HttpMockWorkMode workMode = conditionRule.getWorkMode();
 
@@ -149,10 +149,10 @@ public class MockserviceImpl {
 				} else {
 					// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
 					return MockResponse.builder()
-							.responseBody(__interpreterResponse(matchedMockRule.getMockResponse(), requestHeaders,
+							.responseBody(__interpreterResponse(conditionRule.getMockResponse(), requestHeaders,
 									requestQueryString, requestBody, false))
 							.mockRule(matchedMockRule).isMock(true).isUpstream(false)
-							.headers(matchedMockRule.getResponseHeaders()).build();
+							.headers(conditionRule.getResponseHeaders()).build();
 				}
 
 			}

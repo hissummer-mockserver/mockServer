@@ -47,10 +47,9 @@ public class CheckLoginInterceptor implements HandlerInterceptor {
 
 		if (!loginCheck[0]) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-			response.addHeader("Access-Control-Allow-Credentials", "true");
-			response.addHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
 		}
-
+		response.addHeader("Access-Control-Allow-Credentials", "true");
+		response.addHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
 		return loginCheck[0];
 	}
 
