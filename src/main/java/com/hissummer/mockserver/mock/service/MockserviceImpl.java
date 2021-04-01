@@ -149,7 +149,7 @@ public class MockserviceImpl {
 				} else {
 					// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
 					return MockResponse.builder()
-							.responseBody(__interpreterResponse(conditionRule.getMockResponse(), requestHeaders,
+							.responseBody(__interpreterResponse(conditionRule.getMockResponse(), requestHeaders,requestUri,
 									requestQueryString, requestBody, false))
 							.mockRule(matchedMockRule).isMock(true).isUpstream(false)
 							.headers(conditionRule.getResponseHeaders()).build();
@@ -171,7 +171,7 @@ public class MockserviceImpl {
 					// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
 					return MockResponse.builder()
 							.responseBody(__interpreterResponse(matchedMockRule.getMockResponse(), requestHeaders,
-									requestQueryString, requestBody, false))
+									requestUri,requestQueryString, requestBody, false))
 							.mockRule(matchedMockRule).isMock(true).isUpstream(false)
 							.headers(matchedMockRule.getResponseHeaders()).build();
 				}
@@ -199,7 +199,7 @@ public class MockserviceImpl {
 
 			});
 
-			String result = __interpreterResponse(conditionsResult[0], requestHeaders, requestQueryString, requestBody,
+			String result = __interpreterResponse(conditionsResult[0], requestHeaders,requestUri, requestQueryString, requestBody,
 					true);
 
 			if (result.equals("true")) {
@@ -212,7 +212,7 @@ public class MockserviceImpl {
 	}
 
 	private String __interpreterResponse(String originalMockResponse, Map<String, String> requestHeders,
-			String requestQueryString, byte[] requestBody, boolean forceUseGroovyHandler) {
+			String requestUri,String requestQueryString, byte[] requestBody, boolean forceUseGroovyHandler) {
 
 		// multipart 暂不支持requestBody的解析，multipart的请求报文待确认后支持
 		if (requestHeders.get("content-type") == null || requestHeders.get("content-type").contains("multipart")) {
@@ -236,7 +236,7 @@ public class MockserviceImpl {
 		}
 		String mockResponse = originalMockResponse;
 		for (MockResponseSetUpConverterInterface mockResponseConverter : mockResponseConverters) {
-			mockResponse = mockResponseConverter.converter(mockResponse, requestHeders, requestQueryStringMap,
+			mockResponse = mockResponseConverter.converter(mockResponse, requestHeders, requestUri, requestQueryStringMap,
 					requestBody);
 		}
 
@@ -484,7 +484,7 @@ public class MockserviceImpl {
 
 			// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
 			return MockResponse.builder()
-					.responseBody(__interpreterResponse(mockRule.getMockResponse(), Collections.emptyMap(), null, null,
+					.responseBody(__interpreterResponse(mockRule.getMockResponse(), Collections.emptyMap(), null,null, null,
 							false))
 					.isMock(true).isUpstream(false).headers(mockRule.getResponseHeaders()).build().getResponseBody();
 		} else {

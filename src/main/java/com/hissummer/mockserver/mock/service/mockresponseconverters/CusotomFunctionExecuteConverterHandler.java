@@ -21,10 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUpConverterInterface {
 
 	@Autowired
-	ApplicationContext context;
+	private ApplicationContext context;
 
 	@Override
-	public String converter(String originalResponse, Map<String, String> requestHeders,
+	public String converter(String originalResponse, Map<String, String> requestHeders,String requestUri,
 			Map<String, String> requestQueryString, byte[] requestBody) {
 
 		String pattern = "\\$\\{__([a-zA-Z0-9]*)\\((.*?)\\)\\}";

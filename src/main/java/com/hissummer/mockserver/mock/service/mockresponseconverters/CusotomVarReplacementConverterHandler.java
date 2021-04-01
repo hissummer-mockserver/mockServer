@@ -31,7 +31,7 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 	ApplicationContext context;
 
 	@Override
-	public String converter(String originalResponse, Map<String, String> requestHeaders,
+	public String converter(String originalResponse, Map<String, String> requestHeaders, String requestUri,
 			Map<String, String> requestQueryString, byte[] requestBody) {
 
 		String pattern = "\\$\\{([^_]{1}.*?)\\}";
@@ -77,7 +77,10 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 					// requestHeader.$."headerKey"
 					// m.group(1).substring(15) get the "headerkey" used to get header value.
 					replaceString = getReplaceStringFromQueryString(m.group(1).substring(21), requestQueryString);
+				} else if (m.group(1).startsWith("requestUri.")) {
+					replaceString = getReplaceStringFromRequestUri(m.group(1).substring(11 + 2), requestUri);
 				}
+
 				if (replaceString != null) {
 					offposition = offposition + replaceString.length() - m.group(0).length();
 					originalResponse = originalResponse.substring(0, newStart) + replaceString
@@ -91,6 +94,22 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 		}
 
 		return originalResponse;
+	}
+
+	private String getReplaceStringFromRequestUri(String extractPath, String requestUri) {
+
+		if (requestUri.startsWith("/")) {
+			requestUri = requestUri.substring(1);
+		}
+		String returnValue = "undefined";
+		try {
+			int index = Integer.parseInt(extractPath);
+			returnValue = requestUri.split("/")[index-1];
+
+		} catch (Exception e) {
+			log.warn("exception in replace string from queryuri");
+		}
+		return returnValue;
 	}
 
 	private String getReplaceStringFromQueryString(String extractPath, Map<String, String> requestQueryString) {
@@ -209,6 +228,8 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 	}
 
 	public static void main(String args[]) {
+
+		System.out.println("/a/b/c".split("/").toString());
 
 		JSONObject a = new JSONObject();
 		a.put("test", "value");
