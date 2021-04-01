@@ -1,5 +1,6 @@
 package com.hissummer.mockserver.mgmt.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -132,5 +133,18 @@ public class HttpConditionRuleServiceImpl {
 
 		} else
 			return null;
+	}
+
+	public void resort(HttpConditionRule localTempConditionRule) {
+
+		int[] order= {1};
+		
+		localTempConditionRule.getConditionRules().stream().sorted(Comparator.comparing(HttpCondition::getOrderId)).forEach(conditionRule->{
+						
+			conditionRule.setOrderId(order[0]++);
+			
+			
+		});
+		
 	}
 }
