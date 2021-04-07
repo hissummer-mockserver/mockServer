@@ -41,7 +41,13 @@ public class GroovyScriptsHandler implements ScriptsConverterInterface {
 		}
 
 		engine.put("response", originalResponse);
-		engine.put("requestBody", requestBody);
+		if (requestHeders.containsKey("content-type")
+				&& (requestHeders.get("content-type").contains("application/x-www-form-urlencoded")
+						|| requestHeders.get("content-type").contains("application/json"))) {
+			engine.put("requestBody", requestBody);
+		} else {
+			engine.put("requestBody", null);
+		}
 		engine.put("requestHeaders", requestHeders);
 		try {
 			engine.eval(originalResponse);

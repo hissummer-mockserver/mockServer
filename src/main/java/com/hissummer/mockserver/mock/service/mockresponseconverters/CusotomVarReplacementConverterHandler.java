@@ -104,7 +104,7 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 		String returnValue = "undefined";
 		try {
 			int index = Integer.parseInt(extractPath);
-			returnValue = requestUri.split("/")[index-1];
+			returnValue = requestUri.split("/")[index - 1];
 
 		} catch (Exception e) {
 			log.warn("exception in replace string from queryuri");
@@ -148,6 +148,10 @@ public class CusotomVarReplacementConverterHandler implements MockResponseSetUpC
 
 	private String getReplaceStringFromBody(String extractPath, Map<String, String> requestHeaders,
 			byte[] requestBody) {
+
+		if (requestBody == null)
+			return "undefined";
+
 		log.debug("get from body:{} ", extractPath);
 
 		if (contentTypeContains(requestHeaders, "application/x-www-form-urlencoded")) {

@@ -137,14 +137,14 @@ public class HttpConditionRuleServiceImpl {
 
 	public void resort(HttpConditionRule localTempConditionRule) {
 
-		int[] order= {1};
-		
-		localTempConditionRule.getConditionRules().stream().sorted(Comparator.comparing(HttpCondition::getOrderId)).forEach(conditionRule->{
-						
-			conditionRule.setOrderId(order[0]++);
-			
-			
-		});
-		
+		int[] order = { 1 };
+
+		localTempConditionRule.getConditionRules().stream().sorted(Comparator.comparing(HttpCondition::getOrderId))
+				.forEach(conditionRule -> {
+
+					conditionRule.setOrderId(order[0]++);
+
+				});
+
 	}
 }
