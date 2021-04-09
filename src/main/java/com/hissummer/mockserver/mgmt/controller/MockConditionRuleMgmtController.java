@@ -53,7 +53,7 @@ public class MockConditionRuleMgmtController {
 							.build();
 				else {
 					localTempConditionRule = httpConditionRuleServiceImpl.getHttpConditionRulesById(id);
-					localTempConditionRule.getConditionRules().set(indexid, conditionRule);
+					localTempConditionRule.getConditionRules().set(indexid-1, conditionRule);
 					operationResult = httpConditionRuleServiceImpl.updateHttpConditionRule(localTempConditionRule);
 				}
 				break;
