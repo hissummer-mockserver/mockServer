@@ -10,7 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.hissummer.mockserver.mock.service.mockresponseconverters.converterinterface.MockResponseSetUpConverterInterface;
+import com.hissummer.mockserver.mock.service.mockresponseconverters.converterinterface.TextConverterSetUpInterface;
 import com.hissummer.mockserver.mock.service.mockresponseconverters.customfunction.CustomFunctionInterface;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Order(value = 2)
 @Slf4j
-public class CusotomFunctionExecuteConverterHandler implements MockResponseSetUpConverterInterface {
+public class CusotomFunctionExecuteConverterHandler implements TextConverterSetUpInterface {
 
 	@Autowired
 	private ApplicationContext context;

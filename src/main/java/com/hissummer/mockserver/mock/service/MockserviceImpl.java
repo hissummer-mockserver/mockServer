@@ -25,7 +25,7 @@ import com.hissummer.mockserver.mgmt.pojo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mgmt.service.HttpConditionRuleServiceImpl;
 import com.hissummer.mockserver.mock.service.jpa.MockRuleMongoRepository;
 import com.hissummer.mockserver.mock.service.mockresponseconverters.GroovyScriptsHandler;
-import com.hissummer.mockserver.mock.service.mockresponseconverters.converterinterface.MockResponseSetUpConverterInterface;
+import com.hissummer.mockserver.mock.service.mockresponseconverters.converterinterface.TextConverterSetUpInterface;
 import com.hissummer.mockserver.mock.service.mockresponseconverters.converterinterface.MockResponseTearDownConverterInterface;
 import com.hissummer.mockserver.mock.vo.MockResponse;
 
@@ -51,9 +51,9 @@ import okhttp3.Response;
 public class MockserviceImpl {
 
 	@Autowired
-	List<MockResponseSetUpConverterInterface> mockResponseConverters;
+	List<TextConverterSetUpInterface> setUpConverters;
 	@Autowired
-	List<MockResponseTearDownConverterInterface> mockResponseTearDownConverters;
+	List<MockResponseTearDownConverterInterface> tearDownConverters;
 	@Autowired
 	MockRuleMongoRepository mockRuleRepository;
 
@@ -80,25 +80,6 @@ public class MockserviceImpl {
 		return response.getResponseBody();
 	}
 
-	public MockResponse getResponse(Map<String, String> requestHeaders, String requestHostname, String requestMethod,
-			String requestUri, String requestQueryString, byte[] requestBody) {
-
-		MockResponse response = __getResponse(requestHeaders, requestHostname, requestMethod, requestUri,
-				requestQueryString, requestBody);
-
-		if (response != null) {
-
-			return response;
-		} else {
-
-			String nomatchresponse = JSON
-					.toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(true).message(NOMATCHED).build());
-
-			return MockResponse.builder().responseBody(nomatchresponse)
-					.mockRule(HttpMockRule.builder().uri("null").host("*").build()).build();
-		}
-	}
-
 	/**
 	 * 根据hostName和请求Url地址，获取到Mock报文的具体实现
 	 * 
@@ -106,21 +87,26 @@ public class MockserviceImpl {
 	 * @param requestUri
 	 * @return
 	 */
-	private MockResponse __getResponse(Map<String, String> requestHeaders, String requestHostName, String requestMethod,
+	public MockResponse getResponse(Map<String, String> requestHeaders, String requestHostName, String requestMethod,
 			String requestUri, String requestQueryString, byte[] requestBody) {
 
+		MockResponse returnResponse = null;
 		String host = requestHostName;
-		requestHeaders.get("Host");
+		if (!host.equals(requestHeaders.get("Host"))) {
+			log.warn("requestHostName = {}, header Host value={} not equal", requestHostName,
+					requestHeaders.get("Host"));
+		}
 
 		// 如果Host是ip地址,则查找mock规则时,则hostName是未定义,只根据uri进行查找匹配规则.
+		// TODO 需要支持ipv6
 		if (__isIpv4(host)) {
 			host = "*";
 		}
 		// 第一次匹配规则
 		HttpMockRule matchedMockRule = __getMatchedMockRulesByHostnameAndUrl(host, requestUri);
 		HttpCondition conditionRule = null;
-		// 如果第一次查找时,Host是域名,且没有找到对应的规则,则会重新假设Host为*时,重新再查找一次.
-		if (matchedMockRule == null && host != null && !host.equals("*")) {
+		// 如果第一次查找时,Host是域名,没有找到对应的规则,则会重新假设Host为*时,重新再查找一次.
+		if (matchedMockRule == null && !host.equals("*")) {
 			host = "*";
 			// 如果第一次host不为null时没有查到匹配规则,则重新将host设置为null,重新查找一次规则.
 			matchedMockRule = __getMatchedMockRulesByHostnameAndUrl(host, requestUri);
@@ -139,20 +125,29 @@ public class MockserviceImpl {
 				// 如果存在条件规则，则直接看是否命中某一条规则
 
 				HttpMockWorkMode workMode = conditionRule.getWorkMode();
-
-				if (workMode != null && workMode.equals(HttpMockWorkMode.UPSTREAM)) {
-
+				if (workMode == null)
+					workMode = HttpMockWorkMode.MOCK;
+				switch (workMode) {
+				case UPSTREAM:
 					// mock rule 的工作模式为upstream模式. 后期将upstream作为hostname的rule单独管理，这里的代码将会移除！
-					return __getUpstreamResponse(matchedMockRule, conditionRule, requestHeaders, requestMethod,
-							requestUri + "?" + requestQueryString, requestBody);
+					returnResponse = getUpstreamResponse(matchedMockRule, conditionRule, requestHeaders,
+							requestMethod, requestUri + "?" + requestQueryString, requestBody);
+					break;
 
-				} else {
+				case MOCK:
 					// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
-					return MockResponse.builder()
-							.responseBody(__interpreterResponse(conditionRule.getMockResponse(), requestHeaders,
-									requestUri, requestQueryString, requestBody, false))
+					returnResponse = MockResponse.builder()
+							.responseBody(interpreter(conditionRule.getMockResponse(), requestHeaders, requestUri,
+									requestQueryString, requestBody, false))
 							.mockRule(matchedMockRule).isMock(true).isUpstream(false)
 							.headers(conditionRule.getResponseHeaders()).build();
+					break;
+
+				case INTERNAL_FORWARD:
+					break;
+				default:
+					break;
+
 				}
 
 			}
@@ -160,26 +155,42 @@ public class MockserviceImpl {
 			else {
 				// 没有找到条件规则，则走默认的mock规则。
 				HttpMockWorkMode workMode = matchedMockRule.getWorkMode();
-
-				if (workMode != null && workMode.equals(HttpMockWorkMode.UPSTREAM)) {
-
+				if (workMode == null)
+					workMode = HttpMockWorkMode.MOCK;
+				switch (workMode) {
+				case UPSTREAM:
 					// mock rule 的工作模式为upstream模式. 后期将upstream作为hostname的rule单独管理，这里的代码将会移除！
-					return __getUpstreamResponse(matchedMockRule, null, requestHeaders, requestMethod,
+					returnResponse = getUpstreamResponse(matchedMockRule, null, requestHeaders, requestMethod,
 							requestUri + "?" + requestQueryString, requestBody);
+					break;
 
-				} else {
+				case MOCK:
 					// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
-					return MockResponse.builder()
-							.responseBody(__interpreterResponse(matchedMockRule.getMockResponse(), requestHeaders,
-									requestUri, requestQueryString, requestBody, false))
+					returnResponse = MockResponse.builder()
+							.responseBody(interpreter(matchedMockRule.getMockResponse(), requestHeaders, requestUri,
+									requestQueryString, requestBody, false))
 							.mockRule(matchedMockRule).isMock(true).isUpstream(false)
 							.headers(matchedMockRule.getResponseHeaders()).build();
+					break;
+
+				case INTERNAL_FORWARD:
+					break;
+				default:
+					break;
 				}
 			}
 		} else {
-			// 如果没有找到mock规则，则直接返回空null
-			return null;
+			// 什么也不需要做，返回默认的规则
 		}
+
+		if (returnResponse == null) {
+			String nomatchresponse = JSON
+					.toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(true).message(NOMATCHED).build());
+			returnResponse = MockResponse.builder().responseBody(nomatchresponse)
+					.mockRule(HttpMockRule.builder().uri("null").host("*").build()).build();
+		}
+
+		return returnResponse;
 	}
 
 	private HttpCondition getMatchedConditionRule(List<HttpCondition> conditionRules, String requestUri,
@@ -199,7 +210,7 @@ public class MockserviceImpl {
 
 			});
 
-			String result = __interpreterResponse(conditionsResult[0], requestHeaders, requestUri, requestQueryString,
+			String result = interpreter(conditionsResult[0], requestHeaders, requestUri, requestQueryString,
 					requestBody, true);
 
 			if (result.equals("true")) {
@@ -211,13 +222,24 @@ public class MockserviceImpl {
 
 	}
 
-	private String __interpreterResponse(String originalMockResponse, Map<String, String> requestHeders,
-			String requestUri, String requestQueryString, byte[] requestBody, boolean forceUseGroovyHandler) {
+	/**
+	 * 解析文本文件
+	 * 
+	 * @param toBeInterpreteredText 待解析处理的文本
+	 * @param requestHeders         请求头
+	 * @param requestUri            请求Uri
+	 * @param requestQueryString    请求查询字符串
+	 * @param requestBody           请求体
+	 * @param forceUseGroovyHandler 是否强制使用groovy脚本执行
+	 * @return
+	 */
+	private String interpreter(String toBeInterpreteredText, Map<String, String> requestHeders, String requestUri,
+			String requestQueryString, byte[] requestBody, boolean forceUseGroovyHandler) {
 
 		// multipart 暂不支持requestBody的解析，multipart的请求报文待确认后支持
-		if (requestHeders.get("content-type") == null || requestHeders.get("content-type").contains("multipart")) {
-			// requestBody = "";
-		}
+//		if (requestHeders.get("content-type") == null || requestHeders.get("content-type").contains("multipart")) {
+//			// requestBody = "";
+//		}
 		Map<String, String> requestQueryStringMap = new HashMap<>();
 
 		if (requestQueryString != null && !requestQueryString.equals("null")) {
@@ -234,26 +256,29 @@ public class MockserviceImpl {
 
 			}
 		}
-		String mockResponse = originalMockResponse;
-		for (MockResponseSetUpConverterInterface mockResponseConverter : mockResponseConverters) {
-			mockResponse = mockResponseConverter.converter(mockResponse, requestHeders, requestUri,
+		String afterInterpreteredText = toBeInterpreteredText;
+		for (TextConverterSetUpInterface converter : setUpConverters) {
+			// 内部变量替换
+			afterInterpreteredText = converter.converter(afterInterpreteredText, requestHeders, requestUri,
 					requestQueryStringMap, requestBody);
 		}
 
-		if (originalMockResponse.startsWith("//groovy") || forceUseGroovyHandler) {
-			mockResponse = groovyScriptsHandler.converter(mockResponse, requestHeders, requestQueryStringMap,
-					requestBody);
+		if (toBeInterpreteredText.startsWith("//groovy") || forceUseGroovyHandler) {
+			// groovy的脚本执行
+			afterInterpreteredText = groovyScriptsHandler.converter(afterInterpreteredText, requestHeders,
+					requestQueryStringMap, requestBody);
 		}
 
-		for (MockResponseTearDownConverterInterface mockResponseConverter : mockResponseTearDownConverters) {
-			mockResponse = mockResponseConverter.converter(mockResponse, requestHeders, requestQueryStringMap,
-					requestBody);
+		for (MockResponseTearDownConverterInterface converter : tearDownConverters) {
+			// 输出的格式化
+			afterInterpreteredText = converter.converter(afterInterpreteredText, requestHeders,
+					requestQueryStringMap, requestBody);
 		}
 
-		return mockResponse;
+		return afterInterpreteredText;
 	}
 
-	private MockResponse __getUpstreamResponse(HttpMockRule matchedMockRule, HttpCondition condition,
+	private MockResponse getUpstreamResponse(HttpMockRule matchedMockRule, HttpCondition condition,
 			Map<String, String> requestHeaders, String requestMethod, String requestUri, byte[] requestBody) {
 		// 获取到匹配的结果
 		String upstreamAddress = "mockserver.hissummer.com";
@@ -279,7 +304,7 @@ public class MockserviceImpl {
 
 		upstreamUri = getActualRequestUpstreamUri(matchedMockRule.getUri(), requestUri, upstreamUri);
 
-		MockResponse upstreamResponse = __getUpstreamResponse(protocol, requestHeaders, upstreamAddress, requestMethod,
+		MockResponse upstreamResponse = requestToUpstream(protocol, requestHeaders, upstreamAddress, requestMethod,
 				upstreamUri, requestBody);
 
 		upstreamResponse.setMockRule(matchedMockRule);
@@ -328,7 +353,7 @@ public class MockserviceImpl {
 
 	}
 
-	private MockResponse __getUpstreamResponse(String protocol, Map<String, String> requestHeaders,
+	private MockResponse requestToUpstream(String protocol, Map<String, String> requestHeaders,
 			String upstreamAddress, String requestMethod, String requestUri, byte[] requestBody) {
 
 		Headers.Builder headerBuilder = new Headers.Builder();
@@ -354,8 +379,7 @@ public class MockserviceImpl {
 		try {
 			Response response = call.execute();
 			log.debug("upstream response:{} | {} | {}", JSON.toJSONString(response.code()),
-					JSON.toJSONString(response.headers()), JSON.toJSONString(response.body()));
-
+					JSON.toJSONString(response.headers()), JSON.toJSONString(response.body()));		
 			JSONObject responseJson = new JSONObject();
 			Map<String, String> upstreamResponseHeaders = new HashMap<>();
 			if (response.isSuccessful()) {
@@ -484,8 +508,8 @@ public class MockserviceImpl {
 
 			// mock rule 的工作模式为mock模式，mock模式直接返回mock的报文即可
 			return MockResponse.builder()
-					.responseBody(__interpreterResponse(mockRule.getMockResponse(), Collections.emptyMap(), null, null,
-							null, false))
+					.responseBody(
+							interpreter(mockRule.getMockResponse(), Collections.emptyMap(), null, null, null, false))
 					.isMock(true).isUpstream(false).headers(mockRule.getResponseHeaders()).build().getResponseBody();
 		} else {
 			return "upstream mode not support test, please directly access the upstream address.";
