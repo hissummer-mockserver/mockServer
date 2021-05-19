@@ -37,7 +37,7 @@ public class MockserviceTest extends SpringBootTestBase {
 		fail("Not yet implemented");
 	}
 
-	@Test
+	//@Test
 	public void test__getMatchedMockRulesByUrl() throws NoSuchMethodException, SecurityException,
 			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
@@ -54,14 +54,14 @@ public class MockserviceTest extends SpringBootTestBase {
 
 	}
 
-	@Test
+	//@Test
 	public void testAddMockRule() {
 
 		mockservice.addMockRule(null, "/haha", "{\"mockResponse\":\"this is the haha mock Response!\"}", null, null);
 
 	}
 
-	@Test
+	//@Test
 	public void testAddMockRule2() {
 
 		// log.info(JSON.toJSONString(mockservice2.findByHost("*", PageRequest.of(0,

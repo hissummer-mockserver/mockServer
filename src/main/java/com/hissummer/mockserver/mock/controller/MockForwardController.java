@@ -190,7 +190,7 @@ public class MockForwardController implements ErrorController {
 
 	private boolean checkUTF8(byte[] barr) {
 
-		CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder();
+		CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
 		ByteBuffer buf = ByteBuffer.wrap(barr);
 
 		try {

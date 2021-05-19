@@ -93,27 +93,17 @@ public class MockserviceImpl {
 		MockResponse returnResponse = null;
 		String host = requestHostName;
 		if (!host.equals(requestHeaders.get("Host"))) {
+			
+			// TODO  transparent proxy mode ?
 			log.warn("requestHostName = {}, header Host value={} not equal", requestHostName,
 					requestHeaders.get("Host"));
 		}
 
-		// 如果Host是ip地址,则查找mock规则时,则hostName是未定义,只根据uri进行查找匹配规则.
-		// TODO 需要支持ipv6
-		if (__isIpv4(host)) {
-			host = "*";
-		}
 		// 第一次匹配规则
-		HttpMockRule matchedMockRule = __getMatchedMockRulesByHostnameAndUrl(host, requestUri);
+		HttpMockRule matchedMockRule = getMatchedMockRulesByHostnameAndUrl(host, requestUri);
 		HttpCondition conditionRule = null;
-		// 如果第一次查找时,Host是域名,没有找到对应的规则,则会重新假设Host为*时,重新再查找一次.
-		if (matchedMockRule == null && !host.equals("*")) {
-			host = "*";
-			// 如果第一次host不为null时没有查到匹配规则,则重新将host设置为null,重新查找一次规则.
-			matchedMockRule = __getMatchedMockRulesByHostnameAndUrl(host, requestUri);
-		}
 
 		if (matchedMockRule != null) {
-
 			// 如果找到了匹配的mock规则，然后查找是否有命中的条件规则。
 			HttpConditionRule conditionRulesOnMockRule = httpConditionRuleServiceImpl
 					.getHttpConditionRulesByHttpMockRuleId(matchedMockRule.getId());
@@ -123,15 +113,14 @@ public class MockserviceImpl {
 							requestUri, requestMethod, requestQueryString, requestHeaders, requestBody)) != null) {
 
 				// 如果存在条件规则，则直接看是否命中某一条规则
-
 				HttpMockWorkMode workMode = conditionRule.getWorkMode();
 				if (workMode == null)
 					workMode = HttpMockWorkMode.MOCK;
 				switch (workMode) {
 				case UPSTREAM:
 					// mock rule 的工作模式为upstream模式. 后期将upstream作为hostname的rule单独管理，这里的代码将会移除！
-					returnResponse = getUpstreamResponse(matchedMockRule, conditionRule, requestHeaders,
-							requestMethod, requestUri + "?" + requestQueryString, requestBody);
+					returnResponse = getUpstreamResponse(matchedMockRule, conditionRule, requestHeaders, requestMethod,
+							requestUri + "?" + requestQueryString, requestBody);
 					break;
 
 				case MOCK:
@@ -144,6 +133,9 @@ public class MockserviceImpl {
 					break;
 
 				case INTERNAL_FORWARD:
+						// 修改requestUri 然后内部转发(forward)到getResponse重新获取新的匹配规则
+					String forwardedUri =  getActualRequestUpstreamUri( requestUri,matchedMockRule.getUri(), conditionRule.getUpstreams().getNodes().iterator().next().getUri());
+					returnResponse = 	this.getResponse(requestHeaders, requestHostName, requestMethod, forwardedUri, requestQueryString, requestBody);
 					break;
 				default:
 					break;
@@ -153,6 +145,7 @@ public class MockserviceImpl {
 			}
 
 			else {
+
 				// 没有找到条件规则，则走默认的mock规则。
 				HttpMockWorkMode workMode = matchedMockRule.getWorkMode();
 				if (workMode == null)
@@ -174,14 +167,16 @@ public class MockserviceImpl {
 					break;
 
 				case INTERNAL_FORWARD:
-					break;
+					// 修改requestUri 然后内部转发(forward)到getResponse重新获取新的匹配规则
+				String forwardedUri =  getActualRequestUpstreamUri( requestUri, matchedMockRule.getUri(),matchedMockRule.getUpstreams().getNodes().get(0).getUri());
+
+				returnResponse =  this.getResponse(requestHeaders, requestHostName, requestMethod, forwardedUri, requestQueryString, requestBody);
+				break;					
 				default:
 					break;
 				}
 			}
-		} else {
-			// 什么也不需要做，返回默认的规则
-		}
+		} 
 
 		if (returnResponse == null) {
 			String nomatchresponse = JSON
@@ -271,8 +266,8 @@ public class MockserviceImpl {
 
 		for (MockResponseTearDownConverterInterface converter : tearDownConverters) {
 			// 输出的格式化
-			afterInterpreteredText = converter.converter(afterInterpreteredText, requestHeders,
-					requestQueryStringMap, requestBody);
+			afterInterpreteredText = converter.converter(afterInterpreteredText, requestHeders, requestQueryStringMap,
+					requestBody);
 		}
 
 		return afterInterpreteredText;
@@ -302,7 +297,7 @@ public class MockserviceImpl {
 					matchedMockRule.getUpstreams());
 		}
 
-		upstreamUri = getActualRequestUpstreamUri(matchedMockRule.getUri(), requestUri, upstreamUri);
+		upstreamUri = getActualRequestUpstreamUri( requestUri,matchedMockRule.getUri(), upstreamUri);
 
 		MockResponse upstreamResponse = requestToUpstream(protocol, requestHeaders, upstreamAddress, requestMethod,
 				upstreamUri, requestBody);
@@ -313,16 +308,41 @@ public class MockserviceImpl {
 	}
 
 	/**
+	 * 获取最后真实要转发或者请求upstream的uri。
+	 * 
+	 * 例子1：
+	 * 本次实际请求的requestUri = /test/mytest
+	 * 本次命中的规则mockRuleUri = /test
+	 * 本次命中的规则请求上游服务的upstreamUri = /test
+	 * 则返回的实际要请求upstream的uri为  /test/mytest
+	 * 
+	 * 例子2：
+	 * 本次实际请求的requestUri = /test/mytest
+	 * 本次命中的规则mockRuleUri = /test
+	 * 本次命中的规则请求上游服务的upstreamUri = /
+	 * 则返回的实际要请求upstream的uri为  /mytest
+	 * 
+	 * 例子3：
+	 * 本次实际请求的requestUri = /test/mytest
+	 * 本次命中的规则mockRuleUri = /
+	 * 本次命中的规则请求上游服务的upstreamUri = /
+	 * 则返回的实际要请求upstream的uri为  /test/mytest
+	 * 
+	 * 例子4：
+	 * 本次实际请求的requestUri = /test/mytest
+	 * 本次命中的规则mockRuleUri = /
+	 * 本次命中的规则请求上游服务的upstreamUri = /upstream
+	 * 则返回的实际要请求upstream的uri为  /upstream/test/mytest	 
 	 * 
 	 * 
-	 * {"upstreams":[{protocol:"",addrress:"",uri:""},{}]}
-	 * http://mockserver/request1/ ->
-	 * 
-	 * @param requestUri
-	 * @param upstreamUri
+	 * @param mockRuleUri 匹配到的mock规则 uri
+	 * @param requestUri  本次请求的uri
+	 * @param upstreamUri 上游的uri
 	 * @return
+	 * 
+	 * 
 	 */
-	private String getActualRequestUpstreamUri(String mockRuleUri, String requestUri, String upstreamUri) {
+	private String getActualRequestUpstreamUri( String requestUri, String mockRuleUri,String upstreamUri) {
 
 		String handledRequestUri = requestUri;
 		String handledUpstreamUri = upstreamUri;
@@ -353,8 +373,8 @@ public class MockserviceImpl {
 
 	}
 
-	private MockResponse requestToUpstream(String protocol, Map<String, String> requestHeaders,
-			String upstreamAddress, String requestMethod, String requestUri, byte[] requestBody) {
+	private MockResponse requestToUpstream(String protocol, Map<String, String> requestHeaders, String upstreamAddress,
+			String requestMethod, String requestUri, byte[] requestBody) {
 
 		Headers.Builder headerBuilder = new Headers.Builder();
 
@@ -379,7 +399,7 @@ public class MockserviceImpl {
 		try {
 			Response response = call.execute();
 			log.debug("upstream response:{} | {} | {}", JSON.toJSONString(response.code()),
-					JSON.toJSONString(response.headers()), JSON.toJSONString(response.body()));		
+					JSON.toJSONString(response.headers()), JSON.toJSONString(response.body()));
 			JSONObject responseJson = new JSONObject();
 			Map<String, String> upstreamResponseHeaders = new HashMap<>();
 			if (response.isSuccessful()) {
@@ -461,8 +481,13 @@ public class MockserviceImpl {
 	 * 
 	 * 
 	 */
-	private HttpMockRule __getMatchedMockRulesByHostnameAndUrl(String hostName, String requestUri) {
-
+	private HttpMockRule getMatchedMockRulesByHostnameAndUrl(String hostName, String requestUri) {
+		// 如果Host是ip地址,则查找mock规则时,则hostName是未定义,只根据uri进行查找匹配规则.
+		// TODO 需要支持ipv6
+		if (__isIpv4(hostName)) {
+			hostName = "*";
+		}
+		
 		String requestUriFormat = requestUri;
 		if (requestUri != null && requestUri.length() > 0 && requestUri.charAt(requestUri.length() - 1) == '/') {
 			requestUriFormat = requestUri.substring(0, requestUri.length() - 1);
@@ -497,7 +522,16 @@ public class MockserviceImpl {
 			if (matchedMockRule != null)
 				return matchedMockRule;
 		}
-		return null;
+
+		// 如果第一次查找时,Host是域名,没有找到对应的规则,则会重新假设Host为*时,重新再查找一次.
+		if (!hostName.equals("*")) {
+			hostName = "*";
+			// 如果第一次host不为null时没有查到匹配规则,则重新将host设置为null,重新查找一次规则.
+			return getMatchedMockRulesByHostnameAndUrl(hostName, requestUri);
+		} else {
+
+			return null;
+		}
 	}
 
 	public String testRule(HttpMockRule mockRule) {
