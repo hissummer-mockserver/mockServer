@@ -33,7 +33,7 @@ public class StartTaskTimer {
 		Timer timer = new Timer(true);
 		// timer.schedule(taskMonitorTimerTask, calendar.getTime(),
 		// TimeUnit.MINUTES.toMillis(5));
-		timer.schedule(taskMonitorTimerTask, calendar.getTime(), TimeUnit.HOURS.toMillis(24));
+		timer.schedule(taskMonitorTimerTask, calendar.getTime());
 
 	}
 }

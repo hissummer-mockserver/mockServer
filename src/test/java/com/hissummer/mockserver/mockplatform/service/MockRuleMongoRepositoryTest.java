@@ -11,7 +11,7 @@ import com.hissummer.mockserver.RemoveOldRequestLogsTask;
 import com.hissummer.mockserver.mgmt.entity.HttpMockRule;
 import com.hissummer.mockserver.mgmt.service.jpa.HttpMockRuleMongoRepository;
 
-@Ignore
+
 public class MockRuleMongoRepositoryTest extends SpringBootTestBase {
 
 	@Autowired
