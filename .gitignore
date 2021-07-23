@@ -1,4 +1,5 @@
 catalina.base_IS_UNDEFINED/
+LOGBASE_IS_UNDEFINED/
 target/
 src/main/webapp/templates/*
 src/main/resources/static/*
