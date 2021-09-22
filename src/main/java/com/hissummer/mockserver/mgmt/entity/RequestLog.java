@@ -3,14 +3,19 @@ package com.hissummer.mockserver.mgmt.entity;
 import java.util.Date;
 import java.util.Map;
 
+import lombok.AllArgsConstructor;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Document(collection = "requestlogs")
+@AllArgsConstructor
 @Builder
+@NoArgsConstructor
 public class RequestLog {
 
 	private String id;
@@ -33,6 +38,7 @@ public class RequestLog {
 	private Map<String, String> upstreamRequestHeaders;
 	private String upstreamRequestBody;
 
+	@Indexed(name="createTime", expireAfterSeconds=86400)
 	private Date createTime;
 	@Builder.Default
 	private boolean isMock = true;
