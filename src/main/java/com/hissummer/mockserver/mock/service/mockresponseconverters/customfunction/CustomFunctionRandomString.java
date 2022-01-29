@@ -1,12 +1,13 @@
 package com.hissummer.mockserver.mock.service.mockresponseconverters.customfunction;
 
+import java.security.SecureRandom;
 import java.util.Random;
 
 import org.springframework.stereotype.Component;
 
 @Component("CustomFunctionRandomString")
 public class CustomFunctionRandomString implements CustomFunctionInterface {
-
+	private Random rand = new Random();
 	public String execute(String[] args) {
 
 		if (args.length == 1)
@@ -33,9 +34,8 @@ public class CustomFunctionRandomString implements CustomFunctionInterface {
 
 		String SALTCHARS = charactors;
 		StringBuilder salt = new StringBuilder();
-		Random rnd = new Random();
 		while (salt.length() < length) { // length of the random string.
-			int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+			int index = (int) (this.rand.nextFloat() * SALTCHARS.length());
 			salt.append(SALTCHARS.charAt(index));
 		}
 		String saltStr = salt.toString();
@@ -57,9 +57,8 @@ public class CustomFunctionRandomString implements CustomFunctionInterface {
 
 		String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 		StringBuilder salt = new StringBuilder();
-		Random rnd = new Random();
 		while (salt.length() < length) { // length of the random string.
-			int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+			int index = (int) (this.rand.nextFloat() * SALTCHARS.length());
 			salt.append(SALTCHARS.charAt(index));
 		}
 		String saltStr = salt.toString();

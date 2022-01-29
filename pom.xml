@@ -24,7 +24,7 @@
 			<type>pom</type>
 			<scope>provided</scope>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.springframework/spring-core 
+		<!-- https://mvnrepository.com/artifact/org.springframework/spring-core
 			覆盖 org.springframework.boot 2.0.9 的默认spring-core版本 5.0.13 RELEASE 版本 -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -34,8 +34,10 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-			<version>2.0.4.RELEASE</version>
+			<version>2.1.6.RELEASE</version>
 		</dependency>
+
+
 		<!-- we use embedded activemq broker -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -107,7 +109,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.78</version>
+			<version>1.2.69</version>
 		</dependency>
 
 		<dependency>

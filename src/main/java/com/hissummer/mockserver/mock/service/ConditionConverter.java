@@ -3,13 +3,15 @@ package com.hissummer.mockserver.mock.service;
 import com.hissummer.mockserver.mgmt.pojo.CompareConditionEnum;
 
 /*
- * 	private String toBeCompareValue;
-	private CompareConditionEnum compareCondition;
-	private String conditionValue;
+
  */
 public class ConditionConverter {
 
 	final static private String VALIDINTORFLOAT = "[-+]?[0-9]+\\\\.?[0-9]*";
+
+	private ConditionConverter() {
+		throw new IllegalStateException("Utility class");
+	}
 
 	public static String converToGroovyExpression(String toBeCompareValue, CompareConditionEnum compareCondition,
 			String conditionValue) {

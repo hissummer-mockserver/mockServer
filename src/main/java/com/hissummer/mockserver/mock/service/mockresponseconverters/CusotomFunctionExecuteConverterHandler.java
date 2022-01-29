@@ -117,7 +117,7 @@ public class CusotomFunctionExecuteConverterHandler implements TextConverterSetU
 
 		for (String argument : argumentArray) {
 			log.debug("before resolve argument {}", argument);
-			argument.replace("[comma]", ",");
+			argument=argument.replace("[comma]", ",");
 
 			if ((argument.startsWith("\"") && argument.endsWith("\"")))
 

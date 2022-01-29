@@ -3,6 +3,7 @@ package com.hissummer.mockserver.mock.service.mockresponseconverters;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -233,7 +234,7 @@ public class CusotomVarReplacementConverterHandler implements TextConverterSetUp
 
 	public static void main(String args[]) {
 
-		System.out.println("/a/b/c".split("/").toString());
+		System.out.println(Arrays.toString("/a/b/c".split("/")));
 
 		JSONObject a = new JSONObject();
 		a.put("test", "value");
