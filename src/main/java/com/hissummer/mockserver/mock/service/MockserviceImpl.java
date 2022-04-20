@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.hissummer.mockserver.mgmt.pojo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +19,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.hissummer.mockserver.mgmt.entity.HttpConditionRule;
 import com.hissummer.mockserver.mgmt.entity.HttpMockRule;
-import com.hissummer.mockserver.mgmt.pojo.CompareCondition;
-import com.hissummer.mockserver.mgmt.pojo.HttpCondition;
-import com.hissummer.mockserver.mgmt.pojo.HttpMockWorkMode;
-import com.hissummer.mockserver.mgmt.pojo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mgmt.service.HttpConditionRuleServiceImpl;
 import com.hissummer.mockserver.mock.service.jpa.MockRuleMongoRepository;
 import com.hissummer.mockserver.mock.service.mockresponseconverters.GroovyScriptsHandler;
@@ -83,24 +80,27 @@ public class MockserviceImpl {
 	/**
 	 * 根据hostName和请求Url地址，获取到Mock报文的具体实现
 	 * 
-	 * @param requestHeaders
-	 * @param requestUri
+	 * @param requestHeaders headers
+	 * @param requestHostName Host
+	 * @param requestMethod GET POST DELETE ...
+	 * @param requestQueryString a=b&c=d
+	 * @param requestUri /path/path
+	 * @param requestBody  POST or PUT request body content
 	 * @return
 	 */
 	public MockResponse getResponse(Map<String, String> requestHeaders, String requestHostName, String requestMethod,
 			String requestUri, String requestQueryString, byte[] requestBody) {
 
 		MockResponse returnResponse = null;
-		String host = requestHostName;
-		if (!host.equals(requestHeaders.get("Host"))) {
+		if (!requestHostName.equals(requestHeaders.get("Host"))) {
 			
-			// TODO  transparent proxy mode ?
+			// TODO  transparent proxy mode， 这里其实考虑的逻辑有问题，实际上connect的ip地址和请求的host不一致可能会出现，但通常客户端不会出现不一致 ?
 			log.warn("requestHostName = {}, header Host value={} not equal", requestHostName,
 					requestHeaders.get("Host"));
 		}
 
 		// 第一次匹配规则
-		HttpMockRule matchedMockRule = getMatchedMockRulesByHostnameAndUrl(host, requestUri);
+		HttpMockRule matchedMockRule = getMatchedMockRulesByHostnameAndUrl(requestHostName, requestUri);
 		HttpCondition conditionRule = null;
 
 		if (matchedMockRule != null) {
@@ -134,8 +134,11 @@ public class MockserviceImpl {
 
 				case INTERNAL_FORWARD:
 						// 修改requestUri 然后内部转发(forward)到getResponse重新获取新的匹配规则
-					String forwardedUri =  getActualRequestUpstreamUri( requestUri,matchedMockRule.getUri(), conditionRule.getUpstreams().getNodes().iterator().next().getUri());
-					returnResponse = 	this.getResponse(requestHeaders, requestHostName, requestMethod, forwardedUri, requestQueryString, requestBody);
+					UpstreamNode node = conditionRule.getUpstreams().getNodes().iterator().next();
+					String nodeUri = node.getUri();
+					String internalForwardHost = node.getAddress();
+					String forwardedUri =  getActualRequestUpstreamUri( requestUri,matchedMockRule.getUri(), nodeUri);
+					returnResponse = 	this.getResponse(requestHeaders, internalForwardHost, requestMethod, forwardedUri, requestQueryString, requestBody);
 					break;
 				default:
 					break;
@@ -167,10 +170,12 @@ public class MockserviceImpl {
 					break;
 
 				case INTERNAL_FORWARD:
+					UpstreamNode node = matchedMockRule.getUpstreams().getNodes().iterator().next();
+					String nodeUri = node.getUri();
+					String internalForwardHost = node.getAddress();
 					// 修改requestUri 然后内部转发(forward)到getResponse重新获取新的匹配规则
-				String forwardedUri =  getActualRequestUpstreamUri( requestUri, matchedMockRule.getUri(),matchedMockRule.getUpstreams().getNodes().get(0).getUri());
-
-				returnResponse =  this.getResponse(requestHeaders, requestHostName, requestMethod, forwardedUri, requestQueryString, requestBody);
+				String forwardedUri =  getActualRequestUpstreamUri( requestUri, matchedMockRule.getUri(),nodeUri);
+				returnResponse =  this.getResponse(requestHeaders, internalForwardHost, requestMethod, forwardedUri, requestQueryString, requestBody);
 				break;					
 				default:
 					break;
@@ -242,11 +247,15 @@ public class MockserviceImpl {
 
 			for (String queryString : queryStrings) {
 				String[] keyvalue = queryString.split("=");
-				String value = keyvalue[1] == null ? null : keyvalue[1];
-				if (keyvalue[0] != null)
-
+				if(keyvalue.length==1)
 				{
-					requestQueryStringMap.put(keyvalue[0], value);
+					requestQueryStringMap.put(keyvalue[0], "");
+				}
+				else {
+					String value = keyvalue[1];
+					if (keyvalue[0] != null) {
+						requestQueryStringMap.put(keyvalue[0], value);
+					}
 				}
 
 			}

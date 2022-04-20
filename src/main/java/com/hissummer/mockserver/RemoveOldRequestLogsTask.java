@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@Deprecated
 public class RemoveOldRequestLogsTask extends TimerTask {
 
 	@Autowired
