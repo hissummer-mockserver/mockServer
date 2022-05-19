@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.hissummer.mockserver.mgmt.pojo.*;
+import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,12 +29,7 @@ import com.hissummer.mockserver.mock.vo.MockResponse;
 
 import kotlin.Pair;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Call;
-import okhttp3.Headers;
-import okhttp3.MediaType;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import org.springframework.util.StringUtils;
 
 /**
  * 
@@ -74,7 +70,7 @@ public class MockserviceImpl {
 
 		MockResponse response = getResponse(requestHeaders, requestHostname, requestMethod, requestUri,
 				requestQueryString, requestBody);
-		return response.getResponseBody();
+		return response.getResponseBody().toString();
 	}
 
 	/**
@@ -118,9 +114,14 @@ public class MockserviceImpl {
 					workMode = HttpMockWorkMode.MOCK;
 				switch (workMode) {
 				case UPSTREAM:
+					String requestUriWithQueryString = requestUri;
+					if(!StringUtils.isEmpty(requestUri) && requestQueryString.equals("null"))
+					{
+						requestUriWithQueryString = requestUriWithQueryString+"?"+requestQueryString;
+					}
 					// mock rule 的工作模式为upstream模式. 后期将upstream作为hostname的rule单独管理，这里的代码将会移除！
 					returnResponse = getUpstreamResponse(matchedMockRule, conditionRule, requestHeaders, requestMethod,
-							requestUri + "?" + requestQueryString, requestBody);
+							requestUriWithQueryString, requestBody);
 					break;
 
 				case MOCK:
@@ -407,7 +408,7 @@ public class MockserviceImpl {
 		Call call = HttpClientUtil.client.newCall(request);
 		try {
 			Response response = call.execute();
-			log.debug("upstream response:{} | {} | {}", JSON.toJSONString(response.code()),
+			log.debug("upstream response:{} | {} | {} ", JSON.toJSONString(response.code()),
 					JSON.toJSONString(response.headers()), JSON.toJSONString(response.body()));
 			JSONObject responseJson = new JSONObject();
 			Map<String, String> upstreamResponseHeaders = new HashMap<>();
@@ -424,8 +425,9 @@ public class MockserviceImpl {
 				} else {
 					upstreamResponseHeaders.put("X-Forwarded-For", "hissummer-mockserver");
 				}
-
-				return MockResponse.builder().headers(upstreamResponseHeaders).responseBody(response.body().string())
+				byte[] rawdata = response.body().bytes();
+				response.close();
+				return MockResponse.builder().headers(upstreamResponseHeaders).responseBody(rawdata)
 						.isUpstream(true).isMock(false).build();
 			} else {
 
@@ -437,6 +439,7 @@ public class MockserviceImpl {
 				responseJson.put("headers", readableHeaders);
 				responseJson.put("body", response.body().string());
 
+				response.close();
 				return MockResponse.builder().responseBody(responseJson.toJSONString()).isUpstream(true).isMock(false)
 						.build();
 
@@ -553,7 +556,7 @@ public class MockserviceImpl {
 			return MockResponse.builder()
 					.responseBody(
 							interpreter(mockRule.getMockResponse(), Collections.emptyMap(), null, null, null, false))
-					.isMock(true).isUpstream(false).headers(mockRule.getResponseHeaders()).build().getResponseBody();
+					.isMock(true).isUpstream(false).headers(mockRule.getResponseHeaders()).build().getResponseBody().toString();
 		} else {
 			return "upstream mode not support test, please directly access the upstream address.";
 		}

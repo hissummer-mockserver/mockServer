@@ -100,7 +100,7 @@ public class MockForwardController implements ErrorController {
 			}
 
 			String requestUri = (String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
-			// 404 not found
+
 			MockResponse mockOrUpstreamReturnedResponse = mockservice.getResponse(requestHeaders, requestHost,
 					request.getMethod(), requestUri, requestQueryString, requestBody);
 
@@ -120,10 +120,9 @@ public class MockForwardController implements ErrorController {
 
 			try {
 				if (responseHeaders.getContentType() == null) {
-
-					JSON.parse(mockOrUpstreamReturnedResponse.getResponseBody());
+ //content-type 内容类型为null，不可知内容，所以不用返回content-type？
+					JSON.parse(JSON.toJSONString(mockOrUpstreamReturnedResponse.getResponseBody()));
 					responseHeaders.setContentType(new MediaType("application", "json"));
-
 				}
 			} catch (Exception e) {
 				responseHeaders.setContentType(new MediaType("text", "plain", StandardCharsets.UTF_8));
@@ -140,23 +139,29 @@ public class MockForwardController implements ErrorController {
 					.isMock(mockOrUpstreamReturnedResponse.isMock()).createTime(new Date()).build();
 			String contentType = requestHeaders.get("content-type");
 
-			if (requestBody == null) {
-				requestLog.setRequestBody("无请求Body报文数据！");
-			} else if (requestBody != null && contentType != null
-					&& (contentType.contains("application/json")
-							|| contentType.contains("application/x-www-form-urlencoded")
-							|| contentType.contains("application/xml") || contentType.contains("text/html")
-							|| contentType.contains("text/plain"))) {
-				requestLog.setRequestBody(checkUTF8(requestBody) ? new String(requestBody, StandardCharsets.UTF_8)
-						: "非utf-8编码请求报文，此处不做记录");
-			} else {
-				requestLog.setRequestBody("非纯文本的content-type类型，不记录请求报文。");
-			}
+
 
 			Map<String, String> responseHeaderMap = responseHeaders.entrySet().stream()
 					.collect(Collectors.toMap(Map.Entry::getKey, e -> String.join(",", e.getValue())));
 
 			requestLog.setResponseHeaders(responseHeaderMap);
+			if (requestBody == null) {
+				requestLog.setRequestBody("无请求Body报文数据！");
+			} else if (requestBody != null && contentType != null
+					&& (contentType.contains("application/json")
+					|| contentType.contains("application/x-www-form-urlencoded")
+					|| contentType.contains("application/xml") || contentType.contains("text/html")
+					|| contentType.contains("text/plain"))) {
+				requestLog.setRequestBody(checkUTF8(requestBody) ? new String(requestBody, StandardCharsets.UTF_8)
+						: "非utf-8编码请求报文，此处不做记录");
+			} else if (responseHeaderMap.containsKey("Content-Encoding"))
+			{
+				// 内容有压缩的，解压缩记录。但是返回的仍是原报文内容（即压缩的内容）
+				requestLog.setRequestBody("Content-Encoding:"+responseHeaderMap.get("Content-Encoding")+"暂不做记录");
+			}
+			else {
+				requestLog.setRequestBody("非纯文本的content-type类型，不记录请求报文。");
+			}
 
 			contentType = responseHeaders.getContentType().getType() + "/"
 					+ responseHeaders.getContentType().getSubtype();
@@ -169,7 +174,7 @@ public class MockForwardController implements ErrorController {
 							|| contentType.contains("application/x-www-form-urlencoded")
 							|| contentType.contains("application/xml") || contentType.contains("text/html")
 							|| contentType.contains("text/plain"))) {
-				requestLog.setResponseBody(mockOrUpstreamReturnedResponse.getResponseBody());
+				requestLog.setResponseBody(JSON.toJSONString(mockOrUpstreamReturnedResponse.getResponseBody()));
 			} else {
 				requestLog.setResponseBody("非纯文本的content-type类型，不记录请求报文。");
 			}
@@ -188,6 +193,9 @@ public class MockForwardController implements ErrorController {
 				responseHeaders, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
+	/*
+
+	 */
 	private boolean checkUTF8(byte[] barr) {
 
 		CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
