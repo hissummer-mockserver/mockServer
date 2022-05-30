@@ -1,10 +1,10 @@
 package com.hissummer.mockserver.mock.service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +30,9 @@ import com.hissummer.mockserver.mock.vo.MockResponse;
 import kotlin.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 
@@ -58,30 +61,62 @@ public class MockserviceImpl {
 
 	private static final String NOMATCHED = "Sorry , No rules matched.";
 
-	/**
-	 * 根据hostName和请求Url地址，获取到Mock报文.
-	 * 
-	 * @param requestHeaders
-	 * @param requestUri
-	 * @return mock的报文
-	 */
-	public String getResponseBody(Map<String, String> requestHeaders, String requestHostname, String requestMethod,
-			String requestUri, String requestQueryString, byte[] requestBody) {
 
-		MockResponse response = getResponse(requestHeaders, requestHostname, requestMethod, requestUri,
-				requestQueryString, requestBody);
-		return response.getResponseBody().toString();
+	public MockResponse getResponse(HttpServletRequest request, Map<String, String> requestHeaders,byte[] requestBody)
+	{
+		String requestQueryString = request.getQueryString();
+		String requestHost = request.getServerName();
+		String requestUri = (String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
+
+		MockResponse mockOrUpstreamReturnedResponse = getResponse(requestHeaders,requestHost,request.getMethod(),requestUri,requestQueryString,requestBody);
+
+		if(mockOrUpstreamReturnedResponse.isUpstream()) {
+			// 如果通过了mockserver作为代理请求了Upstream上游服务，则需要把mockserver认为一个代理加入进去到X-Forwarded-For
+			if (mockOrUpstreamReturnedResponse.getResponseHeaders() != null) {
+				if (mockOrUpstreamReturnedResponse.getResponseHeaders().containsKey("X-Forwarded-For")) {
+
+					mockOrUpstreamReturnedResponse.getResponseHeaders().put("X-Forwarded-For", request.getRemoteAddr() + ","
+							+ mockOrUpstreamReturnedResponse.getResponseHeaders().get("X-Forwarded-For"));
+				} else {
+					mockOrUpstreamReturnedResponse.getResponseHeaders().put("X-Forwarded-For", request.getRemoteAddr());
+				}
+			}
+		}
+
+		if(mockOrUpstreamReturnedResponse.getResponseHeaders() == null)
+		{
+			mockOrUpstreamReturnedResponse.setResponseHeaders(new HashMap<>());
+		}
+		//添加自定义Header
+		mockOrUpstreamReturnedResponse.getResponseHeaders().put("ClientAddress", request.getRemoteAddr() + ":" + request.getRemotePort());
+		mockOrUpstreamReturnedResponse.getResponseHeaders().put("IsMock", mockOrUpstreamReturnedResponse.isMock()?"true":"false");
+		mockOrUpstreamReturnedResponse.getResponseHeaders().put("IsUpstream", mockOrUpstreamReturnedResponse.isUpstream()?"true":"false");
+
+
+		//设置默认的content-type类型
+		if(!mockOrUpstreamReturnedResponse.getResponseHeaders().containsKey("Content-Type") && !mockOrUpstreamReturnedResponse.getResponseHeaders().containsKey("content-type")){
+			try {
+				JSON.parse(JSON.toJSONString(mockOrUpstreamReturnedResponse.getResponseBody()));
+				mockOrUpstreamReturnedResponse.getResponseHeaders().put("Content-Type","application/json; charset=UTF-8");
+
+			} catch (Exception e) {
+				mockOrUpstreamReturnedResponse.getResponseHeaders().put("Content-Type","text/plain; charset=UTF-8");
+			}
+		}
+
+
+		return mockOrUpstreamReturnedResponse;
 	}
 
 	/**
-	 * 根据hostName和请求Url地址，获取到Mock报文的具体实现
+	 * 根据hostName和请求Url地址，获取到Mock报文或者Upstream上游节点返回
 	 * 
-	 * @param requestHeaders headers
-	 * @param requestHostName Host
-	 * @param requestMethod GET POST DELETE ...
-	 * @param requestQueryString a=b&c=d
-	 * @param requestUri /path/path
-	 * @param requestBody  POST or PUT request body content
+	 * @param requestHeaders 请求headers
+	 * @param requestHostName 请求的Host
+	 * @param requestMethod Http请求方法 GET POST DELETE ...
+	 * @param requestQueryString 请求查询串 a=b&c=d
+	 * @param requestUri 请求资源路径  /path/path
+	 * @param requestBody  请求内容体  POST or PUT request body content
 	 * @return
 	 */
 	public MockResponse getResponse(Map<String, String> requestHeaders, String requestHostName, String requestMethod,
@@ -115,7 +150,7 @@ public class MockserviceImpl {
 				switch (workMode) {
 				case UPSTREAM:
 					String requestUriWithQueryString = requestUri;
-					if(!StringUtils.isEmpty(requestUri) && requestQueryString.equals("null"))
+					if(!StringUtils.isEmpty(requestUri) && !StringUtils.isEmpty(requestQueryString)  && !requestQueryString.equals("null"))
 					{
 						requestUriWithQueryString = requestUriWithQueryString+"?"+requestQueryString;
 					}
@@ -130,7 +165,7 @@ public class MockserviceImpl {
 							.responseBody(interpreter(conditionRule.getMockResponse(), requestHeaders, requestUri,
 									requestQueryString, requestBody, false))
 							.mockRule(matchedMockRule).isMock(true).isUpstream(false)
-							.headers(conditionRule.getResponseHeaders()).build();
+							.responseHeaders(conditionRule.getResponseHeaders()).build();
 					break;
 
 				case INTERNAL_FORWARD:
@@ -156,9 +191,14 @@ public class MockserviceImpl {
 					workMode = HttpMockWorkMode.MOCK;
 				switch (workMode) {
 				case UPSTREAM:
+					String requestUriWithQueryString = requestUri;
+					if(!StringUtils.isEmpty(requestUri) && !StringUtils.isEmpty(requestQueryString)  && !requestQueryString.equals("null"))
+					{
+						requestUriWithQueryString = requestUriWithQueryString+"?"+requestQueryString;
+					}
 					// mock rule 的工作模式为upstream模式. 后期将upstream作为hostname的rule单独管理，这里的代码将会移除！
 					returnResponse = getUpstreamResponse(matchedMockRule, null, requestHeaders, requestMethod,
-							requestUri + "?" + requestQueryString, requestBody);
+							requestUriWithQueryString, requestBody);
 					break;
 
 				case MOCK:
@@ -167,7 +207,7 @@ public class MockserviceImpl {
 							.responseBody(interpreter(matchedMockRule.getMockResponse(), requestHeaders, requestUri,
 									requestQueryString, requestBody, false))
 							.mockRule(matchedMockRule).isMock(true).isUpstream(false)
-							.headers(matchedMockRule.getResponseHeaders()).build();
+							.responseHeaders(matchedMockRule.getResponseHeaders()).build();
 					break;
 
 				case INTERNAL_FORWARD:
@@ -190,6 +230,8 @@ public class MockserviceImpl {
 			returnResponse = MockResponse.builder().responseBody(nomatchresponse)
 					.mockRule(HttpMockRule.builder().uri("null").host("*").build()).build();
 		}
+
+
 
 		return returnResponse;
 	}
@@ -427,7 +469,7 @@ public class MockserviceImpl {
 				}
 				byte[] rawdata = response.body().bytes();
 				response.close();
-				return MockResponse.builder().headers(upstreamResponseHeaders).responseBody(rawdata)
+				return MockResponse.builder().responseHeaders(upstreamResponseHeaders).responseBody(rawdata)
 						.isUpstream(true).isMock(false).build();
 			} else {
 
@@ -556,7 +598,7 @@ public class MockserviceImpl {
 			return MockResponse.builder()
 					.responseBody(
 							interpreter(mockRule.getMockResponse(), Collections.emptyMap(), null, null, null, false))
-					.isMock(true).isUpstream(false).headers(mockRule.getResponseHeaders()).build().getResponseBody().toString();
+					.isMock(true).isUpstream(false).responseHeaders(mockRule.getResponseHeaders()).build().getResponseBody().toString();
 		} else {
 			return "upstream mode not support test, please directly access the upstream address.";
 		}

@@ -11,7 +11,7 @@ import lombok.Data;
 @Builder
 public class MockResponse {
 
-	private Map<String, String> headers;
+	private Map<String, String> responseHeaders;
 	private Object responseBody; // now only support string responseBody
 	private boolean isMock;
 	private boolean isUpstream;

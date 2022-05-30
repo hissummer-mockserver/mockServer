@@ -97,18 +97,33 @@ public class CusotomVarReplacementConverterHandler implements TextConverterSetUp
 		return originalResponse;
 	}
 
+	/**
+	 * ${requestUri} is  "/a/b"
+	 * ${requestUri}.0  is all requestUri   "/a/b"
+	 * ${requestUri}.1 is "a"
+	 * ${requestUri}.1 is "b"
+	 * @param extractPath
+	 * @param requestUri
+	 * @return
+	 */
 	private String getReplaceStringFromRequestUri(String extractPath, String requestUri) {
-
+		String tmpRequestUri = "";
 		if (requestUri.startsWith("/")) {
-			requestUri = requestUri.substring(1);
+			tmpRequestUri = requestUri.substring(1);
 		}
 		String returnValue = "undefined";
 		try {
 			int index = Integer.parseInt(extractPath);
-			returnValue = requestUri.split("/")[index - 1];
-
+			if(index <= 0)
+			{
+				returnValue = requestUri;
+			}
+			else{
+				returnValue = tmpRequestUri.split("/")[index - 1];
+			}
 		} catch (Exception e) {
 			log.warn("exception in replace string from queryuri");
+			returnValue = requestUri;
 		}
 		return returnValue;
 	}
