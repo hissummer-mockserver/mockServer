@@ -22,44 +22,42 @@ import org.springframework.jms.support.converter.MessageType;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 
  * @author lihao
- *
  */
 @Slf4j
 @SpringBootApplication
-@EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class,
-		DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class })
+@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class,
+        DataSourceTransactionManagerAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class Application extends SpringBootServletInitializer {
 
-	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(Application.class);
-	}
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+        return application.sources(Application.class);
+    }
 
-	public static void main(String[] args) throws Exception {
-		log.info("starting mock server ...");
-		SpringApplication.run(Application.class, args);
+    public static void main(String[] args) throws Exception {
+        log.info("starting mock server ...");
+        SpringApplication.run(Application.class, args);
 
-	}
+    }
 
-	@Bean
-	public JmsListenerContainerFactory<DefaultMessageListenerContainer> jmsListenerFactory(
-			ConnectionFactory connectionFactory, DefaultJmsListenerContainerFactoryConfigurer configurer) {
-		DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-		// This provides all boot's default to this factory, including the message
-		// converter
-		configurer.configure(factory, connectionFactory);
-		// You could still override some of Boot's default if necessary.
-		return factory;
-	}
+    @Bean
+    public JmsListenerContainerFactory<DefaultMessageListenerContainer> jmsListenerFactory(
+            ConnectionFactory connectionFactory, DefaultJmsListenerContainerFactoryConfigurer configurer) {
+        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        // This provides all boot's default to this factory, including the message
+        // converter
+        configurer.configure(factory, connectionFactory);
+        // You could still override some of Boot's default if necessary.
+        return factory;
+    }
 
-	@Bean // Serialize message content to json using TextMessage
-	public MessageConverter jacksonJmsMessageConverter() {
-		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-		converter.setTargetType(MessageType.TEXT);
-		converter.setTypeIdPropertyName("_type");
-		return converter;
-	}
+    @Bean // Serialize message content to json using TextMessage
+    public MessageConverter jacksonJmsMessageConverter() {
+        MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+        converter.setTargetType(MessageType.TEXT);
+        converter.setTypeIdPropertyName("_type");
+        return converter;
+    }
 
 }

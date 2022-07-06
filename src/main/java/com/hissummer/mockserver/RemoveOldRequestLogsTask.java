@@ -18,7 +18,7 @@ public class RemoveOldRequestLogsTask extends TimerTask {
 	@Autowired
 	RequestLogMongoRepository requestLogMongoRepository;
 	
-	private final  Timer timer = new Timer(true);; 
+	private final  Timer timer = new Timer(true);
 
 	@Override
 	public void run() {

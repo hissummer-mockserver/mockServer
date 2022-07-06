@@ -34,7 +34,7 @@ import com.hissummer.mockserver.mgmt.service.UserServiceImpl;
 import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.service.jpa.HttpMockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.service.jpa.RequestLogMongoRepository;
-import com.hissummer.mockserver.mock.service.MockserviceImpl;
+import com.hissummer.mockserver.mock.service.MockServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -66,7 +66,7 @@ public class MockRuleMgmtController {
 	RuleCategoryServiceImpl ruleCategoryServiceImpl;
 
 	@Autowired
-	MockserviceImpl mockservice;
+	MockServiceImpl mockservice;
 
 	@Autowired
 	MongoTemplate mongoTemplate;

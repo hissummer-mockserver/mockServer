@@ -1,13 +1,12 @@
 package com.hissummer.mockserver;
 
-import java.util.Calendar;
-import java.util.Timer;
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import java.util.Calendar;
+import java.util.Timer;
 
 @Component
 public class StartTaskTimer {

@@ -21,7 +21,7 @@ public class RequestLog {
 	private String id;
 	private String hittedMockRuleHostName;
 	/**
-	 * uri of the mockrule
+	 * uri of the mockRule
 	 */
 	private String hittedMockRuleUri;
 	/**

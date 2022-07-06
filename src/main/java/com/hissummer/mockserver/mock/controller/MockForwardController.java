@@ -2,7 +2,7 @@ package com.hissummer.mockserver.mock.controller;
 
 import com.hissummer.mockserver.mgmt.entity.RequestLog;
 import com.hissummer.mockserver.mgmt.pojo.MockRuleMgmtResponseVo;
-import com.hissummer.mockserver.mock.service.MockserviceImpl;
+import com.hissummer.mockserver.mock.service.MockServiceImpl;
 import com.hissummer.mockserver.mock.vo.MockResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.Response;
@@ -35,7 +35,7 @@ import java.util.Map;
 public class MockForwardController implements ErrorController {
 
     @Autowired
-    MockserviceImpl mockservice;
+    MockServiceImpl mockService;
 
     @Autowired
     JmsTemplate jmsTemplate;
@@ -47,7 +47,7 @@ public class MockForwardController implements ErrorController {
      * @param requestHeaders : request headers
      * @param requestBody    : nullAble ( requestBody is null when request with HTTP get
      *                       method)
-     * @param response
+     * @param response :
      * @return ResponseEntity<Object>
      */
     @RequestMapping(value = "/forward")
@@ -66,7 +66,7 @@ public class MockForwardController implements ErrorController {
                 log.info(e.getMessage());
             }
 			// 从mockserver配置获取返回mock响应或者upstream响应
-            MockResponse mockOrUpstreamReturnedResponse = mockservice.getResponse(request,requestHeaders, requestBody);
+            MockResponse mockOrUpstreamReturnedResponse = mockService.getResponse(request,requestHeaders, requestBody,null,null);
 
             //请求记录日志
             saveRequestLog(request,requestHeaders,requestBody,mockOrUpstreamReturnedResponse);
@@ -119,7 +119,7 @@ public class MockForwardController implements ErrorController {
          */
         ResponseFacade responsefacade = (ResponseFacade) response;
         Field innerResponse = getField(responsefacade.getClass(), "response");
-        // 强制修改inneResponse为可见
+        // 强制修改innerResponse为可见
         innerResponse.setAccessible(true);
         Response innerResponseObject = (Response) innerResponse.get(responsefacade);
         org.apache.coyote.Response coyoteResponse = innerResponseObject.getCoyoteResponse();
@@ -209,7 +209,7 @@ public class MockForwardController implements ErrorController {
 
 
     /**
-     * This is not used actually. "server.error.path=/forward" in
+     * This is not used, actually. "server.error.path=/forward" in
      * application.properties will define the error path to be the "/forward".
      */
     @Override
@@ -221,10 +221,10 @@ public class MockForwardController implements ErrorController {
     /**
      * Get java object field by the field Name.
      *
-     * @param clazz
-     * @param fieldName
+     * @param clazz  class
+     * @param fieldName fieldName
      * @return Field
-     * @throws NoSuchFieldException
+     * @throws NoSuchFieldException  No such Field Exception
      */
     private static Field getField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
         try {
