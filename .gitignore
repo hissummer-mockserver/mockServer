@@ -7,3 +7,4 @@ src/main/resources/static/*
 .classpath
 .settings/
 pom.xml.versionsBackup
+.idea
