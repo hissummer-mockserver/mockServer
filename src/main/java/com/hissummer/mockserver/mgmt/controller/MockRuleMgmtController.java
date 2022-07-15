@@ -307,10 +307,10 @@ public class MockRuleMgmtController {
 		Page<EurekaMockRule> rules = null;
 
 		EurekaMockRule ruleExmple = EurekaMockRule.builder().build();
-		ruleExmple.setEurekaServer(StringUtils.isEmpty(requestBody.getString("eurekaServer")) ? null
-				: requestBody.getString("eurekaServer"));
-		ruleExmple.setServiceName(StringUtils.isEmpty(requestBody.getString("serviceName")) ? null
-				: requestBody.getString("serviceName"));
+		ruleExmple.setEurekaServer(StringUtils.isEmpty(StringUtils.trimAllWhitespace(requestBody.getString("eurekaServer"))) ? null
+				: StringUtils.trimAllWhitespace(requestBody.getString("eurekaServer")));
+		ruleExmple.setServiceName(StringUtils.isEmpty(StringUtils.trimAllWhitespace(requestBody.getString("serviceName"))) ? null
+				: StringUtils.trimAllWhitespace(requestBody.getString("serviceName")));
 		Example<EurekaMockRule> example = Example.of(ruleExmple);
 		rules = eurekaMockRuleRepository.findAll(example, page);
 
