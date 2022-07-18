@@ -65,9 +65,12 @@ public class MockForwardController implements ErrorController {
             } catch (Exception e) {
                 log.info(e.getMessage());
             }
+            Date startTime = new Date();
+            log.info("{} startTime: {}",request.getRequestURI(),startTime.toLocaleString());
 			// 从mockserver配置获取返回mock响应或者upstream响应
             MockResponse mockOrUpstreamReturnedResponse = mockService.getResponse(request,requestHeaders, requestBody,null,null);
 
+            log.info("{} slaped Time: {}",request.getRequestURI(), (startTime.getTime() - new Date().getTime())/1000 );
             //请求记录日志
             saveRequestLog(request,requestHeaders,requestBody,mockOrUpstreamReturnedResponse);
 
