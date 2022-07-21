@@ -1,13 +1,11 @@
 package com.hissummer.mockserver.mock.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.*;
 import java.util.Map.Entry;
 
 import com.hissummer.mockserver.mgmt.pojo.*;
@@ -504,6 +502,13 @@ public class MockServiceImpl {
         return upstream.split(":")[0];
     }
 
+
+    private boolean isIpv4OrIpv6(String hostName){
+
+        return isIPv4(hostName) || isIPv6(hostName);
+
+    }
+
     /*
      * isIp 判断是否是ipv4地址
      */
@@ -535,6 +540,35 @@ public class MockServiceImpl {
 
     }
 
+    public static boolean isIPv4(String ipAddress) {
+        boolean isIPv4 = false;
+
+        if (ipAddress != null) {
+            try {
+                InetAddress inetAddress = InetAddress.getByName(ipAddress);
+                isIPv4 = (inetAddress instanceof Inet4Address) && inetAddress.getHostAddress().equals(ipAddress);
+            } catch (UnknownHostException ex) {
+            }
+        }
+
+        return isIPv4;
+    }
+
+    public static boolean isIPv6(String ipAddress) {
+        boolean isIPv6 = false;
+
+        if (ipAddress != null) {
+            try {
+                InetAddress inetAddress = InetAddress.getByName(ipAddress);
+                isIPv6 = (inetAddress instanceof Inet6Address);
+            } catch (UnknownHostException ex) {
+            }
+        }
+
+        return isIPv6;
+    }
+
+
     /*
      * Get matched mock rules by Hostname and url. If the hostname is ip address,
      * hostname is '*'.
@@ -543,9 +577,9 @@ public class MockServiceImpl {
      */
     private HttpMockRule getMatchedMockRulesByHostnameAndUrl(String hostName, String requestUri) {
         // 如果Host是ip地址,则查找mock规则时,则hostName是未定义,只根据uri进行查找匹配规则.
-        // TODO 需要支持ipv6
-        if (__isIpv4(hostName)) {
+        if (isIpv4OrIpv6(hostName)) {
             hostName = "*";
+            //如果是通过ip访问mockserver，则查找规则按照 hostName是* 即匹配所有hostName来查找mock规则
         }
 
         String requestUriFormat = requestUri;
@@ -555,10 +589,11 @@ public class MockServiceImpl {
             requestUriFormat = requestUri.substring(0, requestUri.length() - 1);
         }
 
-        String[] requestURIArray = requestUriFormat.split("/");
-        List<String> matchRequestURI = new ArrayList<String>(Arrays.asList(requestURIArray));
-        String matchRequestURIString = requestUriFormat;
+        // /a/b/c  to  {'a','b','c'}
+        List<String> matchRequestURI = new ArrayList<String>(Arrays.asList(requestUriFormat.split("/")));
+        String matchRequestURIString = "/"; //if not matched , default matched uri request is /
         int loops = matchRequestURI.size();
+        List<String> matchRequestURIList = new ArrayList<>();
 
         /**
          * uri: /1/2/3/4 size=4, loop=5 first loop: /1/2/3/4 second loop: /1/2/3 third
@@ -573,17 +608,19 @@ public class MockServiceImpl {
                 // loop. Every loop remove last element of the list.
                 matchRequestURI.remove(matchRequestURI.size() - 1);
                 if (matchRequestURI.isEmpty()) {
-                    matchRequestURIString = "/";
+                    matchRequestURIList.add("/");
                 } else {
-                    matchRequestURIString = String.join("/", matchRequestURI);
+                    matchRequestURIList.add(String.join("/", matchRequestURI));
                 }
+
             }
-
-            HttpMockRule matchedMockRule = mockRuleRepository.findByHostAndUri(hostName, matchRequestURIString);
-
-            if (matchedMockRule != null)
-                return matchedMockRule;
         }
+
+        List<HttpMockRule> foundMockRules = mockRuleRepository.findByHostAndUris(hostName, matchRequestURIList);
+        Optional<HttpMockRule> matchedMockRule =  foundMockRules.stream().max((mockRule1, mockRule2)->Integer.compare(mockRule1.getUri().length(),mockRule2.getUri().length()));
+
+        if (matchedMockRule.get() != null)
+            return matchedMockRule.get();
 
         // 如果第一次查找时,Host是域名,没有找到对应的规则,则会重新假设Host为*时,重新再查找一次.
         if (!hostName.equals("*")) {
