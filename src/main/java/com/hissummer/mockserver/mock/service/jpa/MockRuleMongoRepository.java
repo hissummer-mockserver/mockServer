@@ -9,6 +9,6 @@ import java.util.List;
 public interface MockRuleMongoRepository extends MongoRepository<HttpMockRule, String> {
 
 	HttpMockRule findByHostAndUri(String host, String uri);
-	List<HttpMockRule> findByHostAndUris(String host, List<String> uris);
+	List<HttpMockRule> findByHostAndUriIn(String host, List<String> uris);
 
 }

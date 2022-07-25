@@ -57,10 +57,13 @@ public class MockServiceImpl {
 
 
     public MockResponse getResponse(HttpServletRequest request, Map<String, String> requestHeaders, byte[] requestBody, String overrideInternalRequestUri, String overrideInternalRequestHost) {
+        Date startTime = new Date();
+
         String requestQueryString = request.getQueryString();
         String requestMethod = request.getMethod();
         String requestHost = overrideInternalRequestHost==null?request.getServerName():overrideInternalRequestHost;
         String requestUri = overrideInternalRequestUri==null?(String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI):overrideInternalRequestUri;
+        log.info("{} startTime: {}",requestUri,startTime.toLocaleString());
 
         //获取匹配的MockRule
         HttpMockRule matchedMockRule = getMatchedRule( requestHost,  requestUri);
@@ -71,6 +74,7 @@ public class MockServiceImpl {
 
         //修改响应头
         modifyResponseHeaders(mockOrUpstreamReturnedResponse,request);
+        log.info("{}slaped Time: {},",requestUri, ( new Date().getTime())/1000 - startTime.getTime()/1000);
 
         return mockOrUpstreamReturnedResponse;
     }
@@ -588,7 +592,9 @@ public class MockServiceImpl {
         if (requestUri != null && requestUri.length() > 0 && requestUri.charAt(requestUri.length() - 1) == '/') {
             requestUriFormat = requestUri.substring(0, requestUri.length() - 1);
         }
-
+        if (requestUri != null && requestUri.length() > 0 && requestUri.charAt(0) == '/') {
+            requestUriFormat = requestUri.substring(1, requestUri.length());
+        }
         // /a/b/c  to  {'a','b','c'}
         List<String> matchRequestURI = new ArrayList<String>(Arrays.asList(requestUriFormat.split("/")));
         String matchRequestURIString = "/"; //if not matched , default matched uri request is /
@@ -610,18 +616,18 @@ public class MockServiceImpl {
                 if (matchRequestURI.isEmpty()) {
                     matchRequestURIList.add("/");
                 } else {
-                    matchRequestURIList.add(String.join("/", matchRequestURI));
+                    matchRequestURIList.add("/"+String.join("/", matchRequestURI));
                 }
 
             }
         }
 
-        List<HttpMockRule> foundMockRules = mockRuleRepository.findByHostAndUris(hostName, matchRequestURIList);
+        List<HttpMockRule> foundMockRules = mockRuleRepository.findByHostAndUriIn(hostName, matchRequestURIList);
         Optional<HttpMockRule> matchedMockRule =  foundMockRules.stream().max((mockRule1, mockRule2)->Integer.compare(mockRule1.getUri().length(),mockRule2.getUri().length()));
 
-        if (matchedMockRule.get() != null)
+        if (matchedMockRule.isPresent()) {
             return matchedMockRule.get();
-
+        }
         // 如果第一次查找时,Host是域名,没有找到对应的规则,则会重新假设Host为*时,重新再查找一次.
         if (!hostName.equals("*")) {
             hostName = "*";
