@@ -61,20 +61,18 @@ public class MockServiceImpl {
 
         String requestQueryString = request.getQueryString();
         String requestMethod = request.getMethod();
-        String requestHost = overrideInternalRequestHost==null?request.getServerName():overrideInternalRequestHost;
-        String requestUri = overrideInternalRequestUri==null?(String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI):overrideInternalRequestUri;
-        log.info("{} startTime: {}",requestUri,startTime.toLocaleString());
-
+        String requestHost = overrideInternalRequestHost == null ? request.getServerName() : overrideInternalRequestHost;
+        String requestUri = overrideInternalRequestUri == null ? (String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI) : overrideInternalRequestUri;
         //获取匹配的MockRule
-        HttpMockRule matchedMockRule = getMatchedRule( requestHost,  requestUri);
+        HttpMockRule matchedMockRule = getMatchedRule(requestHost, requestUri);
         //如果匹配了MockRule，查看是否命中MockRule中的条件规则conditionRule
-        HttpCondition conditionRule= getHttpConditionRuleCondition(matchedMockRule,requestUri,requestMethod,requestQueryString,requestHeaders,requestBody);
+        HttpCondition conditionRule = getHttpConditionRuleCondition(matchedMockRule, requestUri, requestMethod, requestQueryString, requestHeaders, requestBody);
         //根据命中的规则和条件规则获取响应
-        MockResponse mockOrUpstreamReturnedResponse = getResponse(matchedMockRule,conditionRule,request,requestUri,requestMethod,requestQueryString,requestHeaders,requestBody);
+        MockResponse mockOrUpstreamReturnedResponse = getResponse(matchedMockRule, conditionRule, request, requestUri, requestMethod, requestQueryString, requestHeaders, requestBody);
 
         //修改响应头
-        modifyResponseHeaders(mockOrUpstreamReturnedResponse,request);
-        log.info("{}slaped Time: {},",requestUri, ( new Date().getTime())/1000 - startTime.getTime()/1000);
+        modifyResponseHeaders(mockOrUpstreamReturnedResponse, request);
+        log.info("{} slaped Seconds: {}", requestUri, (Float.valueOf(new Date().getTime()) / 1000 - Float.valueOf(startTime.getTime()) / 1000) );
 
         return mockOrUpstreamReturnedResponse;
     }
@@ -82,11 +80,12 @@ public class MockServiceImpl {
     /**
      * 修改返回的响应头。1） 添加了一些自定义Header方便排查问题，例如 ClientAddress, IsMock, IsUpstream  2) 如果未设置内容类型，自动设置 content-type
      * 3) Upstream模式下，X-Forwarded-For 加入当前的Mockserver
+     *
      * @param mockOrUpstreamReturnedResponse
      * @param request
      * @return
      */
-    private void modifyResponseHeaders(MockResponse mockOrUpstreamReturnedResponse, HttpServletRequest  request){
+    private void modifyResponseHeaders(MockResponse mockOrUpstreamReturnedResponse, HttpServletRequest request) {
 
         if (mockOrUpstreamReturnedResponse.isUpstream()) {
             // 如果通过了mockserver作为代理请求了Upstream上游服务，则需要把mockserver认为一个代理加入进去到X-Forwarded-For
@@ -126,14 +125,13 @@ public class MockServiceImpl {
 
     /**
      * 根据hostName和请求Url地址，获取到Mock报文或者Upstream上游节点返回
-     *
-     *  requestHeaders     请求headers
-     *  requestHostName    请求的Host
-     *  requestMethod      Http请求方法 GET POST DELETE ...
-     *  requestQueryString 请求查询串 a=b&c=d
-     *  requestUri         请求资源路径  /path/path
-     *  requestBody        请求内容体  POST or PUT request body content
-     *
+     * <p>
+     * requestHeaders     请求headers
+     * requestHostName    请求的Host
+     * requestMethod      Http请求方法 GET POST DELETE ...
+     * requestQueryString 请求查询串 a=b&c=d
+     * requestUri         请求资源路径  /path/path
+     * requestBody        请求内容体  POST or PUT request body content
      */
     /*
     @Deprecated
@@ -168,18 +166,17 @@ public class MockServiceImpl {
         return returnResponse;
     }
 */
-    private HttpMockRule getMatchedRule(String requestHostName, String requestUri){
+    private HttpMockRule getMatchedRule(String requestHostName, String requestUri) {
 
         return getMatchedMockRulesByHostnameAndUrl(requestHostName, requestUri);
 
     }
 
-    private HttpCondition getHttpConditionRuleCondition(HttpMockRule matchedMockRule, String requestUri, String requestMethod, String requestQueryString, Map<String, String> requestHeaders, byte[] requestBody){
+    private HttpCondition getHttpConditionRuleCondition(HttpMockRule matchedMockRule, String requestUri, String requestMethod, String requestQueryString, Map<String, String> requestHeaders, byte[] requestBody) {
 
-        if(matchedMockRule== null ) {
+        if (matchedMockRule == null) {
             return null;
-        }
-        else {
+        } else {
             HttpConditionRule conditionRulesOnMockRule = httpConditionRuleServiceImpl
                     .getHttpConditionRulesByHttpMockRuleId(matchedMockRule.getId());
 
@@ -195,18 +192,18 @@ public class MockServiceImpl {
 
     private MockResponse getResponse(HttpMockRule matchedMockRule, HttpCondition conditionRule, HttpServletRequest request, String requestUri, String requestMethod, String requestQueryString, Map<String, String> requestHeaders, byte[] requestBody) {
 
-
-        MockResponse returnResponse = null;
-        if (returnResponse == null) {
-            String nomatchresponse = JSON
-                    .toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(true).message(NO_MATCHED).build());
-            returnResponse = MockResponse.builder().responseBody(nomatchresponse)
-                    .mockRule(HttpMockRule.builder().uri("null").host("*").build()).build();
+        String nomatchresponse = JSON
+                .toJSONString(MockRuleMgmtResponseVo.builder().status(0).success(true).message(NO_MATCHED).build());
+        MockResponse returnResponse = MockResponse.builder().responseBody(nomatchresponse)
+                .mockRule(HttpMockRule.builder().uri("null").host("*").build()).build();
+        if (matchedMockRule == null) {
+            return returnResponse;
         }
         // 如果存在条件规则，则直接看是否命中某一条规则
         HttpMockWorkMode workMode = conditionRule == null ? matchedMockRule.getWorkMode() : conditionRule.getWorkMode();
-        if (workMode == null)
+        if (workMode == null) {
             workMode = HttpMockWorkMode.MOCK;
+        }
         switch (workMode) {
             case UPSTREAM:
                 String requestUriWithQueryString = requestUri;
@@ -238,7 +235,7 @@ public class MockServiceImpl {
                 String nodeUri = node.getUri();
                 String internalForwardHost = node.getAddress();
                 String forwardedUri = getActualRequestUpstreamUri(requestUri, matchedMockRule.getUri(), nodeUri);
-                returnResponse = this.getResponse( request,requestHeaders,requestBody,forwardedUri,internalForwardHost);
+                returnResponse = this.getResponse(request, requestHeaders, requestBody, forwardedUri, internalForwardHost);
                 break;
             default:
                 break;
@@ -500,6 +497,7 @@ public class MockServiceImpl {
 
         }
 
+
     }
 
     private String getHost(String upstream) {
@@ -507,7 +505,7 @@ public class MockServiceImpl {
     }
 
 
-    private boolean isIpv4OrIpv6(String hostName){
+    private boolean isIpv4OrIpv6(String hostName) {
 
         return isIPv4(hostName) || isIPv6(hostName);
 
@@ -609,21 +607,20 @@ public class MockServiceImpl {
 
         for (int i = 0; i <= loops; i++) {
 
-            if (i != 0) {
-                // Verify that "remove()" is used correctly. Here is correct, we don't use i in
-                // loop. Every loop remove last element of the list.
+            // Verify that "remove()" is used correctly. Here is correct, we don't use i in
+            // loop. Every loop remove last element of the list.
+
+            if (matchRequestURI.isEmpty()) {
+                matchRequestURIList.add("/");
+            } else {
+                matchRequestURIList.add("/" + String.join("/", matchRequestURI));
                 matchRequestURI.remove(matchRequestURI.size() - 1);
-                if (matchRequestURI.isEmpty()) {
-                    matchRequestURIList.add("/");
-                } else {
-                    matchRequestURIList.add("/"+String.join("/", matchRequestURI));
-                }
 
             }
         }
 
         List<HttpMockRule> foundMockRules = mockRuleRepository.findByHostAndUriIn(hostName, matchRequestURIList);
-        Optional<HttpMockRule> matchedMockRule =  foundMockRules.stream().max((mockRule1, mockRule2)->Integer.compare(mockRule1.getUri().length(),mockRule2.getUri().length()));
+        Optional<HttpMockRule> matchedMockRule = foundMockRules.stream().max((mockRule1, mockRule2) -> Integer.compare(mockRule1.getUri().length(), mockRule2.getUri().length()));
 
         if (matchedMockRule.isPresent()) {
             return matchedMockRule.get();

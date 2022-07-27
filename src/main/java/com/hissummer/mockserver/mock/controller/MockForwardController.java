@@ -63,7 +63,7 @@ public class MockForwardController implements ErrorController {
                 //response.setStatus(200); not work!!!
                 changeHttpCodeTo200(response); // reflection to change response status code from 404 to 200.
             } catch (Exception e) {
-                log.info(e.getMessage());
+                log.info("changeHttpCode exception: {}",e.getMessage());
             }
 			// 从mockserver配置获取返回mock响应或者upstream响应
             MockResponse mockOrUpstreamReturnedResponse = mockService.getResponse(request,requestHeaders, requestBody,null,null);

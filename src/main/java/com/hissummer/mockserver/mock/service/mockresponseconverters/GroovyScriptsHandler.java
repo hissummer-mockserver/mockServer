@@ -31,7 +31,7 @@ public class GroovyScriptsHandler implements ScriptsConverterInterface {
 
 	@Override
 	@CompileStatic
-	public String converter(String originalResponse, Map<String, String> requestHeders,
+	public String converter(String originalResponse, Map<String, String> requestHeaders,
 			Map<String, String> requestQueryString, byte[] requestBody) {
 
 		ScriptEngine engine = scriptEnginePool.getSpareEngine();
@@ -40,21 +40,23 @@ public class GroovyScriptsHandler implements ScriptsConverterInterface {
 			return "Groovy engine is busy now,please try again later.";
 		}
 
-		engine.put("response", originalResponse);
-		if (requestHeders.containsKey("content-type")
-				&& (requestHeders.get("content-type").contains("application/x-www-form-urlencoded")
-						|| requestHeders.get("content-type").contains("application/json"))) {
-			engine.put("requestBody", requestBody);
-		} else {
-			engine.put("requestBody", null);
-		}
-		engine.put("requestHeaders", requestHeders);
+//		//engine.put("response", originalResponse);
+//		if (requestHeaders.containsKey("content-type")
+//				&& (requestHeaders.get("content-type").contains("application/x-www-form-urlencoded")
+//						|| requestHeaders.get("content-type").contains("application/json"))) {
+//			engine.put("requestBody", requestBody);
+//		} else {
+//			engine.put("requestBody", null);
+//		}
+//		engine.put("requestHeaders", requestHeaders);
+
 		try {
 			engine.eval(originalResponse);
 			return engine.get("response").toString();
 		} catch (ScriptException e) {
-			engine.put("response", e.getMessage() + e.getStackTrace().toString());
-			return engine.get("response").toString();
+//			engine.put("response", e.getMessage() + e.getStackTrace().toString());
+//			return engine.get("response").toString();
+			return e.getMessage() + e.getStackTrace().toString();
 		} finally {
 			scriptEnginePool.releaseEngine(engine);
 		}
@@ -63,22 +65,27 @@ public class GroovyScriptsHandler implements ScriptsConverterInterface {
 
 	// @CompileStatic
 	public static void main(String[] args) {
-		System.out.println((new Date()).getTime());
-		ScriptEngineManager mgr = new ScriptEngineManager();
-		System.out.println((new Date()).getTime());
-		ScriptEngine jsEngine = mgr.getEngineByName("groovy");
-		System.out.println((new Date()).getTime());
-		try {
-			System.out.println((new Date()).getTime());
-			jsEngine.put("response", "hi");
-			System.out.println((new Date()).getTime());
-			jsEngine.eval("response='hello'");
-			System.out.println((new Date()).getTime());
 
-		} catch (ScriptException ex) {
-			ex.printStackTrace();
+		for(int i = 0 ; i <=20; i ++) {
+			System.out.println((new Date()).getTime());
+			ScriptEngineManager mgr = new ScriptEngineManager();
+			System.out.println((new Date()).getTime());
+			ScriptEngine jsEngine = mgr.getEngineByName("groovy");
+			System.out.println((new Date()).getTime());
+			try {
+				System.out.println((new Date()).getTime());
+				jsEngine.put("response", "hi");
+				System.out.println(jsEngine.get("response").toString());
+				System.out.println((new Date()).getTime());
+				jsEngine.eval("response='hello'");
+				System.out.println("eval: "+(new Date()).getTime());
+
+			} catch (ScriptException ex) {
+				ex.printStackTrace();
+			}
+			System.out.println(jsEngine.get("response").toString());
+
 		}
-		System.out.println(jsEngine.get("response").toString());
 	}
 
 }
