@@ -40,18 +40,18 @@ public class GroovyScriptsHandler implements ScriptsConverterInterface {
 			return "Groovy engine is busy now,please try again later.";
 		}
 
-//		//engine.put("response", originalResponse);
-//		if (requestHeaders.containsKey("content-type")
-//				&& (requestHeaders.get("content-type").contains("application/x-www-form-urlencoded")
-//						|| requestHeaders.get("content-type").contains("application/json"))) {
-//			engine.put("requestBody", requestBody);
-//		} else {
-//			engine.put("requestBody", null);
-//		}
-//		engine.put("requestHeaders", requestHeaders);
+		engine.put("response", "{\"groovy scripts: no response assigned\"}");
+		if (requestHeaders.containsKey("content-type")
+				&& (requestHeaders.get("content-type").contains("application/x-www-form-urlencoded")
+						|| requestHeaders.get("content-type").contains("application/json"))) {
+			engine.put("requestBody", requestBody);
+		} else {
+			engine.put("requestBody", null);
+		}
+		engine.put("requestHeaders", requestHeaders);
 
 		try {
-			engine.eval(originalResponse);
+			engine.eval(originalResponse.intern());
 			return engine.get("response").toString();
 		} catch (ScriptException e) {
 //			engine.put("response", e.getMessage() + e.getStackTrace().toString());
