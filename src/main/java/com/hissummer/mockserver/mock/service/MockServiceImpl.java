@@ -72,7 +72,7 @@ public class MockServiceImpl {
 
         //修改响应头
         modifyResponseHeaders(mockOrUpstreamReturnedResponse, request);
-        log.info("{} slaped Seconds: {}", requestUri, (Float.valueOf(new Date().getTime()) / 1000 - Float.valueOf(startTime.getTime()) / 1000) );
+        log.info("{} slaped Seconds: {}", requestUri, (new Date().getTime()- startTime.getTime() ) / new Float(1000) );
 
         return mockOrUpstreamReturnedResponse;
     }
