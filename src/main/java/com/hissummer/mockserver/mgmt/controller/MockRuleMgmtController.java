@@ -273,6 +273,7 @@ public class MockRuleMgmtController {
 
 		String uri = "/";
 		String hostname = "*";
+		String requestUri = "";
 
 		if (!StringUtils.isEmpty(requestBody.getString("uri"))) {
 			uri = requestBody.getString("uri");
@@ -282,9 +283,18 @@ public class MockRuleMgmtController {
 			hostname = requestBody.getString("hostname");
 		}
 
+		if (!StringUtils.isEmpty(requestBody.getString("requestUri"))) {
+			requestUri = requestBody.getString("requestUri");
+		}
+
 		if (StringUtils.isEmpty(uri)) {
 			requestLogs = requestLogMongoRepository.findAll(page);
-		} else {
+		} else if(!StringUtils.isEmpty(requestUri))
+		{
+			requestLogs = requestLogMongoRepository.findByHittedMockRuleUriAndHittedMockRuleHostNameAndRequestUri(uri, hostname,
+					requestUri,page);
+		}
+		else{
 			requestLogs = requestLogMongoRepository.findByHittedMockRuleUriAndHittedMockRuleHostName(uri, hostname,
 					page);
 		}
