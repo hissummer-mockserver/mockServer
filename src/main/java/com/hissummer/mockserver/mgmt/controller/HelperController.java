@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @CrossOrigin(origins = "*")
-@RequestMapping("/help")
+//@RequestMapping("/help")
 @RestController
 @Deprecated
 public class HelperController {
@@ -31,7 +31,7 @@ public class HelperController {
 	@Autowired
 	private ApplicationContext appContext;
 
-	@GetMapping(value = "/beans", produces = { "application/json" })
+	//@GetMapping(value = "/beans", produces = { "application/json" })
 	public String beans() {
 
 		String[] beanNames = appContext.getBeanDefinitionNames();
@@ -43,7 +43,7 @@ public class HelperController {
 		return "[\"" + String.join("\",\"", beanNames) + "\"]";
 	}
 
-	@GetMapping(value = "/properties", produces = { "application/json" })
+	//@GetMapping(value = "/properties", produces = { "application/json" })
 	public String properties() {
 
 		final Environment env = appContext.getEnvironment();

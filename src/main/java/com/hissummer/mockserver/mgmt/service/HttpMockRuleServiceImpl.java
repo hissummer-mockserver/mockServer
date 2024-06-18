@@ -31,7 +31,7 @@ public class HttpMockRuleServiceImpl {
 	@Transactional
 	public HttpMockRule updateMockRule(HttpMockRule mockRule) throws ServiceException {
 
-		if (mockRule.getId() == null || mockRule.getId().equals("")) {
+		if (mockRule.getId() == null || mockRule.getId().isEmpty()) {
 			throw ServiceException.builder().status(0).serviceMessage("The id could not be empty.").build();
 
 		}
@@ -42,7 +42,7 @@ public class HttpMockRuleServiceImpl {
 	@Transactional
 	public HttpMockRule deleteMockRule(HttpMockRule mockRule) throws ServiceException {
 
-		if (mockRule.getId() == null || mockRule.getId().equals("")) {
+		if (mockRule.getId() == null || mockRule.getId().isEmpty()) {
 			throw ServiceException.builder().status(0).serviceMessage("The id could not be empty.").build();
 		}
 		mockRuleMgmtRepository.deleteById(mockRule.getId());
@@ -50,7 +50,7 @@ public class HttpMockRuleServiceImpl {
 
 	}
 
-	@Transactional
+	//@Transactional
 	public Page<HttpMockRule> queryMockRules(String host, String uri, String category, int pageNumber, int pageSize)
 			throws ServiceException {
 
@@ -68,7 +68,6 @@ public class HttpMockRuleServiceImpl {
 				byHost = "\\*";
 			} else {
 				byHost = host;
-				;
 			}
 
 		}

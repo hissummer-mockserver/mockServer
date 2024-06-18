@@ -141,7 +141,7 @@
 			<artifactId>xstream</artifactId>
 			<version>1.4.18</version>
 		</dependency>
-
+<!-- groovy need mysql-connector-java to utilize mysql operations -->
 		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
 		<dependency>
 			<groupId>mysql</groupId>

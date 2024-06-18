@@ -11,7 +11,6 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +31,7 @@ import com.hissummer.mockserver.mgmt.service.HttpMockRuleServiceImpl;
 import com.hissummer.mockserver.mgmt.service.RuleCategoryServiceImpl;
 import com.hissummer.mockserver.mgmt.service.UserServiceImpl;
 import com.hissummer.mockserver.mgmt.service.jpa.EurekaMockRuleMongoRepository;
-import com.hissummer.mockserver.mgmt.service.jpa.HttpMockRuleMongoRepository;
+//import com.hissummer.mockserver.mgmt.service.jpa.HttpMockRuleMongoRepository;
 import com.hissummer.mockserver.mgmt.service.jpa.RequestLogMongoRepository;
 import com.hissummer.mockserver.mock.service.MockServiceImpl;
 
@@ -53,8 +52,8 @@ public class MockRuleMgmtController {
 	private static final String USERNAMEPARAM = "username";
 	private static final String PASSWORDPARAM = "password";
 
-	@Autowired
-	HttpMockRuleMongoRepository mockRuleMgmtMongoRepository;
+//	@Autowired
+//	HttpMockRuleMongoRepository mockRuleMgmtMongoRepository;
 
 	@Autowired
 	RequestLogMongoRepository requestLogMongoRepository;
@@ -66,10 +65,10 @@ public class MockRuleMgmtController {
 	RuleCategoryServiceImpl ruleCategoryServiceImpl;
 
 	@Autowired
-	MockServiceImpl mockservice;
+	MockServiceImpl mockService;
 
-	@Autowired
-	MongoTemplate mongoTemplate;
+//	@Autowired
+//	MongoTemplate mongoTemplate;
 
 	@Autowired
 	EurekaMockRuleServiceImpl eurekaMockRuleServiceImpl;
@@ -83,7 +82,7 @@ public class MockRuleMgmtController {
 	@PostMapping(value = "/addRule")
 	public MockRuleMgmtResponseVo addRule(@RequestBody HttpMockRule mockRule) {
 
-		MockRuleMgmtResponseVo result = null;
+		MockRuleMgmtResponseVo result ;
 
 		try {
 
@@ -105,7 +104,7 @@ public class MockRuleMgmtController {
 	@PostMapping(value = "/updateRule")
 	public MockRuleMgmtResponseVo updateRule(@RequestBody HttpMockRule mockRule) {
 
-		MockRuleMgmtResponseVo result = null;
+		MockRuleMgmtResponseVo result  ;
 		try {
 			ruleCategoryServiceImpl.addCategory(RuleCategory.builder().category(mockRule.getCategory())
 					.description(mockRule.getCategory()).build());
@@ -124,7 +123,7 @@ public class MockRuleMgmtController {
 	@PostMapping(value = "/deleteRule")
 	public MockRuleMgmtResponseVo deleteRule(@RequestBody HttpMockRule mockRule) {
 
-		MockRuleMgmtResponseVo result = null;
+		MockRuleMgmtResponseVo result;
 
 		try {
 			httpMockRuleServiceImpl.deleteMockRule(mockRule);
@@ -140,11 +139,11 @@ public class MockRuleMgmtController {
 	@PostMapping(value = "/testRule")
 	public MockRuleMgmtResponseVo testRule(@RequestBody HttpMockRule mockRule) {
 
-		MockRuleMgmtResponseVo result = null;
+		MockRuleMgmtResponseVo result  ;
 
 		try {
 
-			String testResponse = mockservice.testRule(mockRule);
+			String testResponse = mockService.testRule(mockRule);
 
 			result = MockRuleMgmtResponseVo.builder().status(0).success(true).message(testResponse).build();
 		} catch (Exception e) {
@@ -158,7 +157,7 @@ public class MockRuleMgmtController {
 	@PostMapping(value = "/queryRule")
 	public MockRuleMgmtResponseVo queryRules(@RequestBody JSONObject requestBody) {
 
-		int pageNumber = requestBody.getIntValue("pageNumber") < 0 ? 0 : requestBody.getIntValue("pageNumber");
+		int pageNumber = Math.max(requestBody.getIntValue("pageNumber"), 0);
 		int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 50 : requestBody.getIntValue("pageSize");
 		String uri = requestBody.getString("uri");
 		String host = requestBody.getString("host");
@@ -240,7 +239,7 @@ public class MockRuleMgmtController {
 	}
 
 	@PostMapping(value = "/queryCategory")
-	public MockRuleMgmtResponseVo queryCategorys(@RequestBody JSONObject requestBody) {
+	public MockRuleMgmtResponseVo queryCategories(@RequestBody JSONObject requestBody) {
 
 		List<RuleCategory> categories = null;
 
@@ -252,7 +251,7 @@ public class MockRuleMgmtController {
 
 		}
 
-		int pageNumber = requestBody.getIntValue("pageNumber") < 0 ? 0 : requestBody.getIntValue("pageNumber");
+		int pageNumber = Math.max(requestBody.getIntValue("pageNumber"), 0);
 		int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 50 : requestBody.getIntValue("pageSize");
 
 		Page<RuleCategory> categoryWithPage = ruleCategoryServiceImpl.queryCategories(pageSize, pageNumber);
@@ -264,7 +263,7 @@ public class MockRuleMgmtController {
 	@PostMapping(value = "/queryRequestLog")
 	public MockRuleMgmtResponseVo queryRequestLog(@RequestBody JSONObject requestBody) {
 
-		int pageNumber = requestBody.getIntValue("pageNumber") < 0 ? 0 : requestBody.getIntValue("pageNumber");
+		int pageNumber = Math.max(requestBody.getIntValue("pageNumber"), 0);
 		int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 20 : requestBody.getIntValue("pageSize");
 
 		PageRequest page = PageRequest.of(pageNumber, pageSize, Sort.by("createTime").descending());
@@ -309,19 +308,19 @@ public class MockRuleMgmtController {
 	@PostMapping(value = "/queryEurekaRule")
 	public MockRuleMgmtResponseVo queryEurekaRules(@RequestBody JSONObject requestBody) {
 
-		int pageNumber = requestBody.getIntValue("pageNumber") < 0 ? 0 : requestBody.getIntValue("pageNumber");
+		int pageNumber = Math.max(requestBody.getIntValue("pageNumber"), 0);
 		int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 50 : requestBody.getIntValue("pageSize");
 
 		PageRequest page = PageRequest.of(pageNumber, pageSize);
 
 		Page<EurekaMockRule> rules = null;
 
-		EurekaMockRule ruleExmple = EurekaMockRule.builder().build();
-		ruleExmple.setEurekaServer(StringUtils.isEmpty(StringUtils.trimAllWhitespace(requestBody.getString("eurekaServer"))) ? null
+		EurekaMockRule ruleExample = EurekaMockRule.builder().build();
+		ruleExample.setEurekaServer(StringUtils.isEmpty(StringUtils.trimAllWhitespace(requestBody.getString("eurekaServer"))) ? null
 				: StringUtils.trimAllWhitespace(requestBody.getString("eurekaServer")));
-		ruleExmple.setServiceName(StringUtils.isEmpty(StringUtils.trimAllWhitespace(requestBody.getString("serviceName"))) ? null
+		ruleExample.setServiceName(StringUtils.isEmpty(StringUtils.trimAllWhitespace(requestBody.getString("serviceName"))) ? null
 				: StringUtils.trimAllWhitespace(requestBody.getString("serviceName")));
-		Example<EurekaMockRule> example = Example.of(ruleExmple);
+		Example<EurekaMockRule> example = Example.of(ruleExample);
 		rules = eurekaMockRuleRepository.findAll(example, page);
 
 		if (rules != null && !rules.getContent().isEmpty())
@@ -355,7 +354,7 @@ public class MockRuleMgmtController {
 	public MockRuleMgmtResponseVo updateRule(@RequestBody EurekaMockRule mockRule) {
 
 		MockRuleMgmtResponseVo result = null;
-		if (mockRule.getId() == null || mockRule.getId().equals("")) {
+		if (mockRule.getId() == null || mockRule.getId().isEmpty()) {
 			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
 					.build();
 		}
@@ -379,7 +378,7 @@ public class MockRuleMgmtController {
 	public MockRuleMgmtResponseVo deleteRule(@RequestBody EurekaMockRule mockRule) {
 
 		MockRuleMgmtResponseVo result = null;
-		if (mockRule.getId() == null || mockRule.getId().equals("")) {
+		if (mockRule.getId() == null || mockRule.getId().isEmpty()) {
 			return MockRuleMgmtResponseVo.builder().status(0).success(false).message("The id could not be empty.")
 					.build();
 		}
