@@ -3,6 +3,7 @@ package com.hissummer.mockserver.mgmt.service.jpa;
 import java.util.Date;
 import java.util.Optional;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -17,9 +18,11 @@ public interface RequestLogMongoRepository extends MongoRepository<RequestLog, S
 
 	Page<RequestLog> findByHittedMockRuleUriAndHittedMockRuleHostNameAndRequestUri(String uri, String hostname,String requestUri, Pageable pageable);
 
-	Page<RequestLog> findAll(Pageable pageable);
+	@NotNull
+	Page<RequestLog> findAll(@NotNull Pageable pageable);
 
-	Optional<RequestLog> findById(String id);
+	@NotNull
+	Optional<RequestLog> findById(@NotNull String id);
 
 	void deleteByCreateTimeLessThan(Date createTime);
 

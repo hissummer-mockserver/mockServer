@@ -2,6 +2,7 @@ package com.hissummer.mockserver.mgmt.service.jpa;
 
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -11,7 +12,8 @@ import com.hissummer.mockserver.mgmt.entity.HttpMockRule;
 
 public interface HttpMockRuleMongoRepository extends MongoRepository<HttpMockRule, String> {
 
-	Page<HttpMockRule> findAll(Pageable pageable);
+	@NotNull
+	Page<HttpMockRule> findAll(@NotNull Pageable pageable);
 
 	HttpMockRule findByHostAndUri(String host, String uri);
 

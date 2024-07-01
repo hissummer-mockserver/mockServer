@@ -27,6 +27,7 @@ public class RequestLog {
 	/**
 	 * actual request uri
 	 */
+	@Indexed
 	private String requestUri;
 	@Builder.Default
 	private String protocol = "http";

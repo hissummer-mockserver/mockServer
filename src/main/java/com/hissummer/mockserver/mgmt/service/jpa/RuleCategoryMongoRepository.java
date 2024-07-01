@@ -2,6 +2,7 @@ package com.hissummer.mockserver.mgmt.service.jpa;
 
 import java.util.Optional;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -12,8 +13,10 @@ public interface RuleCategoryMongoRepository extends MongoRepository<RuleCategor
 
 	RuleCategory findByCategory(String category);
 
-	Optional<RuleCategory> findById(String id);
+	@NotNull
+	Optional<RuleCategory> findById(@NotNull String id);
 
-	Page<RuleCategory> findAll(Pageable page);
+	@NotNull
+	Page<RuleCategory> findAll(@NotNull Pageable page);
 
 }

@@ -3,6 +3,7 @@ package com.hissummer.mockserver.mgmt.service.jpa;
 import java.util.List;
 import java.util.Optional;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -19,6 +20,7 @@ public interface UserMongoRepository extends MongoRepository<User, String> {
 
 	User findByUsername(String username);
 
-	Optional<User> findById(String id);
+	@NotNull
+	Optional<User> findById(@NotNull String id);
 
 }
