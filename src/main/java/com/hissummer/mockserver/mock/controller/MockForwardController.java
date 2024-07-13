@@ -179,7 +179,7 @@ public class MockForwardController implements ErrorController {
             // 内容有压缩的，解压缩记录。但是返回的仍是原报文内容（即压缩的内容）
             requestLog.setResponseBody("Content-Encoding:" + mockOrUpstreamReturnedResponse.getResponseHeaders().get("Content-Encoding") + "暂不做记录");
         } else if (mockOrUpstreamReturnedResponse.getResponseBody() != null
-                && (contentType.contains("application/json")
+                && (contentType == null || contentType.contains("application/json")
                 || contentType.contains("application/x-www-form-urlencoded")
                 || contentType.contains("application/xml") || contentType.contains("text/html")
                 || contentType.contains("text/plain"))) {
