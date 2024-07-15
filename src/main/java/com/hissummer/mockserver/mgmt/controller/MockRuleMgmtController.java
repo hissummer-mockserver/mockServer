@@ -78,6 +78,10 @@ public class MockRuleMgmtController {
     @Autowired
     HttpMockRuleServiceImpl httpMockRuleServiceImpl;
 
+     private static final   String PAGE_SIZE ="pageSize";
+
+    private static final  String PAGE_NUMBER ="pageNumber";
+
     @PostMapping(value = "/addRule")
     public MockRuleMgmtResponseVo addRule(@RequestBody HttpMockRule mockRule) {
 
@@ -126,7 +130,7 @@ public class MockRuleMgmtController {
 
         try {
             httpMockRuleServiceImpl.deleteMockRule(mockRule);
-            result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Delete success.").build();
+            result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Delete Rule success.").build();
         } catch (ServiceException e) {
 
             result = MockRuleMgmtResponseVo.builder().status(0).success(false).message(e.getServiceMessage()).build();
@@ -156,8 +160,8 @@ public class MockRuleMgmtController {
     @PostMapping(value = "/queryRule")
     public MockRuleMgmtResponseVo queryRules(@RequestBody JSONObject requestBody) {
 
-        int pageNumber = Math.max(requestBody.getIntValue("pageNumber"), 0);
-        int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 50 : requestBody.getIntValue("pageSize");
+        int pageNumber = Math.max(requestBody.getIntValue(PAGE_NUMBER), 0);
+        int pageSize = requestBody.getIntValue(PAGE_SIZE) <= 0 ? 50 : requestBody.getIntValue(PAGE_SIZE);
         String uri = requestBody.getString("uri");
         String host = requestBody.getString("host");
         String category = requestBody.getString("category");
@@ -242,7 +246,7 @@ public class MockRuleMgmtController {
 
         List<RuleCategory> categories = null;
 
-        if (!requestBody.containsKey("pageNumber") || !requestBody.containsKey("pageSize")) {
+        if (!requestBody.containsKey(PAGE_NUMBER) || !requestBody.containsKey(PAGE_SIZE)) {
 
             categories = ruleCategoryServiceImpl.queryCategories();
 
@@ -250,8 +254,8 @@ public class MockRuleMgmtController {
 
         }
 
-        int pageNumber = Math.max(requestBody.getIntValue("pageNumber"), 0);
-        int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 50 : requestBody.getIntValue("pageSize");
+        int pageNumber = Math.max(requestBody.getIntValue(PAGE_NUMBER), 0);
+        int pageSize = requestBody.getIntValue(PAGE_SIZE) <= 0 ? 50 : requestBody.getIntValue(PAGE_SIZE);
 
         Page<RuleCategory> categoryWithPage = ruleCategoryServiceImpl.queryCategories(pageSize, pageNumber);
 
@@ -262,8 +266,8 @@ public class MockRuleMgmtController {
     @PostMapping(value = "/queryRequestLog")
     public MockRuleMgmtResponseVo queryRequestLog(@RequestBody JSONObject requestBody) {
 
-        int pageNumber = Math.max(requestBody.getIntValue("pageNumber"), 0);
-        int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 20 : requestBody.getIntValue("pageSize");
+        int pageNumber = Math.max(requestBody.getIntValue(PAGE_NUMBER), 0);
+        int pageSize = requestBody.getIntValue(PAGE_SIZE) <= 0 ? 20 : requestBody.getIntValue(PAGE_SIZE);
 
         PageRequest page = PageRequest.of(pageNumber, pageSize, Sort.by("createTime").descending());
 
@@ -273,6 +277,8 @@ public class MockRuleMgmtController {
         String hostname = "*";
         String requestUri = "";
         String requestKeyWord = "";
+        long startDate=-1L;
+        long endDate=-1L;
 
         if (!StringUtils.isEmpty(requestBody.getString("uri"))) {
             uri = requestBody.getString("uri");
@@ -288,8 +294,13 @@ public class MockRuleMgmtController {
         if (!StringUtils.isEmpty(requestBody.getString("requestBodyKeyword"))) {
             requestKeyWord = requestBody.getString("requestBodyKeyword");
         }
-
-        requestLogs = RequestLogService.searchByRequestLogKeyWord(requestKeyWord, uri, hostname, requestUri, page);
+        if (!StringUtils.isEmpty(requestBody.getLong("startDate"))) {
+            startDate = Long.parseLong(requestBody.getString("startDate"));
+        }
+        if (!StringUtils.isEmpty(requestBody.getLong("endDate"))) {
+            endDate = Long.parseLong(requestBody.getString("endDate"));
+        }
+        requestLogs = RequestLogService.searchByRequestLogKeyWord(requestKeyWord, uri, hostname, requestUri, page,startDate,endDate);
 
         if (requestLogs != null && !requestLogs.getContent().isEmpty())
             return MockRuleMgmtResponseVo.builder().status(0).success(true).data(requestLogs).build();
@@ -301,8 +312,8 @@ public class MockRuleMgmtController {
     @PostMapping(value = "/queryEurekaRule")
     public MockRuleMgmtResponseVo queryEurekaRules(@RequestBody JSONObject requestBody) {
 
-        int pageNumber = Math.max(requestBody.getIntValue("pageNumber"), 0);
-        int pageSize = requestBody.getIntValue("pageSize") <= 0 ? 50 : requestBody.getIntValue("pageSize");
+        int pageNumber = Math.max(requestBody.getIntValue(PAGE_NUMBER), 0);
+        int pageSize = requestBody.getIntValue(PAGE_SIZE) <= 0 ? 50 : requestBody.getIntValue(PAGE_SIZE);
 
         PageRequest page = PageRequest.of(pageNumber, pageSize);
 
