@@ -54,9 +54,6 @@ public class MockForwardController implements ErrorController {
     public ResponseEntity<Object> forward(HttpServletRequest request, @RequestHeader Map<String, String> requestHeaders,
                                           @Nullable @RequestBody byte[] requestBody, final HttpServletResponse response) {
 
-        //Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-        //log.info("response status code: ",response.getStatus());
-
         if (response.getStatus() == HttpStatus.NOT_FOUND.value()) {
             // 通过错误重定向过来的response上个请求的response相应。 如果http code码是404 NotFound， 则那么认为这个接口在mockserver不存在，然后去查找mock规则。
             try {

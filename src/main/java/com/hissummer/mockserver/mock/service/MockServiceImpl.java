@@ -8,7 +8,9 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.hissummer.mockserver.cache.mockRuleCacheService;
 import com.hissummer.mockserver.mgmt.pojo.*;
+import com.netflix.ribbon.proxy.annotation.Http;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,7 +74,7 @@ public class MockServiceImpl {
 
         //修改响应头
         modifyResponseHeaders(mockOrUpstreamReturnedResponse, request);
-        log.info("{} slaped Seconds: {}", requestUri, (new Date().getTime()- startTime.getTime() ) / new Float(1000) );
+        log.info("{} slaped Seconds: {}", requestUri, (new Date().getTime() - startTime.getTime()) / new Float(1000));
 
         return mockOrUpstreamReturnedResponse;
     }
@@ -168,8 +170,20 @@ public class MockServiceImpl {
 */
     private HttpMockRule getMatchedRule(String requestHostName, String requestUri) {
 
-        return getMatchedMockRulesByHostnameAndUrl(requestHostName, requestUri);
+        // try to hit cache
+        String ruleId = mockRuleCacheService.ruleCache.getIfPresent(requestHostName + "-" + requestUri);
+        if (!StringUtils.isEmpty(ruleId)) {
+            Optional<HttpMockRule> httpMockRule = mockRuleRepository.findById(ruleId);
+            log.info("hit cache: {} , key is: {}", httpMockRule.isPresent(), requestHostName + "-" + requestUri);
+            return httpMockRule.orElse(null);
+        }
 
+        // not hit the cache ,then find from the mongodb.
+        HttpMockRule httpMockRule = getMatchedMockRulesByHostnameAndUrl(requestHostName, requestUri);
+        //if found mockRule from the db, then put to the cache.
+        if (httpMockRule != null)
+            mockRuleCacheService.ruleCache.put(requestHostName + "-" + requestUri, httpMockRule.getId());
+        return httpMockRule;
     }
 
     private HttpCondition getHttpConditionRuleCondition(HttpMockRule matchedMockRule, String requestUri, String requestMethod, String requestQueryString, Map<String, String> requestHeaders, byte[] requestBody) {
@@ -177,6 +191,7 @@ public class MockServiceImpl {
         if (matchedMockRule == null) {
             return null;
         } else {
+            //condition rule cache is a little complicated. @TODO
             HttpConditionRule conditionRulesOnMockRule = httpConditionRuleServiceImpl
                     .getHttpConditionRulesByHttpMockRuleId(matchedMockRule.getId());
 
@@ -417,7 +432,7 @@ public class MockServiceImpl {
 
         String suffixUri = handledRequestUri.substring(handledMockRuleUri.length());
 
-        if (suffixUri.length() > 0 && suffixUri.charAt(0) != '/') {
+        if (!suffixUri.isEmpty() && suffixUri.charAt(0) != '/') {
             suffixUri = "/" + suffixUri;
         }
 
