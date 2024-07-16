@@ -2,11 +2,15 @@ package com.hissummer.mockserver.mgmt.pojo;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UpstreamGroup {
 
 	private List<UpstreamNode> nodes;

@@ -8,9 +8,8 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.Map.Entry;
 
-import com.hissummer.mockserver.cache.mockRuleCacheService;
+import com.hissummer.mockserver.cache.MockRuleCacheService;
 import com.hissummer.mockserver.mgmt.pojo.*;
-import com.netflix.ribbon.proxy.annotation.Http;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -171,7 +170,7 @@ public class MockServiceImpl {
     private HttpMockRule getMatchedRule(String requestHostName, String requestUri) {
 
         // try to hit cache
-        String ruleId = mockRuleCacheService.ruleCache.getIfPresent(requestHostName + "-" + requestUri);
+        String ruleId = MockRuleCacheService.ruleCache.getIfPresent(requestHostName + "-" + requestUri);
         if (!StringUtils.isEmpty(ruleId)) {
             Optional<HttpMockRule> httpMockRule = mockRuleRepository.findById(ruleId);
             log.info("hit cache: {} , key is: {}", httpMockRule.isPresent(), requestHostName + "-" + requestUri);
@@ -182,7 +181,7 @@ public class MockServiceImpl {
         HttpMockRule httpMockRule = getMatchedMockRulesByHostnameAndUrl(requestHostName, requestUri);
         //if found mockRule from the db, then put to the cache.
         if (httpMockRule != null)
-            mockRuleCacheService.ruleCache.put(requestHostName + "-" + requestUri, httpMockRule.getId());
+            MockRuleCacheService.ruleCache.put(requestHostName + "-" + requestUri, httpMockRule.getId());
         return httpMockRule;
     }
 
