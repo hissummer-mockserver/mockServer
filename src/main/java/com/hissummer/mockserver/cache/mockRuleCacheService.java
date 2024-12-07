@@ -8,7 +8,9 @@ public class mockRuleCacheService {
 
     public static Cache<String, String > ruleCache = CacheBuilder.newBuilder()
             .expireAfterAccess(60, TimeUnit.MINUTES).build();
+   /*
     public static Cache<String, String > conditionRuleCache = CacheBuilder.newBuilder()
             .expireAfterAccess(60, TimeUnit.MINUTES).build();
+   */
 
 }
