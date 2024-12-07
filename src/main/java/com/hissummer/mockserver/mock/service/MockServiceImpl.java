@@ -254,6 +254,8 @@ public class MockServiceImpl {
 
             // 默认的顺序 TODO 这里后续需要确认存入的顺序和读出的顺序是否一致。
 
+            if(!condition.getEnable()) continue;
+
             conditionsResult[0] = "response = ";
             condition.getConditionExpression().forEach(conditionExpression -> {
 
