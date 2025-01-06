@@ -581,7 +581,7 @@ public class MockServiceImpl {
      */
     private HttpMockRule getMatchedMockRulesByHostnameAndUrl(String hostName, String requestUri) {
         // 如果Host是ip地址,则查找mock规则时,则hostName是未定义,只根据uri进行查找匹配规则.
-        if (isIpv4OrIpv6(hostName)) {
+        if (isIpv4OrIpv6(hostName) || hostName.equals("core-mockplatform.test.weicai.com.cn")) {
             hostName = "*";
             //如果是通过ip访问mockserver，则查找规则按照 hostName是* 即匹配所有hostName来查找mock规则
         }

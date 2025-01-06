@@ -20,6 +20,11 @@ public class HttpMockRuleServiceImpl {
 	@Transactional
 	public HttpMockRule addMockRule(HttpMockRule mockRule) throws ServiceException {
 
+		if(mockRule.getHost().equals("core-mockplatform.test.weicai.com.cn"))
+		{
+			throw ServiceException.builder().status(0).serviceMessage("core-mockplatform.test.weicai.com.cn 该域名不能作为virtualHost mock规则添加。详情请询问@lihao01").build();
+
+		}
 		if (mockRuleMgmtRepository.findByHostAndUri(mockRule.getHost(), mockRule.getUri()) != null) {
 
 			throw ServiceException.builder().status(0).serviceMessage("mockrule already exist.").build();
