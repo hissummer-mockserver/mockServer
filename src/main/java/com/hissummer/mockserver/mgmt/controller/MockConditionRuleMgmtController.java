@@ -2,6 +2,8 @@ package com.hissummer.mockserver.mgmt.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.alibaba.fastjson.JSONArray;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +19,10 @@ import com.hissummer.mockserver.mgmt.pojo.MockRuleMgmtResponseVo;
 import com.hissummer.mockserver.mgmt.service.HttpConditionRuleServiceImpl;
 
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * 
@@ -239,6 +245,62 @@ public class MockConditionRuleMgmtController {
 		}
 		return result;
 
+	}
+
+
+	@RequestMapping(value = "/hostmapping", method = { RequestMethod.POST})
+	public MockRuleMgmtResponseVo queryHostMappings(@RequestBody JSONObject hostMappingsKeyword) {
+
+		MockRuleMgmtResponseVo result = null;
+
+		String hostsFilePath = "/etc/hosts";
+		try {
+			JSONArray  jsonResult = parseHostsFileToJson(hostsFilePath);
+			result = MockRuleMgmtResponseVo.builder().status(0).success(true).data(jsonResult).message("").build();
+ 		} catch (IOException e) {
+			result =  MockRuleMgmtResponseVo.builder().status(0).success(false).message("error occurred!").build();
+		}
+
+		return result;
+
+	}
+
+	public static JSONArray parseHostsFileToJson(String filePath) throws IOException {
+		// Initialize a JSONArray to hold all entries
+		JSONArray hostsArray = new JSONArray();
+
+		try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				line = line.trim();
+
+				// Skip comments and empty lines
+				if (line.startsWith("#") || line.isEmpty()) {
+					continue;
+				}
+
+				// Split the line into IP and domain(s)
+				String[] parts = line.split("\\s+");
+				if (parts.length < 2) {
+					continue; // Skip malformed lines
+				}
+
+				String ip = parts[0];
+				for (int i = 1; i < parts.length; i++) {
+					String domain = parts[i];
+
+					// Create a JSON object for each IP-domain pair
+					JSONObject hostEntry = new JSONObject();
+					hostEntry.put("domain", domain);
+					hostEntry.put("ip", ip);
+
+					hostsArray.add(hostEntry);
+				}
+			}
+		}
+
+		// Convert JSONArray to a JSON string
+		return hostsArray;
 	}
 
 }
