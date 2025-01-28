@@ -3,6 +3,8 @@ package com.hissummer.mockserver.mgmt.entity;
 import java.util.List;
 import java.util.Map;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.hissummer.mockserver.mgmt.pojo.HttpMockWorkMode;
@@ -15,6 +17,9 @@ import lombok.Data;
 @Data
 @Document(collection = "mockrules")
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+
 public class HttpMockRule {
 
 	private String id;

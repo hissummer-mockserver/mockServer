@@ -6,12 +6,14 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.hissummer.mockserver.cache.MockRuleCacheService;
 import com.hissummer.mockserver.mgmt.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -78,6 +80,9 @@ public class MockRuleMgmtController {
     @Autowired
     HttpMockRuleServiceImpl httpMockRuleServiceImpl;
 
+    @Autowired
+    JmsTemplate jmsTemplate;
+
      private static final   String PAGE_SIZE ="pageSize";
 
     private static final  String PAGE_NUMBER ="pageNumber";
@@ -92,6 +97,8 @@ public class MockRuleMgmtController {
             ruleCategoryServiceImpl.addCategory(RuleCategory.builder().category(mockRule.getCategory())
                     .description(mockRule.getCategory()).build());
             HttpMockRule savedMockRule = httpMockRuleServiceImpl.addMockRule(mockRule);
+
+            jmsTemplate.convertAndSend("cleanCache", mockRule);
 
             result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Add success.")
                     .data(savedMockRule).build();
@@ -111,6 +118,7 @@ public class MockRuleMgmtController {
         try {
             ruleCategoryServiceImpl.addCategory(RuleCategory.builder().category(mockRule.getCategory())
                     .description(mockRule.getCategory()).build());
+
             HttpMockRule savedMockRule = httpMockRuleServiceImpl.updateMockRule(mockRule);
             result = MockRuleMgmtResponseVo.builder().status(0).success(true).message("Update success.")
                     .data(savedMockRule).build();
