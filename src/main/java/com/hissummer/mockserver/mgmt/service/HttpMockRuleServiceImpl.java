@@ -24,22 +24,27 @@ public class HttpMockRuleServiceImpl {
     @Autowired
     JmsTemplate jmsTemplate;
 
-    @Transactional
-    public HttpMockRule addMockRule(HttpMockRule mockRule) throws ServiceException {
+	@Transactional
+	public HttpMockRule addMockRule(HttpMockRule mockRule) throws ServiceException {
 
-        if (mockRuleMgmtRepository.findByHostAndUri(mockRule.getHost(), mockRule.getUri()) != null) {
+		if(mockRule.getHost().equals("core-mockplatform.test.weicai.com.cn"))
+		{
+			throw ServiceException.builder().status(0).serviceMessage("core-mockplatform.test.weicai.com.cn 该域名不能作为virtualHost mock规则添加。详情请询问@lihao01").build();
 
-            throw ServiceException.builder().status(0).serviceMessage("mockrule already exist.").build();
-        }
-        return mockRuleMgmtRepository.insert(mockRule);
+		}
+		if (mockRuleMgmtRepository.findByHostAndUri(mockRule.getHost(), mockRule.getUri()) != null) {
 
-    }
+			throw ServiceException.builder().status(0).serviceMessage("mockrule already exist.").build();
+		}
+		return mockRuleMgmtRepository.insert(mockRule);
 
-    @Transactional
-    public HttpMockRule updateMockRule(HttpMockRule mockRule) throws ServiceException {
+	}
 
-        if (mockRule.getId() == null || mockRule.getId().isEmpty()) {
-            throw ServiceException.builder().status(0).serviceMessage("The id could not be empty.").build();
+	@Transactional
+	public HttpMockRule updateMockRule(HttpMockRule mockRule) throws ServiceException {
+
+		if (mockRule.getId() == null || mockRule.getId().isEmpty()) {
+			throw ServiceException.builder().status(0).serviceMessage("The id could not be empty.").build();
 
         }
 
@@ -59,53 +64,53 @@ public class HttpMockRuleServiceImpl {
 
         return saveMockRule;
 
-    }
+	}
 
-    @Transactional
-    public HttpMockRule deleteMockRule(HttpMockRule mockRule) throws ServiceException {
+	@Transactional
+	public HttpMockRule deleteMockRule(HttpMockRule mockRule) throws ServiceException {
 
-        if (mockRule.getId() == null || mockRule.getId().isEmpty()) {
-            throw ServiceException.builder().status(0).serviceMessage("The id could not be empty.").build();
-        }
+		if (mockRule.getId() == null || mockRule.getId().isEmpty()) {
+			throw ServiceException.builder().status(0).serviceMessage("The id could not be empty.").build();
+		}
         jmsTemplate.convertAndSend("cleanCache", mockRule);
-        mockRuleMgmtRepository.deleteById(mockRule.getId());
-        return mockRule;
+		mockRuleMgmtRepository.deleteById(mockRule.getId());
+		return mockRule;
 
-    }
+	}
 
-    //@Transactional
-    public Page<HttpMockRule> queryMockRules(String host, String uri, String category, int pageNumber, int pageSize)
-            throws ServiceException {
+	//@Transactional
+	public Page<HttpMockRule> queryMockRules(String host, String uri, String category, int pageNumber, int pageSize)
+			throws ServiceException {
 
-        Page<HttpMockRule> rules = null;
-        String byHost = ".*";
-        String byUri = ".*";
-        PageRequest page = PageRequest.of(pageNumber, pageSize);
-        if (!StringUtils.isEmpty(uri)) {
-            byUri = uri;
-        }
-        if (!StringUtils.isEmpty(host)) {
+		Page<HttpMockRule> rules = null;
+		String byHost = ".*";
+		String byUri = ".*";
+		PageRequest page = PageRequest.of(pageNumber, pageSize);
+		if (!StringUtils.isEmpty(uri)) {
+			byUri = uri;
+		}
+		if (!StringUtils.isEmpty(host)) {
 
-            if (host.equals("*")) {
-                // 因为做的是正则匹配查询，所以特殊的*字符转换为\*，即查询包含*字符的host值。
-                byHost = "\\*";
-            } else {
-                byHost = host;
-            }
+			if (host.equals("*")) {
+				// 因为做的是正则匹配查询，所以特殊的*字符转换为\*，即查询包含*字符的host值。
+				byHost = "\\*";
+			} else {
+				byHost = host;
+			}
 
-        }
+		}
 
-        if (StringUtils.isEmpty(category)) {
-            rules = mockRuleMgmtRepository.findByHostRegexpAndUriRegexp(byHost, byUri, page);
-        } else {
-            rules = mockRuleMgmtRepository.findByHostRegexpAndUriRegexpAndCategory(byHost, byUri, category, page);
-        }
+		if (StringUtils.isEmpty(category)) {
+			rules = mockRuleMgmtRepository.findByHostRegexpAndUriRegexp(byHost, byUri, page);
+		} else {
+			rules = mockRuleMgmtRepository.findByHostRegexpAndUriRegexpAndCategory(byHost, byUri, category, page);
+		}
 
-        if (rules != null && !rules.getContent().isEmpty())
-            return rules;
-        else
-            return Page.empty();
+		if (rules != null && !rules.getContent().isEmpty())
+			return rules;
+		else
+			return Page.empty();
 
-    }
+	}
 
 }
