@@ -65,7 +65,7 @@ public class MockForwardController implements ErrorController {
 			// 从mockserver配置获取返回mock响应或者upstream响应
             MockResponse mockOrUpstreamReturnedResponse = mockService.getResponse(request,requestHeaders, requestBody,null,null);
            //请求记录日志
-            saveRequestLog(request,requestHeaders,requestBody,mockOrUpstreamReturnedResponse);
+            saveRequestLogWithInternalForward(request,requestHeaders,requestBody,mockOrUpstreamReturnedResponse);
 
             // 转换成HttpHeader
             HttpHeaders responseHeaders = new HttpHeaders();
@@ -126,7 +126,30 @@ public class MockForwardController implements ErrorController {
 
     }
 
-    private void saveRequestLog(HttpServletRequest request, Map<String,String> requestHeaders, byte[] requestBody,MockResponse mockOrUpstreamReturnedResponse){
+    /*
+    保存日志，如果是internalfoward，则把初始第一次的命中的规则的日志也记录下。方便查看。
+     */
+    private void saveRequestLogWithInternalForward(HttpServletRequest request, Map<String,String> requestHeaders, byte[] requestBody,MockResponse mockOrUpstreamReturnedResponse){
+
+        if(mockOrUpstreamReturnedResponse.getOriginalMockRule() == null || mockOrUpstreamReturnedResponse.getMockRule().getId() == null )
+        {
+            log.info("未找到mock规则的不会记录请求日志！");
+            return ;
+        }
+        if(mockOrUpstreamReturnedResponse.getMockRule().getId().equals(mockOrUpstreamReturnedResponse.getOriginalMockRule().getId()))
+        {
+            //说明没有内部转发过
+            saveRequestLog(request,requestHeaders,requestBody,mockOrUpstreamReturnedResponse,false);
+        }
+        else{
+            //内部转发过，所以仅记录到原始的mock记录日志
+            saveRequestLog(request,requestHeaders,requestBody,mockOrUpstreamReturnedResponse,true);
+
+        }
+
+    }
+
+    private void saveRequestLog(HttpServletRequest request, Map<String,String> requestHeaders, byte[] requestBody,MockResponse mockOrUpstreamReturnedResponse,boolean logInOriginalMockRule){
 
         String requestUri = (String) request.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI);
 
@@ -137,12 +160,22 @@ public class MockForwardController implements ErrorController {
                 + (requestQueryString == null || requestQueryString.equals("null") || requestQueryString.equals("")
                 ? ""
                 : "?" + requestQueryString);
+        RequestLog requestLog;
+        if(!logInOriginalMockRule) {
+             requestLog = RequestLog.builder().requestHeaders(requestHeaders)
+                    .hittedMockRuleUri(mockOrUpstreamReturnedResponse.getMockRule().getUri())
+                    .requestUri(actualFullRequestUri)
+                    .hittedMockRuleHostName(mockOrUpstreamReturnedResponse.getMockRule().getHost())
+                    .isMock(mockOrUpstreamReturnedResponse.isMock()).createTime(new Date()).build();
+        }
+        else{
+             requestLog = RequestLog.builder().requestHeaders(requestHeaders)
+                    .hittedMockRuleUri(mockOrUpstreamReturnedResponse.getOriginalMockRule().getUri())
+                    .requestUri(actualFullRequestUri)
+                    .hittedMockRuleHostName(mockOrUpstreamReturnedResponse.getOriginalMockRule().getHost())
+                    .isMock(mockOrUpstreamReturnedResponse.isMock()).createTime(new Date()).build();
+        }
 
-        RequestLog requestLog = RequestLog.builder().requestHeaders(requestHeaders)
-                .hittedMockRuleUri(mockOrUpstreamReturnedResponse.getMockRule().getUri())
-                .requestUri(actualFullRequestUri)
-                .hittedMockRuleHostName(mockOrUpstreamReturnedResponse.getMockRule().getHost())
-                .isMock(mockOrUpstreamReturnedResponse.isMock()).createTime(new Date()).build();
         //requestHeader is lowercase （@RequestHeader Map<String, String> requestHeaders）
         String contentType = requestHeaders.get("content-type");
 

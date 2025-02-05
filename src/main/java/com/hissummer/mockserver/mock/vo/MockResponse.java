@@ -16,4 +16,5 @@ public class MockResponse {
 	private boolean isMock;
 	private boolean isUpstream;
 	private HttpMockRule mockRule;
+	private HttpMockRule originalMockRule;
 }

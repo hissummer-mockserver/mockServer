@@ -71,6 +71,9 @@ public class MockServiceImpl {
         //根据命中的规则和条件规则获取响应
         MockResponse mockOrUpstreamReturnedResponse = getResponse(matchedMockRule, conditionRule, request, requestUri, requestMethod, requestQueryString, requestHeaders, requestBody);
 
+        //如果有internalforward，这里保存第一次查找到的mock规则
+        mockOrUpstreamReturnedResponse.setOriginalMockRule(matchedMockRule);
+
         //修改响应头
         modifyResponseHeaders(mockOrUpstreamReturnedResponse, request);
         log.info("{} slaped Seconds: {}", requestUri, (new Date().getTime() - startTime.getTime()) / new Float(1000));
@@ -595,7 +598,7 @@ public class MockServiceImpl {
      */
     private HttpMockRule getMatchedMockRulesByHostnameAndUrl(String hostName, String requestUri) {
         // 如果Host是ip地址,则查找mock规则时,则hostName是未定义,只根据uri进行查找匹配规则.
-        if (isIpv4OrIpv6(hostName) || hostName.equals("core-mockplatform.test.weicai.com.cn")) {
+        if (isIpv4OrIpv6(hostName) || hostName.equals("core-mockplatform.test.weicai.com.cn") || hostName.equals("localhost")) {
             hostName = "*";
             //如果是通过ip访问mockserver，则查找规则按照 hostName是* 即匹配所有hostName来查找mock规则
         }
@@ -636,7 +639,7 @@ public class MockServiceImpl {
         }
 
         List<HttpMockRule> foundMockRules = mockRuleRepository.findByHostAndUriIn(hostName, matchRequestURIList);
-        Optional<HttpMockRule> matchedMockRule = foundMockRules.stream().max((mockRule1, mockRule2) -> Integer.compare(mockRule1.getUri().length(), mockRule2.getUri().length()));
+        Optional<HttpMockRule> matchedMockRule = foundMockRules.stream().max(Comparator.comparingInt(mockRule -> mockRule.getUri().length()));
 
         if (matchedMockRule.isPresent()) {
             return matchedMockRule.get();

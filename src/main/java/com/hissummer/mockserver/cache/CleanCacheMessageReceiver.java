@@ -16,6 +16,8 @@ public class CleanCacheMessageReceiver {
     @JmsListener(destination = "cleanCache", containerFactory = "jmsListenerFactory")
     public void receiveMessage(HttpMockRule mockRule) {
 
+        log.info("received message: {}",mockRule.toString());
+
         List<String> tobeCleanedCache = new ArrayList<>();
         for (Map.Entry<String, String> entry : MockRuleCacheService.ruleCache.asMap().entrySet()) {
             String key = entry.getKey();
