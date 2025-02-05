@@ -15,11 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.alibaba.fastjson.JSONObject;
 import com.hissummer.mockserver.mgmt.entity.EurekaMockRule;
@@ -42,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 
 @Slf4j
-@CrossOrigin(origins = "*", allowCredentials = "true")
+@CrossOrigin(origins = "*", allowCredentials = "true",methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE,RequestMethod.PUT,RequestMethod.OPTIONS})
 @RestController
 @RequestMapping("/xxxxhissummerxxxx/api")
 public class MockRuleMgmtController {
@@ -285,6 +281,7 @@ public class MockRuleMgmtController {
         String hostname = "*";
         String requestUri = "";
         String requestKeyWord = "";
+        String requestMockRuleId = "";
         long startDate=-1L;
         long endDate=-1L;
 
@@ -302,13 +299,17 @@ public class MockRuleMgmtController {
         if (!StringUtils.isEmpty(requestBody.getString("requestBodyKeyword"))) {
             requestKeyWord = requestBody.getString("requestBodyKeyword");
         }
+        if (!StringUtils.isEmpty(requestBody.getString("requestMockRuleId"))) {
+            requestMockRuleId = requestBody.getString("requestMockRuleId");
+        }
+
         if (!StringUtils.isEmpty(requestBody.getLong("startDate"))) {
             startDate = Long.parseLong(requestBody.getString("startDate"));
         }
         if (!StringUtils.isEmpty(requestBody.getLong("endDate"))) {
             endDate = Long.parseLong(requestBody.getString("endDate"));
         }
-        requestLogs = RequestLogService.searchByRequestLogKeyWord(requestKeyWord, uri, hostname, requestUri, page,startDate,endDate);
+        requestLogs = RequestLogService.searchByRequestLogKeyWord(requestMockRuleId,requestKeyWord, uri, hostname, requestUri, page,startDate,endDate);
 
         if (requestLogs != null && !requestLogs.getContent().isEmpty())
             return MockRuleMgmtResponseVo.builder().status(0).success(true).data(requestLogs).build();

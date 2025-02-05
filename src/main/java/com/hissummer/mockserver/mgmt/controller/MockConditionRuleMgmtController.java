@@ -32,7 +32,7 @@ import java.io.IOException;
  * 
  */
 @Slf4j
-@CrossOrigin(origins = "*", allowCredentials = "true")
+@CrossOrigin(origins = "*", allowCredentials = "true",methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE,RequestMethod.PUT,RequestMethod.OPTIONS})
 @RestController
 @RequestMapping("/xxxxhissummerxxxx/api")
 public class MockConditionRuleMgmtController {

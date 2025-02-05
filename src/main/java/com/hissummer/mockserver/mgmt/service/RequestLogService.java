@@ -25,8 +25,15 @@ public class RequestLogService {
     public RequestLogService(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
     }
-    public Page<RequestLog> searchByRequestLogKeyWord(String requestBodyKeyword, String mockRuleUri, String mockRuleHostName, String requestUri, PageRequest page,Long startDate,Long endDate) {
+    public Page<RequestLog> searchByRequestLogKeyWord(String mockRuleId,String requestBodyKeyword, String mockRuleUri, String mockRuleHostName, String requestUri, PageRequest page,Long startDate,Long endDate) {
         Query query = new Query();
+
+        if (StringUtils.isNotEmpty(mockRuleId)) {
+
+            Criteria mockRuleIdCriteria = Criteria.where("mockRuleId").is(mockRuleId);
+            query.addCriteria(mockRuleIdCriteria);
+
+        }
         if (StringUtils.isNotEmpty(requestBodyKeyword)) {
             TextCriteria criteria = TextCriteria.forDefaultLanguage().matching(requestBodyKeyword);
             query.addCriteria(criteria);

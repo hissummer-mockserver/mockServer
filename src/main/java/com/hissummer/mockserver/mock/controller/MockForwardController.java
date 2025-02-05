@@ -162,14 +162,14 @@ public class MockForwardController implements ErrorController {
                 : "?" + requestQueryString);
         RequestLog requestLog;
         if(!logInOriginalMockRule) {
-             requestLog = RequestLog.builder().requestHeaders(requestHeaders)
+             requestLog = RequestLog.builder().requestHeaders(requestHeaders).mockRuleId(mockOrUpstreamReturnedResponse.getMockRule().getId())
                     .hittedMockRuleUri(mockOrUpstreamReturnedResponse.getMockRule().getUri())
                     .requestUri(actualFullRequestUri)
                     .hittedMockRuleHostName(mockOrUpstreamReturnedResponse.getMockRule().getHost())
                     .isMock(mockOrUpstreamReturnedResponse.isMock()).createTime(new Date()).build();
         }
         else{
-             requestLog = RequestLog.builder().requestHeaders(requestHeaders)
+             requestLog = RequestLog.builder().requestHeaders(requestHeaders).mockRuleId(mockOrUpstreamReturnedResponse.getOriginalMockRule().getId())
                     .hittedMockRuleUri(mockOrUpstreamReturnedResponse.getOriginalMockRule().getUri())
                     .requestUri(actualFullRequestUri)
                     .hittedMockRuleHostName(mockOrUpstreamReturnedResponse.getOriginalMockRule().getHost())
