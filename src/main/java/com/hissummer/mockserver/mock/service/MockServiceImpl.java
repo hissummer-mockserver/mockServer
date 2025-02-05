@@ -91,6 +91,12 @@ public class MockServiceImpl {
      */
     private void modifyResponseHeaders(MockResponse mockOrUpstreamReturnedResponse, HttpServletRequest request) {
 
+
+
+        if (mockOrUpstreamReturnedResponse.getResponseHeaders() == null) {
+            mockOrUpstreamReturnedResponse.setResponseHeaders(new HashMap<>());
+        }
+
         if (mockOrUpstreamReturnedResponse.isUpstream()) {
             // 如果通过了mockserver作为代理请求了Upstream上游服务，则需要把mockserver认为一个代理加入进去到X-Forwarded-For
             if (mockOrUpstreamReturnedResponse.getResponseHeaders() != null) {
@@ -103,9 +109,14 @@ public class MockServiceImpl {
                 }
             }
         }
+        if (mockOrUpstreamReturnedResponse.getResponseHeaders() != null && mockOrUpstreamReturnedResponse.getOriginalMockRule()!=null) {
+            if (mockOrUpstreamReturnedResponse.getResponseHeaders().containsKey("RuleForWard")) {
 
-        if (mockOrUpstreamReturnedResponse.getResponseHeaders() == null) {
-            mockOrUpstreamReturnedResponse.setResponseHeaders(new HashMap<>());
+                mockOrUpstreamReturnedResponse.getResponseHeaders().put("RuleForWard", mockOrUpstreamReturnedResponse.getOriginalMockRule().getHost()+"/"+mockOrUpstreamReturnedResponse.getOriginalMockRule().getUri() + "->"
+                        + mockOrUpstreamReturnedResponse.getResponseHeaders().get("RuleForWard"));
+            } else {
+                mockOrUpstreamReturnedResponse.getResponseHeaders().put("RuleForWard", mockOrUpstreamReturnedResponse.getOriginalMockRule().getHost()+"/"+mockOrUpstreamReturnedResponse.getOriginalMockRule().getUri());
+            }
         }
         //添加自定义Header
         mockOrUpstreamReturnedResponse.getResponseHeaders().put("ClientAddress", request.getRemoteAddr() + ":" + request.getRemotePort());
