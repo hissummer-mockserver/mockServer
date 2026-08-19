@@ -137,8 +137,8 @@
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
-			<version>2.4.16</version>
-			<!-- not Overriding managed version 2.4.16 for groovy-all -->
+			<version>2.4.21</version>
+			<!-- not Overriding managed version 2.4.21 for groovy-all -->
 		</dependency>
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
